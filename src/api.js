@@ -3,7 +3,7 @@ class ApiService {
     this.baseURL =
       import.meta.env.VITE_API_URL ||
       "https://resi-backend.vercel.app/api";
-    this.DEBUG = true;
+    this.DEBUG = import.meta.env.MODE === 'development' && import.meta.env.VITE_DEBUG === 'true';
   }
 
   normalizeEndpoint(endpoint) {
@@ -62,15 +62,6 @@ class ApiService {
     }
 
     try {
-      if (this.DEBUG) {
-        console.log(
-          `🌐 API Request: ${config.method} ${this.baseURL}${endpoint}`
-        );
-        if (!isFormData && config.body) {
-          console.log("📦 Request body:", JSON.parse(config.body));
-        }
-      }
-
       const response = await fetch(`${this.baseURL}${endpoint}`, config);
 
       const contentType = response.headers.get("content-type");
@@ -81,15 +72,6 @@ class ApiService {
         data = await response.blob();
       } else {
         data = await response.text();
-      }
-
-      if (this.DEBUG) {
-        console.log(
-          `📨 API Response: ${response.status} ${response.statusText}`
-        );
-        if (contentType?.includes("application/json")) {
-          console.log("📦 Response data:", data);
-        }
       }
 
       if (typeof data === "object" && data !== null) {
@@ -141,13 +123,9 @@ class ApiService {
 
       return data;
     } catch (error) {
+      // Only log in development mode (if DEBUG is explicitly enabled)
       if (this.DEBUG) {
-        console.error("❌ API request failed:", error);
-        console.error("Error details:", {
-          endpoint: `${this.baseURL}${endpoint}`,
-          method: config.method,
-          error: error.message,
-        });
+        console.error("❌ API Error:", error.message);
       }
 
       if (error.name === "TypeError" && error.message.includes("fetch")) {
@@ -161,6 +139,7 @@ class ApiService {
 
   // ================= Auth =================
   async login(credentials) {
+    // Never log credentials - security risk
     return this.request("/auth/login", {
       method: "POST",
       body: credentials,
@@ -334,12 +313,9 @@ class ApiService {
 
   async getMyMatches() {
     try {
-      console.log('Getting job matches from API');
       const result = await this.request("/jobs/my-matches");
-      console.log('Job matches API result:', result);
       return result;
     } catch (error) {
-      console.error('Error getting job matches:', error);
       if (error.message.includes('Resource not found')) {
         return { jobs: [], error: 'Job matching service not available' };
       }
@@ -441,21 +417,13 @@ class ApiService {
   
   async editJob(jobId, jobData) {
     try {
-      console.log('Making editJob API call:', {
-        jobId,
-        endpoint: `/jobs/${jobId}`,
-        hasToken: !!localStorage.getItem("token")
-      });
-      
       const result = await this.request(`/jobs/${jobId}`, {
         method: "PUT",
         body: jobData,
       });
       
-      console.log('Edit job API response:', result);
       return result;
     } catch (error) {
-      console.error('Error in editJob API call:', error);
       if (error.message.includes('403') || error.message.includes('Forbidden')) {
         throw new Error('Not authorized: You can only edit your own jobs');
       }
@@ -478,10 +446,7 @@ class ApiService {
   }
   
   async inviteWorker(jobId, workerId) {
-    console.log('Sending invitation request:', { jobId, workerId });
-    
     if (!jobId || !workerId) {
-      console.error('Missing required parameters for invitation');
       throw new Error('Missing jobId or workerId');
     }
     
@@ -490,7 +455,6 @@ class ApiService {
       try {
         await this.getJob(jobId);
       } catch (jobError) {
-        console.error('Job verification failed:', jobError);
         throw new Error('Job not found or no longer available');
       }
       
@@ -500,11 +464,8 @@ class ApiService {
         body: { workerId },
       });
       
-      console.log('Invitation response:', result);
       return result;
     } catch (error) {
-      console.error('Invitation API error:', error);
-      
       // Provide more helpful error messages
       if (error.message.includes('404')) {
         throw new Error('Job not found. It may have been deleted or closed.');
