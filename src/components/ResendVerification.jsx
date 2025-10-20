@@ -36,8 +36,8 @@ function ResendVerification() {
         setError(data.alert || 'Failed to resend verification email. Please try again later.');
       }
     } catch (err) {
+      // Error already handled - don't log email details
       setError('Network error. Please check your connection and try again.');
-      console.error('Resend verification error:', err);
     } finally {
       setLoading(false);
     }

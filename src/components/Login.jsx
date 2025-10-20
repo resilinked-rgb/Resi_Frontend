@@ -184,7 +184,7 @@ function Login() {
         }
       }
     } catch (err) {
-      console.error('Login error:', err)
+      // Error already handled by API service - don't log sensitive details
       const errorMessage = err.message || 'Connection error. Please try again.'
       setError(errorMessage)
       showError(errorMessage)

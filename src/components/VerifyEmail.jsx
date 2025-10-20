@@ -25,8 +25,8 @@ function VerifyEmail() {
           setError(data.alert || 'Email verification failed. This link may be invalid or expired.');
         }
       } catch (err) {
+        // Error already handled - don't log verification details
         setError('Network error. Please try again later or contact support.');
-        console.error('Verification error:', err);
       } finally {
         setLoading(false);
       }

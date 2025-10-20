@@ -89,8 +89,7 @@ function ResetRequest() {
       }
       
     } catch (err) {
-      console.error('Reset request error:', err)
-      
+      // Error already handled - don't log email addresses
       let errorMessage = 'There was a problem sending the email. Please try again.'
       
       if (err.message.includes('network') || err.message.includes('fetch')) {

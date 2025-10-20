@@ -353,9 +353,6 @@ class ApiService {
       
       return result;
     } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('cancelApplication API error:', error);
-      }
       // Enhance error handling to provide better error messages
       if (error.message.includes('No application found')) {
         throw new Error('No application found');
@@ -710,7 +707,6 @@ class ApiService {
         method: "POST"
       });
     } catch (error) {
-      console.error('Error restoring user:', error);
       if (error.message.includes('403') || error.message.includes('Forbidden')) {
         throw new Error('Not authorized: Only administrators can restore deleted users');
       }
@@ -724,7 +720,6 @@ class ApiService {
         method: "POST"
       });
     } catch (error) {
-      console.error('Error restoring job:', error);
       if (error.message.includes('403') || error.message.includes('Forbidden')) {
         throw new Error('Not authorized: Only administrators can restore deleted jobs');
       }
@@ -738,7 +733,6 @@ class ApiService {
         method: "POST"
       });
     } catch (error) {
-      console.error('Error restoring goal:', error);
       if (error.message.includes('403') || error.message.includes('Forbidden')) {
         throw new Error('Not authorized: Only administrators can restore deleted goals');
       }
@@ -752,7 +746,6 @@ class ApiService {
         method: "DELETE"
       });
     } catch (error) {
-      console.error('Error permanently deleting user:', error);
       if (error.message.includes('403') || error.message.includes('Forbidden')) {
         throw new Error('Not authorized: Only administrators can permanently delete users');
       }
@@ -766,7 +759,6 @@ class ApiService {
         method: "DELETE"
       });
     } catch (error) {
-      console.error('Error permanently deleting job:', error);
       if (error.message.includes('403') || error.message.includes('Forbidden')) {
         throw new Error('Not authorized: Only administrators can permanently delete jobs');
       }
@@ -780,7 +772,6 @@ class ApiService {
         method: "DELETE"
       });
     } catch (error) {
-      console.error('Error permanently deleting goal:', error);
       if (error.message.includes('403') || error.message.includes('Forbidden')) {
         throw new Error('Not authorized: Only administrators can permanently delete goals');
       }

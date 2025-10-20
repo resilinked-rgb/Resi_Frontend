@@ -231,8 +231,7 @@ function ResetPassword() {
       }
       
     } catch (err) {
-      console.error('Reset password error:', err)
-      
+      // Error already handled - don't log password reset details
       let errorMessage = 'There was a problem resetting your password. Please try again.'
       
       if (err.message.includes('token')) {

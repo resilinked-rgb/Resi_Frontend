@@ -345,8 +345,7 @@ function Register() {
         showError(errorMessage)
       }
     } catch (err) {
-      console.error("Registration error:", err)
-      // Extract the error message from the error object
+      // Error already handled by API service - don't log sensitive registration data
       const errorMessage = err.message || err.alert || "Connection error. Please try again."
       setError(errorMessage)
       showError(errorMessage)

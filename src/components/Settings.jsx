@@ -172,7 +172,7 @@ function Settings() {
         showError(response.message || 'Failed to change password')
       }
     } catch (error) {
-      console.error('Password change error:', error)
+      // Error already handled - don't log passwords
       showError(error.message || 'Failed to change password')
     }
   }
