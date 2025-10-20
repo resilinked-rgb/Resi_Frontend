@@ -4,6 +4,7 @@ import { AuthContext } from '../context/AuthContext'
 import { AlertContext } from '../context/AlertContext'
 import apiService from '../api'
 import ReportModal from './ReportModal'
+import { getProfilePictureUrl } from '../utils/imageHelper'
 
 function EmployerDashboard() {
   // Helper function for price formatting
@@ -805,8 +806,8 @@ function EmployerDashboard() {
                       <div className="worker-header">
                         <div className="worker-header-left">
                           <div className="worker-card-avatar">
-                            {worker.profilePicture ? (
-                              <img src={worker.profilePicture} alt={`${worker.firstName} ${worker.lastName}`} />
+                            {getProfilePictureUrl(worker) ? (
+                              <img src={getProfilePictureUrl(worker)} alt={`${worker.firstName} ${worker.lastName}`} />
                             ) : (
                               <div className="avatar-placeholder">
                                 {worker.firstName?.[0]}{worker.lastName?.[0]}
@@ -2677,9 +2678,9 @@ function EmployerDashboard() {
             <div className="modal-body">
               <div className="worker-profile-header">
                 <div className="worker-profile-avatar">
-                  {currentWorker.profilePicture ? (
+                  {getProfilePictureUrl(currentWorker) ? (
                     <img 
-                      src={currentWorker.profilePicture} 
+                      src={getProfilePictureUrl(currentWorker)} 
                       alt={`${currentWorker.firstName}'s profile`}
                       className="profile-image"
                     />
@@ -2854,9 +2855,9 @@ function EmployerDashboard() {
               <div className="contact-info-section">
                 <div className="contact-header">
                   <div className="contact-avatar">
-                    {currentWorker.profilePicture ? (
+                    {getProfilePictureUrl(currentWorker) ? (
                       <img 
-                        src={currentWorker.profilePicture} 
+                        src={getProfilePictureUrl(currentWorker)} 
                         alt={`${currentWorker.firstName}'s profile`}
                         className="profile-image"
                       />
@@ -2947,9 +2948,9 @@ function EmployerDashboard() {
             <div className="modal-body">
               <div className="invite-worker-info">
                 <div className="worker-avatar">
-                  {currentWorker.profilePicture ? (
+                  {getProfilePictureUrl(currentWorker) ? (
                     <img 
-                      src={currentWorker.profilePicture} 
+                      src={getProfilePictureUrl(currentWorker)} 
                       alt={`${currentWorker.firstName}'s profile`} 
                       className="profile-image"
                     />

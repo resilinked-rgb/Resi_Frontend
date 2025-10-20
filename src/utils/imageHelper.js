@@ -7,12 +7,17 @@ const API_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://loc
 
 /**
  * Get the full URL for an image
- * @param {string} imagePath - Can be a file path, base64 string, or data URI
+ * @param {string} imagePath - Can be a Cloudinary URL, file path, base64 string, or data URI
  * @returns {string} - Full URL or data URI to display the image
  */
 export const getImageUrl = (imagePath) => {
   if (!imagePath) {
     return null;
+  }
+
+  // If it's already a full URL (Cloudinary or other CDN), return as-is
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return imagePath;
   }
 
   // If it's already a data URI (base64), return as-is

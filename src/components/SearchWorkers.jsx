@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from 'react'
 import { Link } from 'react-router-dom'
 import { AuthContext } from '../context/AuthContext'
 import { AlertContext } from '../context/AlertContext'
+import { getProfilePictureUrl } from '../utils/imageHelper'
 
 // Use environment variable for API base URL
 const API_BASE = import.meta.env.VITE_API_URL || 'https://resi-backend.vercel.app/api'
@@ -422,8 +423,8 @@ function SearchWorkers() {
               <div className="worker-header">
                 <div className="worker-info-header">
                   <div className="worker-avatar">
-                    {worker.profilePicture ? (
-                      <img src={worker.profilePicture} alt={`${worker.firstName} ${worker.lastName}`} />
+                    {getProfilePictureUrl(worker) ? (
+                      <img src={getProfilePictureUrl(worker)} alt={`${worker.firstName} ${worker.lastName}`} />
                     ) : (
                       <div className="avatar-placeholder">
                         {worker.firstName?.[0]}{worker.lastName?.[0]}
@@ -542,9 +543,9 @@ function SearchWorkers() {
             <div className="modal-body">
               <div className="worker-profile-header">
                 <div className="worker-profile-avatar">
-                  {currentWorker.profilePicture ? (
+                  {getProfilePictureUrl(currentWorker) ? (
                     <img 
-                      src={currentWorker.profilePicture} 
+                      src={getProfilePictureUrl(currentWorker)} 
                       alt={`${currentWorker.firstName}'s profile`}
                       className="profile-image"
                     />
@@ -730,9 +731,9 @@ function SearchWorkers() {
             <div className="modal-body">
               <div className="contact-worker-info">
                 <div className="worker-avatar modal-avatar">
-                  {currentWorker.profilePicture ? (
+                  {getProfilePictureUrl(currentWorker) ? (
                     <img 
-                      src={currentWorker.profilePicture} 
+                      src={getProfilePictureUrl(currentWorker)} 
                       alt={`${currentWorker.firstName}'s profile`}
                     />
                   ) : (
@@ -810,9 +811,9 @@ function SearchWorkers() {
             <div className="modal-body">
               <div className="invite-worker-info">
                 <div className="worker-avatar">
-                  {currentWorker.profilePicture ? (
+                  {getProfilePictureUrl(currentWorker) ? (
                     <img 
-                      src={currentWorker.profilePicture} 
+                      src={getProfilePictureUrl(currentWorker)} 
                       alt={`${currentWorker.firstName}'s profile`} 
                       className="profile-image"
                     />

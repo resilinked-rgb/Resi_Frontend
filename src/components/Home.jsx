@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import apiService from '../api'
+import { getProfilePictureUrl } from '../utils/imageHelper'
 
 function Home() {
   const [popularJobs, setPopularJobs] = useState([])
@@ -147,8 +148,8 @@ function Home() {
                 <div key={user._id || index} className="testimonial-card">
                   <div className="testimonial-header">
                     <div className="testimonial-avatar-large">
-                      {user.profilePicture ? (
-                        <img src={user.profilePicture} alt={`${user.firstName} ${user.lastName}`} />
+                      {getProfilePictureUrl(user) ? (
+                        <img src={getProfilePictureUrl(user)} alt={`${user.firstName} ${user.lastName}`} />
                       ) : (
                         user.firstName?.[0] || 'U'
                       )}
