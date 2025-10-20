@@ -3,11 +3,11 @@
     { "source": "/(.*)", "destination": "/" }
   ],
   "env": {
-    "VITE_API_URL": "https://resi-backend-1.onrender.com/api"
+    "VITE_API_URL": "https://resi-backend.vercel.app/api"
   },
   "build": {
     "env": {
-      "VITE_API_URL": "https://resi-backend-1.onrender.com/api"
+      "VITE_API_URL": "https://resi-backend.vercel.app/api"
     }
   },
   "github": {

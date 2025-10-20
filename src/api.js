@@ -2,7 +2,7 @@ class ApiService {
   constructor() {
     this.baseURL =
       import.meta.env.VITE_API_URL ||
-      "https://resi-backend-1.onrender.com/api";
+      "https://resi-backend.vercel.app/api";
     this.DEBUG = true;
   }
 
