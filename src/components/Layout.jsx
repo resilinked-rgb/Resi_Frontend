@@ -38,6 +38,18 @@ function Layout({ children }) {
         </div>
       </main>
 
+      {/* Floating Chatbot Button */}
+      <Link to="/help" className="chatbot-float-button" title="Need help? Chat with our assistant">
+        <div className="chatbot-avatar">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="chatbot-icon">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+            <circle cx="8.5" cy="10.5" r="1.5"/>
+            <circle cx="15.5" cy="10.5" r="1.5"/>
+            <path d="M12 17.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/>
+          </svg>
+        </div>
+      </Link>
+
       {/* Modern Footer */}
       <footer className="main-footer">
         <div className="footer-content">
@@ -294,6 +306,69 @@ function Layout({ children }) {
 
           .footer-content {
             padding: var(--spacing-2) var(--spacing-2) var(--spacing-2);
+          }
+        }
+
+        /* Floating Chatbot Button */
+        .chatbot-float-button {
+          position: fixed;
+          bottom: 2rem;
+          right: 2rem;
+          width: 64px;
+          height: 64px;
+          background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+          cursor: pointer;
+          transition: all 0.3s ease;
+          z-index: 999;
+          text-decoration: none;
+          animation: pulse 2s infinite;
+        }
+
+        .chatbot-float-button:hover {
+          transform: scale(1.1) translateY(-4px);
+          box-shadow: 0 12px 32px rgba(99, 102, 241, 0.5);
+        }
+
+        .chatbot-avatar {
+          width: 40px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .chatbot-icon {
+          width: 100%;
+          height: 100%;
+          color: white;
+          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        }
+
+        @keyframes pulse {
+          0%, 100% {
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+          }
+          50% {
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.6), 0 0 0 8px rgba(99, 102, 241, 0.1);
+          }
+        }
+
+        @media (max-width: 768px) {
+          .chatbot-float-button {
+            bottom: 1.5rem;
+            right: 1.5rem;
+            width: 56px;
+            height: 56px;
+          }
+
+          .chatbot-avatar {
+            width: 36px;
+            height: 36px;
           }
         }
       `}</style>
