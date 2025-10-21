@@ -147,15 +147,21 @@ function Chat() {
   // Poll for new messages when a conversation is selected (fallback for serverless)
   useEffect(() => {
     if (selectedConversation && !SOCKET_URL.includes('localhost')) {
+      console.log('📡 Starting message polling for conversation:', selectedConversation._id);
       loadMessages(selectedConversation._id);
       
       // Poll every 3 seconds for new messages
       const pollingInterval = setInterval(() => {
+        console.log('🔄 Polling for new messages...');
         loadMessages(selectedConversation._id, true);
       }, 3000);
 
-      return () => clearInterval(pollingInterval);
+      return () => {
+        console.log('⏹️ Stopping message polling');
+        clearInterval(pollingInterval);
+      };
     } else if (selectedConversation) {
+      console.log('🏠 Using Socket.io (localhost mode)');
       // Load initial messages even with Socket.io
       loadMessages(selectedConversation._id);
     }
