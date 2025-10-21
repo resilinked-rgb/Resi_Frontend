@@ -907,7 +907,9 @@ const chatStyles = `
     border-radius: 16px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     word-wrap: break-word;
+    overflow-wrap: break-word;
     max-width: 100%;
+    min-width: 80px;
   }
 
   .message-wrapper.own .message-bubble {
@@ -919,8 +921,10 @@ const chatStyles = `
   .message-bubble p {
     margin: 0;
     font-size: 0.95rem;
-    line-height: 1.6;
+    line-height: 1.5;
     word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
   }
 
   .message-meta {
@@ -958,9 +962,12 @@ const chatStyles = `
     padding: 1rem 1.5rem;
     border-top: 1px solid #e2e8f0;
     background: white;
-    display: flex;
+    display: flex !important;
     gap: 0.75rem;
     align-items: center;
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
   }
 
   .message-input-container textarea {
@@ -974,6 +981,8 @@ const chatStyles = `
     min-height: 44px;
     max-height: 120px;
     transition: border-color 0.2s;
+    display: block !important;
+    visibility: visible !important;
   }
 
   .message-input-container textarea:focus {
