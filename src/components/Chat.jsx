@@ -65,51 +65,71 @@ function Chat() {
     }
   }, [searchQuery, user._id]);
 
-  // Socket.io connection and real-time listeners
+  // Socket.io connection and real-time listeners (only works when backend supports WebSocket)
   useEffect(() => {
-    // Initialize socket connection
-    socketRef.current = io(SOCKET_URL, {
-      transports: ['websocket', 'polling']
-    });
-
-    // Join with user ID
-    socketRef.current.emit('join', user._id);
-    console.log('🔌 Connected to Socket.io server');
-
-    // Listen for incoming messages
-    socketRef.current.on('receive_message', (message) => {
-      console.log('📨 Received real-time message:', message);
-      
-      // If message is from current conversation, add it
-      if (selectedConversation && 
-          (message.sender === selectedConversation._id || message.sender._id === selectedConversation._id)) {
-        setMessages(prev => [...prev, message]);
-        setShouldScroll(true);
-        
-        // Mark as seen immediately
-        apiService.markMessagesAsSeen(selectedConversation._id);
-        
-        // Notify sender it was seen
-        socketRef.current.emit('message_seen', {
-          senderId: message.sender._id || message.sender,
-          messageId: message._id,
-          seenBy: [{ user: user._id, seenAt: new Date() }]
+    // Only try Socket.io if running locally or on non-serverless backend
+    const isLocal = SOCKET_URL.includes('localhost');
+    
+    if (isLocal) {
+      try {
+        // Initialize socket connection
+        socketRef.current = io(SOCKET_URL, {
+          transports: ['websocket', 'polling'],
+          reconnection: true,
+          reconnectionAttempts: 3,
+          reconnectionDelay: 1000
         });
-      }
-      
-      // Reload conversations to update last message
-      loadConversations();
-    });
 
-    // Listen for message seen notifications
-    socketRef.current.on('message_marked_seen', (data) => {
-      console.log('✅ Message marked as seen:', data);
-      setMessages(prev => prev.map(msg => 
-        msg._id === data.messageId 
-          ? { ...msg, seenBy: data.seenBy }
-          : msg
-      ));
-    });
+        socketRef.current.on('connect', () => {
+          console.log('🔌 Connected to Socket.io server');
+          // Join with user ID
+          socketRef.current.emit('join', user._id);
+        });
+
+        socketRef.current.on('connect_error', (error) => {
+          console.log('⚠️ Socket.io not available, using polling fallback');
+        });
+
+        // Listen for incoming messages
+        socketRef.current.on('receive_message', (message) => {
+          console.log('📨 Received real-time message:', message);
+          
+          // If message is from current conversation, add it
+          if (selectedConversation && 
+              (message.sender === selectedConversation._id || message.sender._id === selectedConversation._id)) {
+            setMessages(prev => [...prev, message]);
+            setShouldScroll(true);
+            
+            // Mark as seen immediately
+            apiService.markMessagesAsSeen(selectedConversation._id);
+            
+            // Notify sender it was seen
+            socketRef.current.emit('message_seen', {
+              senderId: message.sender._id || message.sender,
+              messageId: message._id,
+              seenBy: [{ user: user._id, seenAt: new Date() }]
+            });
+          }
+          
+          // Reload conversations to update last message
+          loadConversations();
+        });
+
+        // Listen for message seen notifications
+        socketRef.current.on('message_marked_seen', (data) => {
+          console.log('✅ Message marked as seen:', data);
+          setMessages(prev => prev.map(msg => 
+            msg._id === data.messageId 
+              ? { ...msg, seenBy: data.seenBy }
+              : msg
+          ));
+        });
+      } catch (error) {
+        console.log('⚠️ Socket.io failed to initialize, using polling fallback');
+      }
+    } else {
+      console.log('📡 Running on serverless, using polling for messages');
+    }
 
     // Cleanup on unmount
     return () => {
@@ -118,7 +138,24 @@ function Chat() {
         console.log('👋 Disconnected from Socket.io server');
       }
     };
-  }, [user._id, selectedConversation]);
+  }, [user._id]);
+
+  // Poll for new messages when a conversation is selected (fallback for serverless)
+  useEffect(() => {
+    if (selectedConversation && !SOCKET_URL.includes('localhost')) {
+      loadMessages(selectedConversation._id);
+      
+      // Poll every 3 seconds for new messages
+      const pollingInterval = setInterval(() => {
+        loadMessages(selectedConversation._id, true);
+      }, 3000);
+
+      return () => clearInterval(pollingInterval);
+    } else if (selectedConversation) {
+      // Load initial messages even with Socket.io
+      loadMessages(selectedConversation._id);
+    }
+  }, [selectedConversation]);
 
   // Manual scroll only when user sends a message
   const scrollToBottom = () => {
@@ -248,12 +285,15 @@ function Chat() {
       // Add message to UI immediately
       setMessages(prev => [...prev, sentMessage]);
       
-      // Emit via Socket.io for real-time delivery
-      if (socketRef.current) {
+      // Emit via Socket.io for real-time delivery (only if connected)
+      if (socketRef.current && socketRef.current.connected) {
         socketRef.current.emit('send_message', {
           recipientId: selectedConversation._id,
           message: sentMessage
         });
+        console.log('📤 Message sent via Socket.io');
+      } else {
+        console.log('📡 Message saved (polling will deliver)');
       }
       
       setNewMessage('');
