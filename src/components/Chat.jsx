@@ -538,6 +538,17 @@ function Chat() {
                   const isOwnMessage = msg.sender._id === user._id;
                   const isSeen = isOwnMessage && msg.seenBy && msg.seenBy.length > 0;
                   
+                  // Debug log
+                  if (index === messages.length - 1) {
+                    console.log('Latest message:', {
+                      content: msg.content.substring(0, 20),
+                      senderId: msg.sender._id,
+                      currentUserId: user._id,
+                      isOwnMessage,
+                      senderName: `${msg.sender.firstName} ${msg.sender.lastName}`
+                    });
+                  }
+                  
                   return (
                     <div key={msg._id} className={`message-wrapper ${isOwnMessage ? 'own' : 'other'}`}>
                       <div className="message-row">
