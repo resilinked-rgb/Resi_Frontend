@@ -308,22 +308,24 @@ function Layout({ children }) {
 
         /* Floating Chatbot Button */
         .chatbot-float-button {
-          position: fixed;
-          bottom: 2rem;
-          right: 2rem;
-          width: 64px;
-          height: 64px;
-          background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
-          cursor: pointer;
-          transition: all 0.3s ease;
-          z-index: 999;
-          text-decoration: none;
-          animation: pulse 2s infinite;
+          position: fixed !important;
+          bottom: 2rem !important;
+          right: 2rem !important;
+          width: 64px !important;
+          height: 64px !important;
+          background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+          border-radius: 50% !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4) !important;
+          cursor: pointer !important;
+          transition: all 0.3s ease !important;
+          z-index: 9999 !important;
+          text-decoration: none !important;
+          animation: pulse 2s infinite !important;
+          border: none !important;
+          padding: 0 !important;
         }
 
         .chatbot-float-button:hover {
