@@ -538,25 +538,24 @@ function Chat() {
                   const isOwnMessage = msg.sender._id === user._id;
                   const isSeen = isOwnMessage && msg.seenBy && msg.seenBy.length > 0;
                   
-                  // Debug logging
-                  if (isOwnMessage) {
-                    console.log('Message:', msg.content.substring(0, 20), {
-                      seenBy: msg.seenBy,
-                      seenByLength: msg.seenBy?.length,
-                      isSeen
-                    });
-                  }
+                  // Get sender name
+                  const senderName = isOwnMessage 
+                    ? 'You' 
+                    : `${msg.sender.firstName} ${msg.sender.lastName}`;
                   
                   return (
                     <div key={msg._id} className={`message-wrapper ${isOwnMessage ? 'own' : 'other'}`}>
                       <div className="message-row">
                         <div className="message-content">
+                          {!isOwnMessage && (
+                            <span className="sender-name">{senderName}</span>
+                          )}
                           <div className="message-bubble">
                             <p>{msg.content}</p>
                           </div>
                           <div className="message-meta">
                             <span className="message-time">{formatTime(msg.createdAt)}</span>
-                            {isSeen && <span className="message-seen">Seen</span>}
+                            {isSeen && <span className="message-seen">✓✓ Seen</span>}
                           </div>
                         </div>
                       </div>
@@ -905,24 +904,34 @@ const chatStyles = `
     width: 100%;
   }
 
+  .sender-name {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    padding: 0 0.25rem;
+    margin-bottom: 0.125rem;
+  }
+
   .message-bubble {
     background: white;
-    padding: 0.75rem 1rem;
+    padding: 0.875rem 1.125rem;
     border-radius: 16px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     word-wrap: break-word;
+    max-width: 100%;
   }
 
   .message-wrapper.own .message-bubble {
     background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
     color: white;
-    box-shadow: 0 2px 4px rgba(99, 102, 241, 0.15);
+    box-shadow: 0 2px 4px rgba(99, 102, 241, 0.2);
   }
 
   .message-bubble p {
     margin: 0;
     font-size: 0.95rem;
-    line-height: 1.5;
+    line-height: 1.6;
+    word-break: break-word;
   }
 
   .message-meta {
@@ -930,6 +939,7 @@ const chatStyles = `
     align-items: center;
     gap: 0.5rem;
     padding: 0 0.25rem;
+    margin-top: 0.125rem;
   }
 
   .message-wrapper.own .message-meta {
@@ -943,12 +953,16 @@ const chatStyles = `
   .message-time {
     font-size: 0.7rem;
     color: #94a3b8;
+    font-weight: 500;
   }
 
   .message-seen {
     font-size: 0.7rem;
     color: #10b981;
     font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
   }
 
   .message-input-container {
