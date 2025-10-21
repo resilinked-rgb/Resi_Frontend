@@ -973,11 +973,12 @@ const chatStyles = `
 
   .message-meta {
     display: flex;
+    flex-direction: row;
     align-items: center;
     gap: 0.5rem;
     padding: 0 0.25rem;
     margin-top: 0.25rem;
-    min-height: 18px;
+    min-height: 16px;
   }
 
   .message-wrapper.own .message-meta {
@@ -992,17 +993,16 @@ const chatStyles = `
     font-size: 0.7rem;
     color: #94a3b8;
     font-weight: 500;
-    line-height: 1;
+    line-height: 1.2;
+    white-space: nowrap;
   }
 
   .message-seen {
     font-size: 0.7rem;
     color: #10b981;
     font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    line-height: 1;
+    line-height: 1.2;
+    white-space: nowrap;
   }
 
   .message-input-container {
