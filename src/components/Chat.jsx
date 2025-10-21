@@ -937,7 +937,18 @@ const chatStyles = `
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
-    width: 100%;
+    width: fit-content;
+    max-width: 100%;
+  }
+
+  .message-wrapper.own .message-content {
+    align-items: flex-end;
+    margin-left: auto;
+  }
+
+  .message-wrapper.other .message-content {
+    align-items: flex-start;
+    margin-right: auto;
   }
 
   .message-bubble {
@@ -947,7 +958,7 @@ const chatStyles = `
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     word-wrap: break-word;
     overflow-wrap: break-word;
-    width: fit-content;
+    width: 100%;
     max-width: 100%;
     min-width: 100px;
   }
