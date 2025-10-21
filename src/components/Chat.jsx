@@ -386,6 +386,9 @@ function Chat() {
           {selectedConversation ? (
             <>
               <div className="chat-header">
+                <button className="back-button" onClick={() => setSelectedConversation(null)}>
+                  ← Back
+                </button>
                 <div className="chat-user-info">
                   <div className="chat-avatar">
                     {selectedConversation.user.profilePicture ? (
@@ -705,6 +708,26 @@ const chatStyles = `
     padding: 1.25rem 1.5rem;
     border-bottom: 1px solid #e2e8f0;
     background: white;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .back-button {
+    display: none;
+    padding: 0.5rem 1rem;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: #475569;
+    cursor: pointer;
+    transition: background 0.2s;
+    align-self: flex-start;
+  }
+
+  .back-button:hover {
+    background: #e2e8f0;
   }
 
   .chat-user-info {
@@ -787,11 +810,13 @@ const chatStyles = `
     padding: 0.75rem 1rem;
     border-radius: 16px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
   }
 
   .message.own .message-bubble {
     background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
     color: white;
+    border: none;
   }
 
   .message-bubble p {
@@ -809,22 +834,23 @@ const chatStyles = `
   }
 
   .message-input-container {
-    padding: 1.5rem;
+    padding: 1rem 1.5rem;
     border-top: 1px solid #e2e8f0;
     background: white;
     display: flex;
-    gap: 1rem;
-    align-items: flex-end;
+    gap: 0.75rem;
+    align-items: center;
   }
 
   .message-input-container textarea {
     flex: 1;
     padding: 0.875rem 1rem;
-    border: 2px solid #e2e8f0;
+    border: 1px solid #e2e8f0;
     border-radius: 12px;
     font-size: 0.95rem;
     font-family: inherit;
     resize: none;
+    min-height: 44px;
     max-height: 120px;
     transition: border-color 0.2s;
   }
@@ -835,7 +861,9 @@ const chatStyles = `
   }
 
   .message-input-container button {
-    padding: 0.875rem 1.25rem;
+    width: 44px;
+    height: 44px;
+    padding: 0;
     background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
     color: white;
     border: none;
@@ -844,6 +872,9 @@ const chatStyles = `
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .message-input-container button:hover:not(:disabled) {
@@ -926,6 +957,7 @@ const chatStyles = `
   @media (max-width: 768px) {
     .chat-container {
       padding: 0;
+      min-height: 100vh;
     }
 
     .chat-layout {
@@ -942,8 +974,100 @@ const chatStyles = `
       display: none;
     }
 
+    .back-button {
+      display: block;
+    }
+
+    .sidebar-header {
+      padding: 1rem;
+    }
+
+    .sidebar-header h2 {
+      font-size: 1.25rem;
+    }
+
+    .conversation-item {
+      padding: 0.875rem;
+    }
+
+    .conv-avatar img,
+    .conv-avatar .avatar-placeholder {
+      width: 40px;
+      height: 40px;
+    }
+
+    .conv-header h3 {
+      font-size: 0.95rem;
+    }
+
+    .chat-header {
+      padding: 1rem;
+    }
+
+    .chat-avatar img,
+    .chat-avatar .avatar-placeholder {
+      width: 40px;
+      height: 40px;
+    }
+
+    .chat-user-info h3 {
+      font-size: 1rem;
+    }
+
+    .messages-container {
+      padding: 1rem;
+    }
+
     .message-content {
-      max-width: 80%;
+      max-width: 75%;
+    }
+
+    .message-bubble {
+      padding: 0.625rem 0.875rem;
+    }
+
+    .message-bubble p {
+      font-size: 0.9rem;
+    }
+
+    .message-input-container {
+      padding: 0.75rem 1rem;
+      gap: 0.5rem;
+    }
+
+    .message-input-container textarea {
+      padding: 0.75rem 0.875rem;
+      font-size: 0.9rem;
+      min-height: 40px;
+    }
+
+    .message-input-container button {
+      width: 40px;
+      height: 40px;
+      font-size: 1.1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .message-content {
+      max-width: 85%;
+    }
+
+    .search-box input {
+      font-size: 0.875rem;
+      padding: 0.625rem 2rem 0.625rem 0.875rem;
+    }
+
+    .empty-icon {
+      font-size: 3rem;
+    }
+
+    .empty-chat-state h3 {
+      font-size: 1.25rem;
+    }
+
+    .empty-chat-state p {
+      font-size: 0.9rem;
     }
   }
 `;
