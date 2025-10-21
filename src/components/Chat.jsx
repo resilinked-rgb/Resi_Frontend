@@ -443,36 +443,11 @@ function Chat() {
               <div className="messages-container">
                 {messages.map((msg, index) => {
                   const isOwnMessage = msg.sender._id === user._id;
-                  const showAvatar = index === 0 || messages[index - 1].sender._id !== msg.sender._id;
                   const isSeen = isOwnMessage && msg.seenBy && msg.seenBy.length > 0;
                   
                   return (
                     <div key={msg._id} className={`message-wrapper ${isOwnMessage ? 'own' : 'other'}`}>
                       <div className="message-row">
-                        {!isOwnMessage && (
-                          <div className="message-avatar">
-                            {showAvatar ? (
-                              selectedConversation.user.profilePicture ? (
-                                <img 
-                                  src={getProfilePictureUrl(selectedConversation.user)} 
-                                  alt=""
-                                  onError={(e) => {
-                                    e.target.onerror = null;
-                                    e.target.style.display = 'none';
-                                    e.target.nextSibling.style.display = 'flex';
-                                  }}
-                                />
-                              ) : (
-                                <div className="avatar-placeholder-sm">
-                                  {selectedConversation.user.firstName?.[0]}
-                                </div>
-                              )
-                            ) : (
-                              <div className="avatar-spacer"></div>
-                            )}
-                          </div>
-                        )}
-                        
                         <div className="message-content">
                           <div className="message-bubble">
                             <p>{msg.content}</p>
@@ -810,48 +785,22 @@ const chatStyles = `
 
   .message-row {
     display: flex;
-    align-items: flex-start;
-    gap: 0.5rem;
     max-width: 70%;
   }
 
   .message-wrapper.own .message-row {
-    flex-direction: row-reverse;
+    margin-left: auto;
   }
 
-  .message-avatar {
-    flex-shrink: 0;
-    width: 32px;
-    height: 32px;
-  }
-
-  .message-avatar img,
-  .avatar-placeholder-sm {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    object-fit: cover;
-  }
-
-  .avatar-placeholder-sm {
-    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    font-size: 0.85rem;
-  }
-
-  .avatar-spacer {
-    width: 32px;
-    height: 32px;
+  .message-wrapper.other .message-row {
+    margin-right: auto;
   }
 
   .message-content {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+    width: 100%;
   }
 
   .message-bubble {
