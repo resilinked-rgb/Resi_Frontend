@@ -1,17 +1,19 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import apiService from '../api';
 
 function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Hi! 👋 I'm your ResiLinked assistant. How can I help you today?",
+      text: "Hi! 👋 I'm your ResiLinked assistant powered by Google Gemini AI. How can I help you today?",
       sender: 'bot',
       timestamp: new Date()
     }
   ]);
   const [inputText, setInputText] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
   const navigate = useNavigate();
 
@@ -113,7 +115,7 @@ function Chatbot() {
     };
   };
 
-  const handleSendMessage = (text = inputText) => {
+  const handleSendMessage = async (text = inputText) => {
     if (!text.trim()) return;
 
     // Add user message
@@ -126,19 +128,71 @@ function Chatbot() {
 
     setMessages(prev => [...prev, userMsg]);
     setInputText('');
+    setIsTyping(true);
 
-    // Get bot response
-    setTimeout(() => {
+    try {
+      // Build conversation history for context
+      const conversationHistory = messages.map(msg => ({
+        role: msg.sender === 'user' ? 'user' : 'assistant',
+        content: msg.text
+      }));
+
+      // Get AI response from backend
+      const response = await apiService.chatbotQuery(text.trim(), conversationHistory);
+      
+      const botResponse = response.data?.response || response.response || "I'm having trouble understanding. Could you rephrase that?";
+      const source = response.data?.source || response.source || 'unknown';
+
+      console.log(`🤖 Response from: ${source}`);
+
+      // Parse actions from response if needed
+      const actions = extractActions(botResponse);
+
+      const botMsg = {
+        id: messages.length + 2,
+        text: botResponse,
+        sender: 'bot',
+        timestamp: new Date(),
+        actions: actions.length > 0 ? actions : undefined,
+        source
+      };
+
+      setMessages(prev => [...prev, botMsg]);
+    } catch (error) {
+      console.error('Chatbot error:', error);
+      
+      // Fallback to local response
       const response = getBotResponse(text);
       const botMsg = {
         id: messages.length + 2,
         text: response.text,
         sender: 'bot',
         timestamp: new Date(),
-        actions: response.actions
+        actions: response.actions,
+        source: 'fallback'
       };
       setMessages(prev => [...prev, botMsg]);
-    }, 500);
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
+  // Extract action buttons from AI response (if it mentions navigation)
+  const extractActions = (text) => {
+    const actions = [];
+    if (text.includes('/search-jobs') || text.toLowerCase().includes('search for jobs')) {
+      actions.push('Search jobs now');
+    }
+    if (text.includes('/post-job') || text.toLowerCase().includes('post a job')) {
+      actions.push('Post a job now');
+    }
+    if (text.includes('/help') || text.toLowerCase().includes('support ticket')) {
+      actions.push('Create ticket');
+    }
+    if (text.includes('/profile')) {
+      actions.push('Go to profile');
+    }
+    return actions;
   };
 
   const handleQuickAction = (actionText) => {
@@ -215,6 +269,20 @@ function Chatbot() {
                 </div>
               </div>
             ))}
+            
+            {isTyping && (
+              <div className="chatbot-message bot">
+                <span className="message-avatar">🤖</span>
+                <div className="message-content">
+                  <div className="message-bubble typing-indicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             <div ref={messagesEndRef} />
           </div>
 
@@ -396,6 +464,39 @@ const chatbotStyles = `
     margin: 0;
     font-size: 0.9rem;
     line-height: 1.6;
+  }
+
+  .typing-indicator {
+    display: flex;
+    gap: 0.3rem;
+    padding: 0.875rem 1.25rem !important;
+  }
+
+  .typing-indicator span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #6366f1;
+    animation: typing 1.4s infinite;
+  }
+
+  .typing-indicator span:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  .typing-indicator span:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+
+  @keyframes typing {
+    0%, 60%, 100% {
+      transform: translateY(0);
+      opacity: 0.7;
+    }
+    30% {
+      transform: translateY(-10px);
+      opacity: 1;
+    }
   }
 
   .message-actions {

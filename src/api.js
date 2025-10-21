@@ -647,6 +647,14 @@ class ApiService {
     return this.request("/messages/unread/count");
   }
 
+  // ================= Chatbot =================
+  async chatbotQuery(message, conversationHistory = []) {
+    return this.request("/chatbot/query", {
+      method: "POST",
+      body: { message, conversationHistory },
+    });
+  }
+
   // ================= Dashboard =================
   async getDashboardStats() {
     return this.request("/dashboard/barangay");
