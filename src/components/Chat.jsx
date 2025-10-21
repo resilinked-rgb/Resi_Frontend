@@ -538,24 +538,16 @@ function Chat() {
                   const isOwnMessage = msg.sender._id === user._id;
                   const isSeen = isOwnMessage && msg.seenBy && msg.seenBy.length > 0;
                   
-                  // Get sender name
-                  const senderName = isOwnMessage 
-                    ? 'You' 
-                    : `${msg.sender.firstName} ${msg.sender.lastName}`;
-                  
                   return (
                     <div key={msg._id} className={`message-wrapper ${isOwnMessage ? 'own' : 'other'}`}>
                       <div className="message-row">
                         <div className="message-content">
-                          {!isOwnMessage && (
-                            <span className="sender-name">{senderName}</span>
-                          )}
                           <div className="message-bubble">
                             <p>{msg.content}</p>
                           </div>
                           <div className="message-meta">
                             <span className="message-time">{formatTime(msg.createdAt)}</span>
-                            {isSeen && <span className="message-seen">✓✓ Seen</span>}
+                            {isSeen && <span className="message-seen">Seen</span>}
                           </div>
                         </div>
                       </div>
@@ -902,14 +894,6 @@ const chatStyles = `
     flex-direction: column;
     gap: 0.25rem;
     width: 100%;
-  }
-
-  .sender-name {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #64748b;
-    padding: 0 0.25rem;
-    margin-bottom: 0.125rem;
   }
 
   .message-bubble {
