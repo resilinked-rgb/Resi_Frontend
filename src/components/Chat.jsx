@@ -29,16 +29,6 @@ function Chat() {
   // Get the current user's ID consistently
   const currentUserId = user?.userId || user?._id;
 
-  // Debug: Log user structure once
-  useEffect(() => {
-    console.log('🔍 USER OBJECT:', {
-      fullUser: user,
-      userId: user?.userId,
-      _id: user?._id,
-      currentUserId: currentUserId
-    });
-  }, []);
-
   // Load conversations on mount and handle support contact from navigation state
   useEffect(() => {
     loadConversations();
@@ -262,6 +252,16 @@ function Chat() {
           console.error('Failed to mark message as read:', error);
         }
       }
+      
+      // Scroll to bottom after loading messages
+      setTimeout(() => {
+        if (messagesEndRef.current) {
+          const messagesContainer = messagesEndRef.current.parentElement;
+          if (messagesContainer) {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+          }
+        }
+      }, 100);
     } catch (error) {
       console.error('Failed to load messages:', error);
       if (!silent) showError('Failed to load messages');
@@ -547,7 +547,7 @@ function Chat() {
               </div>
 
               <div className="messages-container">
-                {messages.map((msg, index) => {
+                {messages.map((msg) => {
                   // Try multiple ways to get the sender ID
                   const senderId = String(
                     msg.sender?._id || 
@@ -558,20 +558,6 @@ function Chat() {
                   const myUserId = String(currentUserId || '');
                   const isOwnMessage = senderId === myUserId;
                   const isSeen = isOwnMessage && msg.seenBy && msg.seenBy.length > 0;
-                  
-                  // Debug first and last message
-                  if (index === 0 || index === messages.length - 1) {
-                    console.log(`🔍 MESSAGE ${index}:`, {
-                      content: msg.content.substring(0, 20),
-                      'msg.sender': msg.sender,
-                      'typeof msg.sender': typeof msg.sender,
-                      'msg.sender._id': msg.sender?._id,
-                      senderId: senderId,
-                      myUserId: myUserId,
-                      'senderId === myUserId': senderId === myUserId,
-                      isOwnMessage: isOwnMessage
-                    });
-                  }
                   
                   return (
                     <div key={msg._id} className={`message-wrapper ${isOwnMessage ? 'own' : 'other'}`}>
@@ -990,7 +976,8 @@ const chatStyles = `
     align-items: center;
     gap: 0.5rem;
     padding: 0 0.25rem;
-    margin-top: 0.125rem;
+    margin-top: 0.25rem;
+    min-height: 18px;
   }
 
   .message-wrapper.own .message-meta {
@@ -1005,15 +992,17 @@ const chatStyles = `
     font-size: 0.7rem;
     color: #94a3b8;
     font-weight: 500;
+    line-height: 1;
   }
 
   .message-seen {
     font-size: 0.7rem;
     color: #10b981;
     font-weight: 600;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 0.25rem;
+    line-height: 1;
   }
 
   .message-input-container {
