@@ -921,7 +921,8 @@ const chatStyles = `
 
   .message-row {
     display: flex;
-    max-width: 70%;
+    max-width: 75%;
+    min-width: 120px;
   }
 
   .message-wrapper.own .message-row {
@@ -946,8 +947,9 @@ const chatStyles = `
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     word-wrap: break-word;
     overflow-wrap: break-word;
+    width: fit-content;
     max-width: 100%;
-    min-width: 80px;
+    min-width: 100px;
   }
 
   .message-wrapper.own .message-bubble {
