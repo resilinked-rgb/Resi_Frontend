@@ -12,11 +12,30 @@ function Navigation() {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState(user);
   const menuRef = useRef(null);
   const userMenuRef = useRef(null);
   
   // Set to false to disable debug logging
   const DEBUG = false;
+  
+  // Listen for profile updates
+  useEffect(() => {
+    const handleProfileUpdate = (event) => {
+      console.log('🔄 Navigation: Profile updated', event.detail);
+      setCurrentUser(event.detail);
+    };
+    
+    window.addEventListener('profileUpdated', handleProfileUpdate);
+    return () => window.removeEventListener('profileUpdated', handleProfileUpdate);
+  }, []);
+  
+  // Sync with user context
+  useEffect(() => {
+    if (user) {
+      setCurrentUser(user);
+    }
+  }, [user]);
   
   // Debug logging only if DEBUG is true
   if (DEBUG) {
@@ -130,17 +149,18 @@ function Navigation() {
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                 >
                   <div className="user-avatar">
-                    {getProfilePictureUrl(user) ? (
+                    {getProfilePictureUrl(currentUser) ? (
                       <img 
-                        src={getProfilePictureUrl(user)} 
+                        src={getProfilePictureUrl(currentUser)} 
                         alt="Profile" 
                         className="avatar-img"
+                        key={currentUser?.profilePicture} // Force re-render on profile change
                       />
                     ) : (
-                      user?.firstName?.[0] || 'U'
+                      currentUser?.firstName?.[0] || 'U'
                     )}
                   </div>
-                  <span className="user-name">{user?.firstName || 'User'}</span>
+                  <span className="user-name">{currentUser?.firstName || 'User'}</span>
                   <span className={`dropdown-arrow ${userMenuOpen ? 'open' : ''}`}>▼</span>
                 </button>
 
@@ -216,14 +236,15 @@ function Navigation() {
             <div className="mobile-menu-header">
               <div className="user-info-mobile">
                 <div className="user-avatar-mobile">
-                  {getProfilePictureUrl(user) ? (
+                  {getProfilePictureUrl(currentUser) ? (
                     <img 
-                      src={getProfilePictureUrl(user)} 
+                      src={getProfilePictureUrl(currentUser)} 
                       alt="Profile" 
                       className="avatar-img"
+                      key={currentUser?.profilePicture} // Force re-render on profile change
                     />
                   ) : (
-                    user?.firstName?.[0] || 'U'
+                    currentUser?.firstName?.[0] || 'U'
                   )}
                 </div>
                 <div className="user-details-mobile">

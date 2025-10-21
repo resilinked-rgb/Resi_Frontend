@@ -630,6 +630,13 @@ class ApiService {
     });
   }
 
+  async markMessagesAsSeen(messageIds) {
+    return this.request("/messages/seen", {
+      method: "POST",
+      body: { messageIds },
+    });
+  }
+
   async deleteMessage(messageId) {
     return this.request(`/messages/${messageId}`, {
       method: "DELETE",

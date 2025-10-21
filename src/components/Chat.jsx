@@ -150,6 +150,15 @@ function Chat() {
       
       setMessages(conversationMsgs);
       
+      // Mark unread messages as seen
+      const unreadMessageIds = conversationMsgs
+        .filter(msg => !msg.isRead && msg.recipient._id === user._id)
+        .map(msg => msg._id);
+      
+      if (unreadMessageIds.length > 0 && !silent) {
+        markMessagesAsSeen(unreadMessageIds);
+      }
+      
       // Mark unread messages as read
       const unreadMsgs = conversationMsgs.filter(msg => 
         !msg.isRead && msg.recipient._id === user._id
@@ -201,6 +210,15 @@ function Chat() {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage(e);
+    }
+  };
+
+  const markMessagesAsSeen = async (messageIds) => {
+    try {
+      await apiService.markMessagesAsSeen(messageIds);
+      console.log('✅ Messages marked as seen');
+    } catch (error) {
+      console.error('Failed to mark messages as seen:', error);
     }
   };
 
@@ -449,7 +467,12 @@ function Chat() {
                         <div className="message-bubble">
                           <p>{msg.content}</p>
                         </div>
-                        <span className="message-time">{formatTime(msg.createdAt)}</span>
+                        <div className="message-footer">
+                          <span className="message-time">{formatTime(msg.createdAt)}</span>
+                          {isOwnMessage && msg.seenBy && msg.seenBy.length > 0 && (
+                            <span className="message-seen">Seen</span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   );
@@ -833,11 +856,23 @@ const chatStyles = `
     word-wrap: break-word;
   }
 
+  .message-footer {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+    padding: 0 0.5rem;
+  }
+
   .message-time {
     font-size: 0.75rem;
     color: #94a3b8;
-    margin-top: 0.25rem;
-    padding: 0 0.5rem;
+  }
+
+  .message-seen {
+    font-size: 0.7rem;
+    color: #10b981;
+    font-weight: 500;
   }
 
   .message-input-container {

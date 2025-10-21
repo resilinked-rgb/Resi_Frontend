@@ -192,11 +192,21 @@ export function AuthProvider({ children }) {
     clearAuthData()
   }, [clearAuthData])
 
-  const updateUser = (updatedUserData) => {
+  const updateUser = useCallback((updatedUserData) => {
+    // Merge existing user data with updates
     const newUserData = { ...user, ...updatedUserData }
+    
+    // Store in localStorage for persistence
     localStorage.setItem('userData', JSON.stringify(newUserData))
+    
+    // Update state
     setUser(newUserData)
-  }
+    
+    console.log('✅ User profile updated:', newUserData)
+    
+    // Trigger a custom event so other components can react to profile updates
+    window.dispatchEvent(new CustomEvent('profileUpdated', { detail: newUserData }))
+  }, [user])
 
   // Check if user has access to specific dashboard types
   const hasAccessTo = useCallback((dashboardType) => {
