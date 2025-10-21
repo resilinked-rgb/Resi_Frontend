@@ -21,6 +21,7 @@ function Chat() {
   const [shouldScroll, setShouldScroll] = useState(true);
   const messagesEndRef = useRef(null);
   const socketRef = useRef(null);
+  const isFirstLoadRef = useRef(true);
   
   const { user } = useAuth();
   const { success, error: showError } = useAlert();
@@ -151,12 +152,13 @@ function Chat() {
     
     if (selectedConversation && !isLocalhost) {
       console.log('📡 Starting message polling for conversation:', selectedConversation._id);
+      isFirstLoadRef.current = true; // Reset on conversation change
       loadMessages(selectedConversation._id);
       
       // Poll every 3 seconds for new messages
       const pollingInterval = setInterval(() => {
         console.log('🔄 Polling for new messages...');
-        loadMessages(selectedConversation._id, true);
+        loadMessages(selectedConversation._id, true); // silent = true for polling
       }, 3000);
 
       return () => {
@@ -165,6 +167,7 @@ function Chat() {
       };
     } else if (selectedConversation) {
       console.log('🏠 Using Socket.io (localhost mode)');
+      isFirstLoadRef.current = true;
       // Load initial messages even with Socket.io
       loadMessages(selectedConversation._id);
     }
@@ -240,12 +243,12 @@ function Chat() {
       
       setMessages(conversationMsgs);
       
-      // Mark unread messages as seen
+      // Mark unread messages as seen (do this even during polling)
       const unreadMessageIds = conversationMsgs
         .filter(msg => !msg.isRead && msg.recipient._id === user._id)
         .map(msg => msg._id);
       
-      if (unreadMessageIds.length > 0 && !silent) {
+      if (unreadMessageIds.length > 0) {
         markMessagesAsSeen(unreadMessageIds);
       }
       
@@ -262,15 +265,17 @@ function Chat() {
         }
       }
       
-      // Scroll to bottom after loading messages
-      setTimeout(() => {
-        if (messagesEndRef.current) {
-          const messagesContainer = messagesEndRef.current.parentElement;
-          if (messagesContainer) {
+      // Scroll to bottom ONLY on first load (not during polling)
+      if (isFirstLoadRef.current && messagesEndRef.current) {
+        isFirstLoadRef.current = false; // Mark as loaded
+        const messagesContainer = messagesEndRef.current.parentElement;
+        if (messagesContainer) {
+          // Use setTimeout to ensure DOM is fully rendered
+          setTimeout(() => {
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
-          }
+          }, 50);
         }
-      }, 100);
+      }
     } catch (error) {
       console.error('Failed to load messages:', error);
       if (!silent) showError('Failed to load messages');
