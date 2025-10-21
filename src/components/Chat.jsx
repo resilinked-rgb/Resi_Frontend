@@ -864,8 +864,29 @@ const chatStyles = `
   .messages-container {
     flex: 1;
     overflow-y: auto;
+    overflow-x: hidden;
     padding: 1.5rem;
     background: #f8fafc;
+    scroll-behavior: smooth;
+    max-height: calc(100vh - 220px);
+  }
+
+  .messages-container::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .messages-container::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+  }
+
+  .messages-container::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+  }
+
+  .messages-container::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
   }
 
   .message-wrapper {
