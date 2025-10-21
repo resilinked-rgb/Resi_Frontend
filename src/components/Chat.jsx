@@ -29,6 +29,16 @@ function Chat() {
   // Get the current user's ID consistently
   const currentUserId = user?.userId || user?._id;
 
+  // Debug: Log user structure once
+  useEffect(() => {
+    console.log('🔍 USER OBJECT:', {
+      fullUser: user,
+      userId: user?.userId,
+      _id: user?._id,
+      currentUserId: currentUserId
+    });
+  }, []);
+
   // Load conversations on mount and handle support contact from navigation state
   useEffect(() => {
     loadConversations();
@@ -537,11 +547,25 @@ function Chat() {
               </div>
 
               <div className="messages-container">
-                {messages.map((msg) => {
+                {messages.map((msg, index) => {
                   // Compare sender ID with current user ID
                   const senderId = msg.sender?._id || msg.sender?.userId;
                   const isOwnMessage = senderId === currentUserId;
                   const isSeen = isOwnMessage && msg.seenBy && msg.seenBy.length > 0;
+                  
+                  // Debug first message only
+                  if (index === 0) {
+                    console.log('🔍 FIRST MESSAGE:', {
+                      content: msg.content.substring(0, 20),
+                      'msg.sender._id': msg.sender?._id,
+                      'msg.sender.userId': msg.sender?.userId,
+                      senderId: senderId,
+                      currentUserId: currentUserId,
+                      'senderId === currentUserId': senderId === currentUserId,
+                      isOwnMessage: isOwnMessage,
+                      className: isOwnMessage ? 'own' : 'other'
+                    });
+                  }
                   
                   return (
                     <div key={msg._id} className={`message-wrapper ${isOwnMessage ? 'own' : 'other'}`}>
@@ -866,7 +890,7 @@ const chatStyles = `
     overflow-y: auto;
     overflow-x: hidden;
     padding: 1.5rem;
-    padding-bottom: 2rem;
+    padding-bottom: 3rem;
     background: #f8fafc;
     scroll-behavior: smooth;
     max-height: calc(100vh - 220px);
