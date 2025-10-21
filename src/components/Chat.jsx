@@ -26,16 +26,8 @@ function Chat() {
   const { success, error: showError } = useAlert();
   const location = useLocation();
 
-  // Debug: Log user object structure
-  useEffect(() => {
-    if (user) {
-      console.log('👤 Current user structure:', {
-        userId: user.userId,
-        _id: user._id,
-        fullUser: user
-      });
-    }
-  }, [user]);
+  // Get the current user's ID consistently
+  const currentUserId = user?.userId || user?._id;
 
   // Load conversations on mount and handle support contact from navigation state
   useEffect(() => {
@@ -95,7 +87,7 @@ function Chat() {
         socketRef.current.on('connect', () => {
           console.log('🔌 Connected to Socket.io server');
           // Join with user ID
-          socketRef.current.emit('join', user._id);
+          socketRef.current.emit('join', currentUserId);
         });
 
         socketRef.current.on('connect_error', (error) => {
@@ -545,24 +537,11 @@ function Chat() {
               </div>
 
               <div className="messages-container">
-                {messages.map((msg, index) => {
-                  // Use userId if _id doesn't exist
-                  const currentUserId = user._id || user.userId;
-                  const isOwnMessage = msg.sender._id === currentUserId;
+                {messages.map((msg) => {
+                  // Compare sender ID with current user ID
+                  const senderId = msg.sender?._id || msg.sender?.userId;
+                  const isOwnMessage = senderId === currentUserId;
                   const isSeen = isOwnMessage && msg.seenBy && msg.seenBy.length > 0;
-                  
-                  // Debug log for latest message
-                  if (index === messages.length - 1) {
-                    console.log('🔍 Latest message debug:', {
-                      content: msg.content.substring(0, 30),
-                      senderId: msg.sender._id,
-                      currentUserId: currentUserId,
-                      isOwnMessage: isOwnMessage,
-                      shouldBeOnRight: isOwnMessage ? 'YES' : 'NO',
-                      senderName: `${msg.sender.firstName} ${msg.sender.lastName}`,
-                      className: isOwnMessage ? 'own' : 'other'
-                    });
-                  }
                   
                   return (
                     <div key={msg._id} className={`message-wrapper ${isOwnMessage ? 'own' : 'other'}`}>
