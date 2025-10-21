@@ -866,6 +866,7 @@ const chatStyles = `
     overflow-y: auto;
     overflow-x: hidden;
     padding: 1.5rem;
+    padding-bottom: 2rem;
     background: #f8fafc;
     scroll-behavior: smooth;
     max-height: calc(100vh - 220px);
@@ -934,18 +935,24 @@ const chatStyles = `
   }
 
   .message-wrapper.own .message-bubble {
-    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
     color: white;
-    box-shadow: 0 2px 4px rgba(99, 102, 241, 0.2);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
   }
 
   .message-bubble p {
     margin: 0;
-    font-size: 0.95rem;
+    font-size: 1rem;
     line-height: 1.5;
     word-break: break-word;
     overflow-wrap: break-word;
     white-space: pre-wrap;
+    font-weight: 500;
+  }
+
+  .message-wrapper.own .message-bubble p {
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
 
   .message-meta {
