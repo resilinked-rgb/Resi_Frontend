@@ -322,23 +322,7 @@ function Chatbot() {
 
 const chatbotStyles = `
   .chatbot-button {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-    color: white;
-    border: none;
-    border-radius: 50px;
-    padding: 1rem 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
-    transition: transform 0.2s, box-shadow 0.2s;
-    z-index: 1000;
+    display: none !important;
   }
 
   .chatbot-button:hover {
