@@ -146,7 +146,10 @@ function Chat() {
 
   // Poll for new messages when a conversation is selected (fallback for serverless)
   useEffect(() => {
-    if (selectedConversation && !SOCKET_URL.includes('localhost')) {
+    // Check if BOTH frontend and backend are on localhost
+    const isLocalhost = window.location.hostname === 'localhost' && SOCKET_URL.includes('localhost');
+    
+    if (selectedConversation && !isLocalhost) {
       console.log('📡 Starting message polling for conversation:', selectedConversation._id);
       loadMessages(selectedConversation._id);
       
