@@ -179,6 +179,15 @@ function Chat() {
     }
   };
 
+  const markMessagesAsSeen = async (messageIds) => {
+    try {
+      await apiService.markMessagesAsSeen(messageIds);
+      console.log('✅ Messages marked as seen:', messageIds.length);
+    } catch (error) {
+      console.error('Failed to mark messages as seen:', error);
+    }
+  };
+
   const handleSendMessage = async (e) => {
     e.preventDefault();
     
@@ -210,15 +219,6 @@ function Chat() {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage(e);
-    }
-  };
-
-  const markMessagesAsSeen = async (messageIds) => {
-    try {
-      await apiService.markMessagesAsSeen(messageIds);
-      console.log('✅ Messages marked as seen');
-    } catch (error) {
-      console.error('Failed to mark messages as seen:', error);
     }
   };
 
@@ -254,13 +254,19 @@ function Chat() {
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     
     if (days === 0) {
+      // Today - show time
       return msgDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
     } else if (days === 1) {
-      return 'Yesterday';
+      // Yesterday
+      return 'Yesterday ' + msgDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
     } else if (days < 7) {
-      return msgDate.toLocaleDateString('en-US', { weekday: 'short' });
+      // This week - show day and time
+      return msgDate.toLocaleDateString('en-US', { weekday: 'short' }) + ' ' + 
+             msgDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
     } else {
-      return msgDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      // Older - show date and time
+      return msgDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' +
+             msgDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
     }
   };
 
@@ -790,14 +796,17 @@ const chatStyles = `
     display: flex;
     gap: 0.75rem;
     margin-bottom: 1rem;
+    align-items: flex-end;
   }
 
   .message.own {
     flex-direction: row-reverse;
+    justify-content: flex-start;
   }
 
   .message.other {
-    /* Ensure no background or border on other messages container */
+    flex-direction: row;
+    justify-content: flex-start;
     background: transparent;
     border: none;
   }
@@ -860,19 +869,37 @@ const chatStyles = `
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin-top: 0.25rem;
-    padding: 0 0.5rem;
+    margin-top: 0.35rem;
+    padding: 0 0.25rem;
+    flex-wrap: wrap;
+  }
+
+  .message.own .message-footer {
+    justify-content: flex-end;
+  }
+
+  .message.other .message-footer {
+    justify-content: flex-start;
   }
 
   .message-time {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     color: #94a3b8;
+    white-space: nowrap;
   }
 
   .message-seen {
-    font-size: 0.7rem;
+    font-size: 0.72rem;
     color: #10b981;
-    font-weight: 500;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .message-seen::before {
+    content: '•';
+    font-size: 0.6rem;
   }
 
   .message-input-container {
