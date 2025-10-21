@@ -132,7 +132,10 @@ function Login() {
               firstName: profileRes.user.firstName,
               lastName: profileRes.user.lastName,
               email: profileRes.user.email,
-              // add any other fields you want to keep in userData
+              profilePicture: profileRes.user.profilePicture,
+              mobileNo: profileRes.user.mobileNo,
+              address: profileRes.user.address,
+              barangay: profileRes.user.barangay
             };
           }
         } catch (profileErr) {
@@ -143,7 +146,8 @@ function Login() {
             isVerified: data.isVerified,
             firstName: data.firstName,
             lastName: data.lastName,
-            email: formData.email
+            email: data.email || formData.email,
+            profilePicture: data.profilePicture
           };
         }
 

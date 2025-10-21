@@ -68,7 +68,12 @@ export function AuthProvider({ children }) {
               userType: parsedUserData.userType || responseData.user?.userType,
               isVerified: parsedUserData.isVerified || responseData.user?.isVerified,
               firstName: parsedUserData.firstName || responseData.user?.firstName,
-              lastName: parsedUserData.lastName || responseData.user?.lastName
+              lastName: parsedUserData.lastName || responseData.user?.lastName,
+              email: parsedUserData.email || responseData.user?.email,
+              profilePicture: parsedUserData.profilePicture || responseData.user?.profilePicture,
+              mobileNo: parsedUserData.mobileNo || responseData.user?.mobileNo,
+              address: parsedUserData.address || responseData.user?.address,
+              barangay: parsedUserData.barangay || responseData.user?.barangay
             }
             
             localStorage.setItem('userData', JSON.stringify(updatedUserData))
