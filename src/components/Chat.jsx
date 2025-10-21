@@ -548,23 +548,28 @@ function Chat() {
 
               <div className="messages-container">
                 {messages.map((msg, index) => {
-                  // Compare sender ID with current user ID - convert both to strings
-                  const senderId = String(msg.sender?._id || msg.sender?.userId || '');
+                  // Try multiple ways to get the sender ID
+                  const senderId = String(
+                    msg.sender?._id || 
+                    msg.sender?.userId || 
+                    msg.sender || 
+                    ''
+                  );
                   const myUserId = String(currentUserId || '');
                   const isOwnMessage = senderId === myUserId;
                   const isSeen = isOwnMessage && msg.seenBy && msg.seenBy.length > 0;
                   
-                  // Debug first message only
-                  if (index === 0) {
-                    console.log('🔍 FIRST MESSAGE:', {
+                  // Debug first and last message
+                  if (index === 0 || index === messages.length - 1) {
+                    console.log(`🔍 MESSAGE ${index}:`, {
                       content: msg.content.substring(0, 20),
+                      'msg.sender': msg.sender,
+                      'typeof msg.sender': typeof msg.sender,
                       'msg.sender._id': msg.sender?._id,
-                      'msg.sender.userId': msg.sender?.userId,
                       senderId: senderId,
                       myUserId: myUserId,
                       'senderId === myUserId': senderId === myUserId,
-                      isOwnMessage: isOwnMessage,
-                      className: isOwnMessage ? 'own' : 'other'
+                      isOwnMessage: isOwnMessage
                     });
                   }
                   
