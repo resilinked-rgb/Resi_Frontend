@@ -26,6 +26,17 @@ function Chat() {
   const { success, error: showError } = useAlert();
   const location = useLocation();
 
+  // Debug: Log user object structure
+  useEffect(() => {
+    if (user) {
+      console.log('👤 Current user structure:', {
+        userId: user.userId,
+        _id: user._id,
+        fullUser: user
+      });
+    }
+  }, [user]);
+
   // Load conversations on mount and handle support contact from navigation state
   useEffect(() => {
     loadConversations();
@@ -538,14 +549,16 @@ function Chat() {
                   const isOwnMessage = msg.sender._id === user._id;
                   const isSeen = isOwnMessage && msg.seenBy && msg.seenBy.length > 0;
                   
-                  // Debug log
+                  // Debug log for latest message
                   if (index === messages.length - 1) {
-                    console.log('Latest message:', {
-                      content: msg.content.substring(0, 20),
+                    console.log('🔍 Latest message debug:', {
+                      content: msg.content.substring(0, 30),
                       senderId: msg.sender._id,
                       currentUserId: user._id,
-                      isOwnMessage,
-                      senderName: `${msg.sender.firstName} ${msg.sender.lastName}`
+                      isOwnMessage: isOwnMessage,
+                      shouldBeOnRight: isOwnMessage ? 'YES' : 'NO',
+                      senderName: `${msg.sender.firstName} ${msg.sender.lastName}`,
+                      className: isOwnMessage ? 'own' : 'other'
                     });
                   }
                   
