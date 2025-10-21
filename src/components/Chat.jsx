@@ -546,7 +546,9 @@ function Chat() {
 
               <div className="messages-container">
                 {messages.map((msg, index) => {
-                  const isOwnMessage = msg.sender._id === user._id;
+                  // Use userId if _id doesn't exist
+                  const currentUserId = user._id || user.userId;
+                  const isOwnMessage = msg.sender._id === currentUserId;
                   const isSeen = isOwnMessage && msg.seenBy && msg.seenBy.length > 0;
                   
                   // Debug log for latest message
@@ -554,7 +556,7 @@ function Chat() {
                     console.log('🔍 Latest message debug:', {
                       content: msg.content.substring(0, 30),
                       senderId: msg.sender._id,
-                      currentUserId: user._id,
+                      currentUserId: currentUserId,
                       isOwnMessage: isOwnMessage,
                       shouldBeOnRight: isOwnMessage ? 'YES' : 'NO',
                       senderName: `${msg.sender.firstName} ${msg.sender.lastName}`,
