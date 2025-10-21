@@ -67,10 +67,11 @@ function Chat() {
 
   // Socket.io connection and real-time listeners (only works when backend supports WebSocket)
   useEffect(() => {
-    // Only try Socket.io if running locally or on non-serverless backend
-    const isLocal = SOCKET_URL.includes('localhost');
+    // Only try Socket.io if BOTH frontend AND backend are running locally
+    const isFrontendLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const isBackendLocal = SOCKET_URL.includes('localhost') || SOCKET_URL.includes('127.0.0.1');
     
-    if (isLocal) {
+    if (isFrontendLocal && isBackendLocal) {
       try {
         // Initialize socket connection
         socketRef.current = io(SOCKET_URL, {
