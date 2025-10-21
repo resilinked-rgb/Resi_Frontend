@@ -444,40 +444,43 @@ function Chat() {
                 {messages.map((msg, index) => {
                   const isOwnMessage = msg.sender._id === user._id;
                   const showAvatar = index === 0 || messages[index - 1].sender._id !== msg.sender._id;
+                  const isSeen = isOwnMessage && msg.seenBy && msg.seenBy.length > 0;
                   
                   return (
-                    <div key={msg._id} className={`message ${isOwnMessage ? 'own' : 'other'}`}>
-                      {!isOwnMessage && showAvatar && (
-                        <div className="message-avatar">
-                          {selectedConversation.user.profilePicture ? (
-                            <img 
-                              src={getProfilePictureUrl(selectedConversation.user)} 
-                              alt=""
-                              onError={(e) => {
-                                e.target.onerror = null;
-                                e.target.style.display = 'none';
-                                e.target.nextSibling.style.display = 'flex';
-                              }}
-                            />
-                          ) : null}
-                          <div 
-                            className="avatar-placeholder-sm" 
-                            style={{ display: selectedConversation.user.profilePicture ? 'none' : 'flex' }}
-                          >
-                            {selectedConversation.user.firstName?.[0]}
+                    <div key={msg._id} className={`message-wrapper ${isOwnMessage ? 'own' : 'other'}`}>
+                      <div className="message-row">
+                        {!isOwnMessage && (
+                          <div className="message-avatar">
+                            {showAvatar ? (
+                              selectedConversation.user.profilePicture ? (
+                                <img 
+                                  src={getProfilePictureUrl(selectedConversation.user)} 
+                                  alt=""
+                                  onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.style.display = 'none';
+                                    e.target.nextSibling.style.display = 'flex';
+                                  }}
+                                />
+                              ) : (
+                                <div className="avatar-placeholder-sm">
+                                  {selectedConversation.user.firstName?.[0]}
+                                </div>
+                              )
+                            ) : (
+                              <div className="avatar-spacer"></div>
+                            )}
                           </div>
-                        </div>
-                      )}
-                      {!isOwnMessage && !showAvatar && <div className="message-avatar-spacer"></div>}
-                      <div className="message-content">
-                        <div className="message-bubble">
-                          <p>{msg.content}</p>
-                        </div>
-                        <div className="message-footer">
-                          <span className="message-time">{formatTime(msg.createdAt)}</span>
-                          {isOwnMessage && msg.seenBy && msg.seenBy.length > 0 && (
-                            <span className="message-seen">Seen</span>
-                          )}
+                        )}
+                        
+                        <div className="message-content">
+                          <div className="message-bubble">
+                            <p>{msg.content}</p>
+                          </div>
+                          <div className="message-meta">
+                            <span className="message-time">{formatTime(msg.createdAt)}</span>
+                            {isSeen && <span className="message-seen">Seen</span>}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -792,27 +795,38 @@ const chatStyles = `
     background: #f8fafc;
   }
 
-  .message {
-    display: flex;
-    gap: 0.75rem;
+  .message-wrapper {
     margin-bottom: 1rem;
-    align-items: flex-end;
+    display: flex;
   }
 
-  .message.own {
+  .message-wrapper.own {
+    justify-content: flex-end;
+  }
+
+  .message-wrapper.other {
+    justify-content: flex-start;
+  }
+
+  .message-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    max-width: 70%;
+  }
+
+  .message-wrapper.own .message-row {
     flex-direction: row-reverse;
-    justify-content: flex-start;
   }
 
-  .message.other {
-    flex-direction: row;
-    justify-content: flex-start;
-    background: transparent;
-    border: none;
+  .message-avatar {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
   }
 
   .message-avatar img,
-  .message-avatar .avatar-placeholder-sm {
+  .avatar-placeholder-sm {
     width: 32px;
     height: 32px;
     border-radius: 50%;
@@ -826,80 +840,64 @@ const chatStyles = `
     align-items: center;
     justify-content: center;
     font-weight: 600;
-    font-size: 0.875rem;
+    font-size: 0.85rem;
   }
 
-  .message-avatar-spacer {
+  .avatar-spacer {
     width: 32px;
+    height: 32px;
   }
 
   .message-content {
-    max-width: 60%;
     display: flex;
     flex-direction: column;
-  }
-
-  .message.own .message-content {
-    align-items: flex-end;
+    gap: 0.25rem;
   }
 
   .message-bubble {
     background: white;
     padding: 0.75rem 1rem;
     border-radius: 16px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-    border: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    word-wrap: break-word;
   }
 
-  .message.own .message-bubble {
+  .message-wrapper.own .message-bubble {
     background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
     color: white;
-    border: none;
-    box-shadow: 0 2px 4px rgba(99, 102, 241, 0.2);
+    box-shadow: 0 2px 4px rgba(99, 102, 241, 0.15);
   }
 
   .message-bubble p {
     margin: 0;
     font-size: 0.95rem;
     line-height: 1.5;
-    word-wrap: break-word;
   }
 
-  .message-footer {
+  .message-meta {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin-top: 0.35rem;
     padding: 0 0.25rem;
-    flex-wrap: wrap;
   }
 
-  .message.own .message-footer {
+  .message-wrapper.own .message-meta {
     justify-content: flex-end;
   }
 
-  .message.other .message-footer {
+  .message-wrapper.other .message-meta {
     justify-content: flex-start;
   }
 
   .message-time {
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     color: #94a3b8;
-    white-space: nowrap;
   }
 
   .message-seen {
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     color: #10b981;
     font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-  }
-
-  .message-seen::before {
-    content: '•';
-    font-size: 0.6rem;
   }
 
   .message-input-container {
@@ -1087,8 +1085,8 @@ const chatStyles = `
       padding: 1rem;
     }
 
-    .message-content {
-      max-width: 75%;
+    .message-row {
+      max-width: 85%;
     }
 
     .message-bubble {
@@ -1118,8 +1116,8 @@ const chatStyles = `
   }
 
   @media (max-width: 480px) {
-    .message-content {
-      max-width: 85%;
+    .message-row {
+      max-width: 90%;
     }
 
     .search-box input {
