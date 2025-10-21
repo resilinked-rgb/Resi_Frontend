@@ -224,11 +224,20 @@ function Chatbot() {
       {/* Chat Button */}
       {!isOpen && (
         <button className="chatbot-button" onClick={() => setIsOpen(true)} title="Chat with ResiLinked Assistant">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="32" height="32">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
-            <circle cx="9" cy="9" r="1" fill="white"/>
-            <circle cx="15" cy="9" r="1" fill="white"/>
-            <path d="M9 14h6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" width="36" height="36">
+            {/* Robot head */}
+            <rect x="6" y="8" width="12" height="10" rx="2" fill="white" stroke="white" strokeWidth="0.5"/>
+            {/* Antenna */}
+            <line x1="12" y1="8" x2="12" y2="5" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+            <circle cx="12" cy="4" r="1.5" fill="white"/>
+            {/* Eyes */}
+            <circle cx="9.5" cy="11" r="1.2" fill="#6366f1"/>
+            <circle cx="14.5" cy="11" r="1.2" fill="#6366f1"/>
+            {/* Mouth */}
+            <rect x="9" y="14" width="6" height="2" rx="1" fill="#6366f1"/>
+            {/* Ears/Sensors */}
+            <rect x="5" y="11" width="1.5" height="3" rx="0.5" fill="white"/>
+            <rect x="17.5" y="11" width="1.5" height="3" rx="0.5" fill="white"/>
           </svg>
         </button>
       )}
