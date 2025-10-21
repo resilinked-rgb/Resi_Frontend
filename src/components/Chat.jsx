@@ -4,6 +4,9 @@ import { useAlert } from '../context/AlertContext';
 import { useLocation } from 'react-router-dom';
 import apiService from '../api';
 import { getProfilePictureUrl } from '../utils/imageHelper';
+import io from 'socket.io-client';
+
+const SOCKET_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
 function Chat() {
   const [conversations, setConversations] = useState([]);
@@ -17,7 +20,7 @@ function Chat() {
   const [searching, setSearching] = useState(false);
   const [shouldScroll, setShouldScroll] = useState(true);
   const messagesEndRef = useRef(null);
-  const pollingInterval = useRef(null);
+  const socketRef = useRef(null);
   
   const { user } = useAuth();
   const { success, error: showError } = useAlert();
@@ -62,23 +65,60 @@ function Chat() {
     }
   }, [searchQuery, user._id]);
 
-  // Poll for new messages when a conversation is selected
+  // Socket.io connection and real-time listeners
   useEffect(() => {
-    if (selectedConversation) {
-      loadMessages(selectedConversation._id);
-      
-      // Poll every 3 seconds for new messages (silently, no scroll)
-      pollingInterval.current = setInterval(() => {
-        loadMessages(selectedConversation._id, true);
-      }, 3000);
-    }
+    // Initialize socket connection
+    socketRef.current = io(SOCKET_URL, {
+      transports: ['websocket', 'polling']
+    });
 
+    // Join with user ID
+    socketRef.current.emit('join', user._id);
+    console.log('🔌 Connected to Socket.io server');
+
+    // Listen for incoming messages
+    socketRef.current.on('receive_message', (message) => {
+      console.log('📨 Received real-time message:', message);
+      
+      // If message is from current conversation, add it
+      if (selectedConversation && 
+          (message.sender === selectedConversation._id || message.sender._id === selectedConversation._id)) {
+        setMessages(prev => [...prev, message]);
+        setShouldScroll(true);
+        
+        // Mark as seen immediately
+        apiService.markMessagesAsSeen(selectedConversation._id);
+        
+        // Notify sender it was seen
+        socketRef.current.emit('message_seen', {
+          senderId: message.sender._id || message.sender,
+          messageId: message._id,
+          seenBy: [{ user: user._id, seenAt: new Date() }]
+        });
+      }
+      
+      // Reload conversations to update last message
+      loadConversations();
+    });
+
+    // Listen for message seen notifications
+    socketRef.current.on('message_marked_seen', (data) => {
+      console.log('✅ Message marked as seen:', data);
+      setMessages(prev => prev.map(msg => 
+        msg._id === data.messageId 
+          ? { ...msg, seenBy: data.seenBy }
+          : msg
+      ));
+    });
+
+    // Cleanup on unmount
     return () => {
-      if (pollingInterval.current) {
-        clearInterval(pollingInterval.current);
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+        console.log('👋 Disconnected from Socket.io server');
       }
     };
-  }, [selectedConversation]);
+  }, [user._id, selectedConversation]);
 
   // Manual scroll only when user sends a message
   const scrollToBottom = () => {
@@ -196,15 +236,27 @@ function Chat() {
     try {
       setSending(true);
       
-      await apiService.sendMessage({
+      const response = await apiService.sendMessage({
         recipientId: selectedConversation._id,
         subject: `Chat with ${selectedConversation.user.firstName}`,
         content: newMessage.trim()
       });
       
+      console.log('Message sent:', response);
+      const sentMessage = response.data || response;
+      
+      // Add message to UI immediately
+      setMessages(prev => [...prev, sentMessage]);
+      
+      // Emit via Socket.io for real-time delivery
+      if (socketRef.current) {
+        socketRef.current.emit('send_message', {
+          recipientId: selectedConversation._id,
+          message: sentMessage
+        });
+      }
+      
       setNewMessage('');
-      await loadMessages(selectedConversation._id, true);
-      // Scroll after messages load
       setShouldScroll(true);
       scrollToBottom();
     } catch (error) {
@@ -444,6 +496,15 @@ function Chat() {
                 {messages.map((msg, index) => {
                   const isOwnMessage = msg.sender._id === user._id;
                   const isSeen = isOwnMessage && msg.seenBy && msg.seenBy.length > 0;
+                  
+                  // Debug logging
+                  if (isOwnMessage) {
+                    console.log('Message:', msg.content.substring(0, 20), {
+                      seenBy: msg.seenBy,
+                      seenByLength: msg.seenBy?.length,
+                      isSeen
+                    });
+                  }
                   
                   return (
                     <div key={msg._id} className={`message-wrapper ${isOwnMessage ? 'own' : 'other'}`}>
