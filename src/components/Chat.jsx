@@ -548,9 +548,10 @@ function Chat() {
 
               <div className="messages-container">
                 {messages.map((msg, index) => {
-                  // Compare sender ID with current user ID
-                  const senderId = msg.sender?._id || msg.sender?.userId;
-                  const isOwnMessage = senderId === currentUserId;
+                  // Compare sender ID with current user ID - convert both to strings
+                  const senderId = String(msg.sender?._id || msg.sender?.userId || '');
+                  const myUserId = String(currentUserId || '');
+                  const isOwnMessage = senderId === myUserId;
                   const isSeen = isOwnMessage && msg.seenBy && msg.seenBy.length > 0;
                   
                   // Debug first message only
@@ -560,8 +561,8 @@ function Chat() {
                       'msg.sender._id': msg.sender?._id,
                       'msg.sender.userId': msg.sender?.userId,
                       senderId: senderId,
-                      currentUserId: currentUserId,
-                      'senderId === currentUserId': senderId === currentUserId,
+                      myUserId: myUserId,
+                      'senderId === myUserId': senderId === myUserId,
                       isOwnMessage: isOwnMessage,
                       className: isOwnMessage ? 'own' : 'other'
                     });
@@ -890,7 +891,7 @@ const chatStyles = `
     overflow-y: auto;
     overflow-x: hidden;
     padding: 1.5rem;
-    padding-bottom: 3rem;
+    padding-bottom: 4rem;
     background: #f8fafc;
     scroll-behavior: smooth;
     max-height: calc(100vh - 220px);
