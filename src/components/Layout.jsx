@@ -38,15 +38,6 @@ function Layout({ children }) {
         </div>
       </main>
 
-      {/* Floating Chatbot Button */}
-      <Link to="/help" className="chatbot-float-button" title="Need help? Chat with our assistant">
-        <div className="chatbot-avatar">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="chatbot-icon">
-            <path d="M20 9V7c0-1.1-.9-2-2-2h-3c0-1.66-1.34-3-3-3S9 3.34 9 5H6c-1.1 0-2 .9-2 2v2c-1.66 0-3 1.34-3 3s1.34 3 3 3v4c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-4c1.66 0 3-1.34 3-3s-1.34-3-3-3zM7.5 11.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5S9.83 13 9 13s-1.5-.67-1.5-1.5zM16 17H8v-2h8v2zm-1-4c-.83 0-1.5-.67-1.5-1.5S14.17 10 15 10s1.5.67 1.5 1.5S15.83 13 15 13z"/>
-          </svg>
-        </div>
-      </Link>
-
       {/* Modern Footer */}
       <footer className="main-footer">
         <div className="footer-content">
@@ -303,71 +294,6 @@ function Layout({ children }) {
 
           .footer-content {
             padding: var(--spacing-2) var(--spacing-2) var(--spacing-2);
-          }
-        }
-
-        /* Floating Chatbot Button */
-        .chatbot-float-button {
-          position: fixed !important;
-          bottom: 2rem !important;
-          right: 2rem !important;
-          width: 64px !important;
-          height: 64px !important;
-          background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
-          border-radius: 50% !important;
-          display: flex !important;
-          align-items: center !important;
-          justify-content: center !important;
-          box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4) !important;
-          cursor: pointer !important;
-          transition: all 0.3s ease !important;
-          z-index: 9999 !important;
-          text-decoration: none !important;
-          animation: pulse 2s infinite !important;
-          border: none !important;
-          padding: 0 !important;
-        }
-
-        .chatbot-float-button:hover {
-          transform: scale(1.1) translateY(-4px);
-          box-shadow: 0 12px 32px rgba(99, 102, 241, 0.5);
-        }
-
-        .chatbot-avatar {
-          width: 40px;
-          height: 40px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .chatbot-icon {
-          width: 100%;
-          height: 100%;
-          color: white;
-          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-        }
-
-        @keyframes pulse {
-          0%, 100% {
-            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
-          }
-          50% {
-            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.6), 0 0 0 8px rgba(99, 102, 241, 0.1);
-          }
-        }
-
-        @media (max-width: 768px) {
-          .chatbot-float-button {
-            bottom: 1.5rem;
-            right: 1.5rem;
-            width: 56px;
-            height: 56px;
-          }
-
-          .chatbot-avatar {
-            width: 36px;
-            height: 36px;
           }
         }
       `}</style>

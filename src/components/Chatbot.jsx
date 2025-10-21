@@ -223,9 +223,13 @@ function Chatbot() {
     <>
       {/* Chat Button */}
       {!isOpen && (
-        <button className="chatbot-button" onClick={() => setIsOpen(true)}>
-          <span className="chatbot-icon">💬</span>
-          <span className="chatbot-text">Help</span>
+        <button className="chatbot-button" onClick={() => setIsOpen(true)} title="Chat with ResiLinked Assistant">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="32" height="32">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+            <circle cx="9" cy="9" r="1" fill="white"/>
+            <circle cx="15" cy="9" r="1" fill="white"/>
+            <path d="M9 14h6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+          </svg>
         </button>
       )}
 
@@ -322,7 +326,42 @@ function Chatbot() {
 
 const chatbotStyles = `
   .chatbot-button {
-    display: none !important;
+    position: fixed !important;
+    bottom: 2rem !important;
+    right: 2rem !important;
+    width: 64px !important;
+    height: 64px !important;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4) !important;
+    transition: all 0.3s ease !important;
+    z-index: 9999 !important;
+    animation: pulse 2s infinite !important;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+    }
+    50% {
+      box-shadow: 0 4px 30px rgba(99, 102, 241, 0.6);
+    }
+  }
+
+  .chatbot-button:hover {
+    transform: translateY(-4px) scale(1.05) !important;
+    box-shadow: 0 8px 30px rgba(99, 102, 241, 0.6) !important;
+  }
+
+  .chatbot-button svg {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
   }
 
   .chatbot-button:hover {
