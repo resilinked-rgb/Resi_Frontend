@@ -773,6 +773,12 @@ const chatStyles = `
     flex-direction: row-reverse;
   }
 
+  .message.other {
+    /* Ensure no background or border on other messages container */
+    background: transparent;
+    border: none;
+  }
+
   .message-avatar img,
   .message-avatar .avatar-placeholder-sm {
     width: 32px;
@@ -809,14 +815,15 @@ const chatStyles = `
     background: white;
     padding: 0.75rem 1rem;
     border-radius: 16px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    border: none;
   }
 
   .message.own .message-bubble {
     background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
     color: white;
     border: none;
+    box-shadow: 0 2px 4px rgba(99, 102, 241, 0.2);
   }
 
   .message-bubble p {
