@@ -136,11 +136,13 @@
 :global(.faq-answer) {
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.35s ease-out, padding 0.25s ease;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease, opacity 0.3s ease;
+  opacity: 0;
 }
 
 :global(.faq-item.active .faq-answer) {
-  max-height: 400px; /* larger to accommodate longer answers */
+  max-height: 500px; /* Increased for longer answers */
+  opacity: 1;
 }
 
 :global(.faq-answer p) {

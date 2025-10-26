@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { AuthContext } from '../context/AuthContext'
 import { AlertContext } from '../context/AlertContext'
 import apiService from '../api'
-import styles from './Help.module.css'
+import './Help.module.css' // Changed from default import to side-effect import
 
 // Help Center with comprehensive FAQ and support options
 function Help() {
@@ -342,6 +342,8 @@ function Help() {
           <div className="search-container">
             <input
               type="text"
+              id="helpSearch"
+              name="helpSearch"
               className="search-box"
               placeholder="🔍 Search questions..."
               value={searchTerm}
