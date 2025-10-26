@@ -881,6 +881,32 @@ class ApiService {
       method: "GET"
     });
   }
+
+  // Email Change Methods
+  async requestEmailChange(newEmail) {
+    return this.request("/email-change/request", {
+      method: "POST",
+      body: { newEmail }
+    });
+  }
+
+  async verifyEmailChange(token) {
+    return this.request(`/email-change/verify/${token}`, {
+      method: "GET"
+    });
+  }
+
+  async cancelEmailChange() {
+    return this.request("/email-change/cancel", {
+      method: "DELETE"
+    });
+  }
+
+  async getPendingEmailChange() {
+    return this.request("/email-change/pending", {
+      method: "GET"
+    });
+  }
 }
 
 const apiService = new ApiService();

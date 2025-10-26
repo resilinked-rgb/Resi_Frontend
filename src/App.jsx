@@ -24,6 +24,7 @@ import UserDetails from './components/UserDetails'
 import ResetRequest from './components/ResetRequest'
 import ResetPassword from './components/ResetPassword'
 import VerifyEmail from './components/VerifyEmail'
+import VerifyEmailChange from './components/VerifyEmailChange'
 import Notifications from './components/Notifications'
 import Messages from './components/Messages'
 import Chat from './components/Chat'
@@ -117,6 +118,7 @@ function App() {
             <Route path="/reset-password/:token" element={<ResetPassword />} />
             <Route path="/help" element={<Help />} />
             <Route path="/verify-email/:token" element={<VerifyEmail />} />
+            <Route path="/verify-email-change/:token" element={<VerifyEmailChange />} />
             
             {/* Protected routes */}
             <Route path="/landing" element={

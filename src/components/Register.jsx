@@ -1250,6 +1250,14 @@ function Register() {
           animation: fadeSlideIn 0.3s ease;
         }
 
+        .form-step img:not(.register-logo) {
+          max-width: 100%;
+          max-height: 250px;
+          object-fit: contain;
+          border-radius: 8px;
+          margin: 0.5rem 0;
+        }
+
         @keyframes fadeSlideIn {
           from {
             opacity: 0;
@@ -1672,6 +1680,14 @@ function Register() {
           display: flex;
           flex-direction: column;
           gap: 0.75rem;
+        }
+
+        .file-display-wrapper img {
+          max-width: 100%;
+          max-height: 200px;
+          object-fit: contain;
+          border-radius: 8px;
+          border: 2px solid rgba(147, 51, 234, 0.1);
         }
 
         .file-selected-display {
@@ -2205,6 +2221,10 @@ function Register() {
             gap: 0;
           }
 
+          .form-step img:not(.register-logo) {
+            max-height: 180px;
+          }
+
           /* Mobile Email Verification Progress */
           .email-verification-progress {
             padding: 1.5rem 0.5rem;
@@ -2334,6 +2354,14 @@ function Register() {
 
           .form-group {
             margin-bottom: 1.5rem;
+          }
+
+          .form-step img:not(.register-logo) {
+            max-height: 150px;
+          }
+
+          .file-display-wrapper img {
+            max-height: 150px;
           }
         }
 

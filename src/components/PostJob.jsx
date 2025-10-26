@@ -10,6 +10,7 @@ function PostJob() {
     description: '',
     price: '',
     barangay: '',
+    otherBarangay: '',
     postMethod: 'public'
   })
   
@@ -47,6 +48,7 @@ function PostJob() {
           description: draftData.description || '',
           price: draftData.price || '',
           barangay: draftData.barangay || '',
+          otherBarangay: draftData.otherBarangay || '',
           postMethod: draftData.postMethod || 'public'
         })
         
@@ -61,10 +63,20 @@ function PostJob() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }))
+    
+    // Special case for barangay field
+    if (name === 'barangay' && value === 'other') {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+        otherBarangay: ''
+      }))
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }))
+    }
     
     if (formError) {
       setFormError('')
@@ -113,13 +125,26 @@ function PostJob() {
       setFormError('Please select a post timing and date/time if scheduling')
       return
     }
+    if (formData.barangay === 'other' && !formData.otherBarangay) {
+      setFormError('Please specify your barangay')
+      return
+    }
 
     setLoading(true);
     try {
-      const result = await apiService.createJob({
+      const jobData = {
         ...formData,
         skillsRequired: skills
-      });
+      };
+      
+      // If barangay is 'other', use the otherBarangay value
+      if (formData.barangay === 'other') {
+        jobData.barangay = formData.otherBarangay;
+      }
+      // Remove otherBarangay from the submission
+      delete jobData.otherBarangay;
+      
+      const result = await apiService.createJob(jobData);
 
       success("Job posted successfully!");
       setFormData({
@@ -127,6 +152,7 @@ function PostJob() {
         description: '',
         price: '',
         barangay: '',
+        otherBarangay: '',
         postMethod: 'public',
         postTiming: 'now',
         scheduledTime: ''
@@ -187,34 +213,48 @@ function PostJob() {
             />
           </div>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="price">Price (₱) *</label>
-              <input
-                type="number"
-                id="price"
-                name="price"
-                value={formData.price}
-                onChange={handleInputChange}
-                required
-                min="0"
-                step="0.01"
-                placeholder="e.g., 500.00"
-              />
-            </div>
+          <div className="form-group">
+            <label htmlFor="price">Price (₱) *</label>
+            <input
+              type="number"
+              id="price"
+              name="price"
+              value={formData.price}
+              onChange={handleInputChange}
+              required
+              min="0"
+              step="0.01"
+              placeholder="e.g., 500.00"
+            />
+          </div>
 
-            <div className="form-group">
-              <label htmlFor="barangay">Location (Barangay) *</label>
+          <div className="form-group">
+            <label htmlFor="barangay">Location (Barangay) *</label>
+            <select
+              id="barangay"
+              name="barangay"
+              value={formData.barangay}
+              onChange={handleInputChange}
+              required
+            >
+              <option value="">Select Barangay</option>
+              <option value="Sto. Rosario">Sto. Rosario</option>
+              <option value="Sta. Lucia">Sta. Lucia</option>
+              <option value="Sta. Teresita">Sta. Teresita</option>
+              <option value="other">Other</option>
+            </select>
+            {formData.barangay === 'other' && (
               <input
                 type="text"
-                id="barangay"
-                name="barangay"
-                value={formData.barangay}
+                id="otherBarangay"
+                name="otherBarangay"
+                value={formData.otherBarangay}
                 onChange={handleInputChange}
-                required
-                placeholder="e.g., Barangay San Jose"
+                placeholder="Specify your barangay"
+                style={{ marginTop: '0.5em' }}
+                required={formData.barangay === 'other'}
               />
-            </div>
+            )}
           </div>
 
           <div className="form-group">
@@ -413,22 +453,45 @@ function PostJob() {
 
         input[type="text"],
         input[type="number"],
+        select,
         textarea {
           width: 100%;
           padding: 0.75rem;
           border: 2px solid #e2e8f0;
           border-radius: 8px;
           font-size: 1rem;
-          transition: border-color 0.2s;
+          transition: all 0.2s;
           box-sizing: border-box;
+          background-color: white;
+          font-family: inherit;
+        }
+
+        select {
+          cursor: pointer;
+          appearance: none;
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232d3748' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+          background-repeat: no-repeat;
+          background-position: right 0.75rem center;
+          background-size: 1.2em;
+          padding-right: 2.5rem;
         }
 
         input[type="text"]:focus,
         input[type="number"]:focus,
+        select:focus,
         textarea:focus {
           outline: none;
           border-color: #2b6cb0;
           box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.1);
+        }
+
+        input[type="text"]:hover,
+        input[type="number"]:hover,
+        select:hover,
+        textarea:hover {
+          border-color: #cbd5e0;
         }
 
         textarea {

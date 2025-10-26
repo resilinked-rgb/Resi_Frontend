@@ -39,13 +39,78 @@ function Profile() {
   })
   // Goals state removed - now using GoalManagement component
   const [uploading, setUploading] = useState(false)
+  const [showEmailChangeModal, setShowEmailChangeModal] = useState(false)
+  const [newEmailInput, setNewEmailInput] = useState('')
+  const [requestingEmailChange, setRequestingEmailChange] = useState(false)
+  const [pendingEmailChange, setPendingEmailChange] = useState(null)
   
   const { user, updateUser, verifyToken } = useAuth()
   const { success, error: showError } = useAlert()
 
   useEffect(() => {
     loadProfile()
+    checkPendingEmailChange()
   }, [])
+
+  const checkPendingEmailChange = async () => {
+    try {
+      const response = await apiService.getPendingEmailChange()
+      if (response.hasPending && response.emailChange) {
+        setPendingEmailChange(response.emailChange)
+      } else {
+        setPendingEmailChange(null)
+      }
+    } catch (error) {
+      // No pending email change or error fetching, which is fine
+      setPendingEmailChange(null)
+    }
+  }
+
+  const handleRequestEmailChange = async () => {
+    if (!newEmailInput || !newEmailInput.trim()) {
+      showError('Please enter a new email address')
+      return
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(newEmailInput)) {
+      showError('Please enter a valid email address')
+      return
+    }
+
+    try {
+      setRequestingEmailChange(true)
+      const response = await apiService.requestEmailChange(newEmailInput)
+      
+      success(response.alert || 'Verification email sent! Check your current email to confirm the change.')
+      setShowEmailChangeModal(false)
+      setNewEmailInput('')
+      
+      // Reload pending email change status
+      checkPendingEmailChange()
+    } catch (error) {
+      console.error('Email change request error:', error)
+      showError(error.message || 'Failed to request email change')
+    } finally {
+      setRequestingEmailChange(false)
+    }
+  }
+
+  const handleCancelEmailChange = async () => {
+    if (!window.confirm('Are you sure you want to cancel the email change request?')) {
+      return
+    }
+
+    try {
+      const response = await apiService.cancelEmailChange()
+      success(response.alert || 'Email change request cancelled')
+      setPendingEmailChange(null)
+    } catch (error) {
+      console.error('Cancel email change error:', error)
+      showError(error.message || 'Failed to cancel email change')
+    }
+  }
 
   useEffect(() => {
     if (profile?._id) {
@@ -1275,9 +1340,16 @@ function Profile() {
                     id="email"
                     name="email"
                     value={editFormData.email}
-                    onChange={handleInputChange}
-                    required
+                    readOnly
+                    style={{ 
+                      background: '#f3f4f6', 
+                      cursor: 'not-allowed',
+                      color: '#6b7280'
+                    }}
                   />
+                  <small className="form-helper-text" style={{ color: '#9333ea' }}>
+                    🔒 To change your email, use the "Change Email" button below. You'll need to verify the change via your current email address.
+                  </small>
                 </div>
                 
                 <div className="form-group">
@@ -1400,6 +1472,21 @@ function Profile() {
                 </div>
                 
                 <div className="modal-actions">
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      setShowEmailChangeModal(true)
+                      setShowEditModal(false)
+                    }} 
+                    className="btn btn-warning"
+                    style={{ 
+                      background: '#f59e0b', 
+                      color: 'white',
+                      marginRight: 'auto'
+                    }}
+                  >
+                    🔐 Change Email
+                  </button>
                   <button type="button" onClick={() => setShowEditModal(false)} className="btn btn-secondary">
                     Cancel
                   </button>
@@ -1408,6 +1495,123 @@ function Profile() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* Email Change Modal */}
+        {showEmailChangeModal && (
+          <div className="modal-overlay" onClick={() => setShowEmailChangeModal(false)}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '500px' }}>
+              <div className="modal-header">
+                <h3>🔐 Change Email Address</h3>
+                <button onClick={() => setShowEmailChangeModal(false)} className="close-btn">×</button>
+              </div>
+              
+              <div className="modal-body" style={{ padding: '2rem' }}>
+                {pendingEmailChange ? (
+                  <div style={{ 
+                    background: '#fef3c7', 
+                    border: '1px solid #f59e0b', 
+                    borderRadius: '8px', 
+                    padding: '1rem',
+                    marginBottom: '1rem'
+                  }}>
+                    <h4 style={{ color: '#92400e', marginTop: 0 }}>⏳ Email Change Pending</h4>
+                    <p style={{ color: '#78350f', marginBottom: '0.5rem' }}>
+                      <strong>Current Email:</strong> {pendingEmailChange.currentEmail}
+                    </p>
+                    <p style={{ color: '#78350f', marginBottom: '0.5rem' }}>
+                      <strong>New Email:</strong> {pendingEmailChange.newEmail}
+                    </p>
+                    <p style={{ color: '#78350f', fontSize: '0.9rem' }}>
+                      Check your email ({pendingEmailChange.currentEmail}) for the verification link.
+                      Expires: {new Date(pendingEmailChange.expiresAt).toLocaleString()}
+                    </p>
+                    <button 
+                      onClick={handleCancelEmailChange}
+                      style={{
+                        marginTop: '1rem',
+                        padding: '0.5rem 1rem',
+                        background: '#ef4444',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Cancel Request
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <div style={{ 
+                      background: '#fef3c7', 
+                      border: '2px solid #f59e0b', 
+                      borderRadius: '8px', 
+                      padding: '1.25rem',
+                      marginBottom: '1.5rem'
+                    }}>
+                      <p style={{ color: '#92400e', marginBottom: '0.75rem', fontWeight: '700', fontSize: '1rem' }}>
+                        🔒 Important Security Information
+                      </p>
+                      <ul style={{ color: '#78350f', fontSize: '0.95rem', marginBottom: 0, lineHeight: '1.6' }}>
+                        <li><strong>The verification link will be sent to your CURRENT email address: {profile?.email}</strong></li>
+                        <li>This is a security measure to prevent unauthorized email changes</li>
+                        <li>You must click the verification link to complete the email change</li>
+                        <li>The verification link expires in 1 hour</li>
+                      </ul>
+                    </div>
+                    
+                    <div style={{ 
+                      background: '#f8fafc', 
+                      padding: '1rem', 
+                      borderRadius: '8px',
+                      marginBottom: '1.5rem',
+                      border: '1px solid #e2e8f0'
+                    }}>
+                      <p style={{ margin: 0, color: '#475569' }}>
+                        <strong style={{ color: '#1e293b' }}>Current Email:</strong> <span style={{ color: '#9333ea', fontWeight: '600' }}>{profile?.email}</span>
+                      </p>
+                    </div>
+                    
+                    <div className="form-group">
+                      <label htmlFor="newEmail" style={{ fontWeight: '600', color: '#1e293b' }}>New Email Address</label>
+                      <input
+                        type="email"
+                        id="newEmail"
+                        value={newEmailInput}
+                        onChange={(e) => setNewEmailInput(e.target.value)}
+                        placeholder="Enter your new email address"
+                        required
+                        style={{ width: '100%' }}
+                      />
+                      <small style={{ color: '#64748b', fontSize: '0.85rem', marginTop: '0.5rem', display: 'block' }}>
+                        Enter the email address you want to change to
+                      </small>
+                    </div>
+                    
+                    <div className="modal-actions" style={{ marginTop: '2rem' }}>
+                      <button 
+                        type="button" 
+                        onClick={() => setShowEmailChangeModal(false)} 
+                        className="btn btn-secondary"
+                      >
+                        Cancel
+                      </button>
+                      <button 
+                        type="button" 
+                        onClick={handleRequestEmailChange}
+                        className="btn btn-primary"
+                        disabled={requestingEmailChange || !newEmailInput.trim()}
+                        style={{ background: '#9333ea' }}
+                      >
+                        {requestingEmailChange ? 'Sending...' : 'Send Verification Email'}
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         )}
