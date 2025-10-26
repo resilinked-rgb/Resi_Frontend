@@ -20,6 +20,7 @@ function Messages() {
     subject: '',
     content: ''
   });
+  const [recipientName, setRecipientName] = useState('');
 
   const { user } = useContext(AuthContext);
   const { success, error: showError } = useContext(AlertContext);
@@ -35,7 +36,11 @@ function Messages() {
           subject: subject || '',
           content: ''
         });
+        setRecipientName(recipientName || '');
         setShowComposeModal(true);
+        
+        // Clear location state after using it
+        window.history.replaceState({}, document.title);
       }
     }
   }, [location.state]);
@@ -149,6 +154,7 @@ function Messages() {
       
       success('Message sent successfully');
       setNewMessage({ recipientId: '', recipientEmail: '', subject: '', content: '' });
+      setRecipientName('');
       setShowComposeModal(false);
       setActiveTab('sent');
       loadMessages();
@@ -371,40 +377,61 @@ function Messages() {
 
       {/* Compose New Message Modal */}
       {showComposeModal && (
-        <div className="modal-overlay" onClick={() => setShowComposeModal(false)}>
+        <div className="modal-overlay" onClick={() => {
+          setShowComposeModal(false);
+          setNewMessage({ recipientId: '', recipientEmail: '', subject: '', content: '' });
+          setRecipientName('');
+        }}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>New Message</h3>
+              <h3>{recipientName ? `Message ${recipientName}` : 'New Message'}</h3>
               <button
                 className="close-btn"
-                onClick={() => setShowComposeModal(false)}
+                onClick={() => {
+                  setShowComposeModal(false);
+                  setNewMessage({ recipientId: '', recipientEmail: '', subject: '', content: '' });
+                  setRecipientName('');
+                }}
               >
                 ✕
               </button>
             </div>
 
             <form onSubmit={handleComposeMessage} className="modal-form">
-              <div className="form-group">
-                <label>Recipient ID or Email</label>
-                <input
-                  type="text"
-                  value={newMessage.recipientId}
-                  onChange={(e) => setNewMessage({...newMessage, recipientId: e.target.value, recipientEmail: ''})}
-                  placeholder="Enter recipient user ID"
-                />
-                <div style={{textAlign: 'center', margin: '0.5rem 0', color: '#718096', fontWeight: '600'}}>
-                  OR
+              {!recipientName ? (
+                <div className="form-group">
+                  <label>Recipient ID or Email</label>
+                  <input
+                    type="text"
+                    value={newMessage.recipientId}
+                    onChange={(e) => setNewMessage({...newMessage, recipientId: e.target.value, recipientEmail: ''})}
+                    placeholder="Enter recipient user ID"
+                  />
+                  <div style={{textAlign: 'center', margin: '0.5rem 0', color: '#718096', fontWeight: '600'}}>
+                    OR
+                  </div>
+                  <input
+                    type="email"
+                    value={newMessage.recipientEmail}
+                    onChange={(e) => setNewMessage({...newMessage, recipientEmail: e.target.value, recipientId: ''})}
+                    placeholder="Enter recipient email address"
+                  />
+                  <small style={{color: '#718096', fontSize: '0.875rem', marginTop: '0.5rem', display: 'block'}}>
+                    💡 You can use either User ID or Email to send a message
+                  </small>
                 </div>
-                <input
-                  type="email"
-                  value={newMessage.recipientEmail}
-                  onChange={(e) => setNewMessage({...newMessage, recipientEmail: e.target.value, recipientId: ''})}
-                  placeholder="Enter recipient email address"
-                />
-                <small style={{color: '#718096', fontSize: '0.875rem', marginTop: '0.5rem', display: 'block'}}>
-                  💡 You can use either User ID or Email to send a message
-                </small>
-              </div>
+              ) : (
+                <div className="form-group">
+                  <label>To:</label>
+                  <div className="recipient-display">
+                    <span className="recipient-icon">👤</span>
+                    <span className="recipient-text">{recipientName}</span>
+                    {newMessage.recipientEmail && (
+                      <span className="recipient-email">({newMessage.recipientEmail})</span>
+                    )}
+                  </div>
+                </div>
+              )}
 
               <div className="form-group">
                 <label>Subject</label>
@@ -432,12 +459,16 @@ function Messages() {
                 <button
                   type="button"
                   className="cancel-btn"
-                  onClick={() => setShowComposeModal(false)}
+                  onClick={() => {
+                    setShowComposeModal(false);
+                    setNewMessage({ recipientId: '', recipientEmail: '', subject: '', content: '' });
+                    setRecipientName('');
+                  }}
                 >
                   Cancel
                 </button>
                 <button type="submit" className="submit-btn">
-                  Send Message
+                  📤 Send Message
                 </button>
               </div>
             </form>
@@ -472,7 +503,7 @@ function Messages() {
 
         .compose-btn {
           padding: 0.75rem 1.5rem;
-          background: #2b6cb0;
+          background: #9333ea;
           color: white;
           border: none;
           border-radius: 8px;
@@ -486,7 +517,7 @@ function Messages() {
         }
 
         .compose-btn:hover {
-          background: #2c5282;
+          background: #7c3aed;
         }
 
         .back-btn {
@@ -521,12 +552,12 @@ function Messages() {
         }
 
         .tab-btn.active {
-          color: #2b6cb0;
-          border-bottom-color: #2b6cb0;
+          color: #9333ea;
+          border-bottom-color: #9333ea;
         }
 
         .tab-btn:hover {
-          color: #2b6cb0;
+          color: #9333ea;
         }
 
         .unread-badge {
@@ -684,7 +715,7 @@ function Messages() {
 
         .reply-btn {
           padding: 0.75rem 1.5rem;
-          background: #2b6cb0;
+          background: #9333ea;
           color: white;
           border: none;
           border-radius: 8px;
@@ -694,7 +725,7 @@ function Messages() {
         }
 
         .reply-btn:hover {
-          background: #2c5282;
+          background: #7c3aed;
         }
 
         .delete-btn {
@@ -818,16 +849,71 @@ function Messages() {
         }
 
         .submit-btn {
-          background: #2b6cb0;
+          background: #9333ea;
           color: white;
           border: none;
           padding: 0.75rem 1.5rem;
           border-radius: 8px;
           cursor: pointer;
+          font-weight: 500;
+          transition: background-color 0.2s;
         }
 
         .submit-btn:hover {
-          background: #2c5282;
+          background: #7c3aed;
+        }
+
+        .recipient-display {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          padding: 1rem;
+          background: #f3f4f6;
+          border-radius: 8px;
+          border: 2px solid #9333ea;
+        }
+
+        .recipient-icon {
+          font-size: 1.5rem;
+        }
+
+        .recipient-text {
+          font-weight: 600;
+          color: #1f2937;
+          font-size: 1rem;
+        }
+
+        .recipient-email {
+          color: #6b7280;
+          font-size: 0.875rem;
+        }
+
+        .modal-overlay {
+          animation: fadeIn 0.2s ease-in;
+        }
+
+        .modal-content {
+          animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
+        @keyframes slideIn {
+          from {
+            transform: translateY(-20px);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
         }
 
         @media (max-width: 768px) {

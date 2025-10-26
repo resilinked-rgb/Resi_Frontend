@@ -6,6 +6,7 @@ import './App.css'
 import Home from './components/Home'
 import Login from './components/Login'
 import Register from './components/Register'
+import RegistrationSuccess from './components/RegistrationSuccess'
 import TermsOfService from './components/TermsOfService'
 import Landing from './components/Landing'
 import Profile from './components/Profile'
@@ -108,6 +109,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/registration-success" element={<RegistrationSuccess />} />
             <Route path="/terms-of-service" element={<TermsOfService />} />
             <Route path="/reset-request" element={<ResetRequest />} />
             <Route path="/reset-password" element={<ResetPassword />} />

@@ -25,6 +25,10 @@ function EmployeeDashboard() {
   const [activeTab, setActiveTab] = useState('active'); // 'active' or 'history'
   const [showJobModal, setShowJobModal] = useState(false);
   const [selectedJob, setSelectedJob] = useState(null);
+  const [showEmployerModal, setShowEmployerModal] = useState(false);
+  const [selectedEmployer, setSelectedEmployer] = useState(null);
+  const [employerJobs, setEmployerJobs] = useState([]);
+  const [loadingEmployer, setLoadingEmployer] = useState(false);
   const [reportModal, setReportModal] = useState({ isOpen: false, jobId: null, jobTitle: '' });
   const { user, isAuthenticated, loading: authLoading } = useContext(AuthContext);
   const { error: showError, success } = useContext(AlertContext);
@@ -242,6 +246,27 @@ function EmployeeDashboard() {
       setJobInvitations(invitationsResponse?.data || []);
     } catch (error) {
       showError(error.message || 'Failed to decline invitation');
+    }
+  };
+
+  const viewEmployerProfile = async (employerId) => {
+    try {
+      setLoadingEmployer(true);
+      setShowEmployerModal(true);
+      
+      // Fetch employer details
+      const employerResponse = await apiService.getUserById(employerId);
+      setSelectedEmployer(employerResponse.user);
+      
+      // Fetch employer's completed jobs
+      const jobsResponse = await apiService.getCompletedJobsByEmployer(employerId);
+      setEmployerJobs(jobsResponse.jobs || []);
+    } catch (error) {
+      console.error('Error loading employer profile:', error);
+      showError(error.message || 'Failed to load employer profile');
+      setShowEmployerModal(false);
+    } finally {
+      setLoadingEmployer(false);
     }
   };
 
@@ -499,6 +524,14 @@ function EmployeeDashboard() {
                       >
                         Cancel Application
                       </button>
+                      {job.postedBy && (
+                        <button
+                          onClick={() => viewEmployerProfile(job.postedBy._id || job.postedBy)}
+                          className="btn secondary"
+                        >
+                          View Employer
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))
@@ -536,11 +569,19 @@ function EmployeeDashboard() {
                         </span>
                       </div>
                     </div>
-                    {job.applicationInfo?.assignedToMe && (
-                      <div className="job-actions">
+                    <div className="job-actions">
+                      {job.applicationInfo?.assignedToMe && (
                         <span className="assigned-badge">✓ Assigned to you</span>
-                      </div>
-                    )}
+                      )}
+                      {job.postedBy && (
+                        <button
+                          onClick={() => viewEmployerProfile(job.postedBy._id || job.postedBy)}
+                          className="btn secondary"
+                        >
+                          View Employer
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ))
               ) : (
@@ -803,6 +844,120 @@ function EmployeeDashboard() {
         reportType="Job"
         targetName={reportModal.jobTitle}
       />
+
+      {/* Employer Profile Modal */}
+      {showEmployerModal && selectedEmployer && (
+        <div className="modal-overlay" onClick={() => setShowEmployerModal(false)}>
+          <div className="modal-content employer-profile-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Employer Profile</h2>
+              <button className="modal-close" onClick={() => setShowEmployerModal(false)}>×</button>
+            </div>
+            
+            <div className="modal-body">
+              {loadingEmployer ? (
+                <div className="loading-state">
+                  <div className="spinner"></div>
+                  <p>Loading employer profile...</p>
+                </div>
+              ) : (
+                <>
+                  {/* Employer Info */}
+                  <div className="employer-info-section">
+                    <div className="employer-header">
+                      <div className="employer-avatar">
+                        {selectedEmployer.profilePicture ? (
+                          <img src={selectedEmployer.profilePicture} alt={selectedEmployer.firstName} />
+                        ) : (
+                          <div className="avatar-placeholder">
+                            {selectedEmployer.firstName?.[0]}{selectedEmployer.lastName?.[0]}
+                          </div>
+                        )}
+                      </div>
+                      <div className="employer-details">
+                        <h3>{selectedEmployer.firstName} {selectedEmployer.lastName}</h3>
+                        <p className="employer-location">📍 {selectedEmployer.barangay || 'Location not specified'}</p>
+                        {selectedEmployer.averageRating > 0 && (
+                          <p className="employer-rating">⭐ {selectedEmployer.averageRating.toFixed(1)} Rating</p>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {selectedEmployer.bio && (
+                      <div className="employer-bio">
+                        <h4>About</h4>
+                        <p>{selectedEmployer.bio}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Completed Jobs */}
+                  <div className="employer-jobs-section">
+                    <h4>Completed Jobs ({employerJobs.length})</h4>
+                    {employerJobs.length > 0 ? (
+                      <div className="completed-jobs-list">
+                        {employerJobs.map(job => (
+                          <div key={job._id} className="completed-job-card">
+                            <div className="job-header-small">
+                              <h5>{job.title}</h5>
+                              <span className="job-price-small">₱{job.price?.toLocaleString()}</span>
+                            </div>
+                            
+                            <div className="job-meta-small">
+                              <span>📍 {job.barangay}</span>
+                              <span>📅 {new Date(job.datePosted).toLocaleDateString()}</span>
+                            </div>
+
+                            {job.assignedWorker && (
+                              <div className="worker-info-small">
+                                <p><strong>Worker:</strong> {job.assignedWorker.firstName} {job.assignedWorker.lastName}</p>
+                                {job.rating && (
+                                  <div className="job-rating">
+                                    <span>⭐ {job.rating.rating}/5</span>
+                                    {job.rating.comment && (
+                                      <p className="rating-comment">"{job.rating.comment}"</p>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {job.description && (
+                              <p className="job-description-small">{job.description.substring(0, 100)}...</p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="no-jobs-message">No completed jobs yet</p>
+                    )}
+                  </div>
+
+                  {/* Contact Section */}
+                  <div className="employer-contact-section">
+                    <Link 
+                      to="/messages" 
+                      state={{ 
+                        recipientEmail: selectedEmployer.email,
+                        recipientName: `${selectedEmployer.firstName} ${selectedEmployer.lastName}`,
+                        subject: `Job Inquiry`
+                      }}
+                      className="btn primary"
+                      onClick={() => setShowEmployerModal(false)}
+                    >
+                      💬 Message Employer
+                    </Link>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="modal-footer">
+              <button onClick={() => setShowEmployerModal(false)} className="btn secondary">Close</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <style>{`
         .dashboard-container {
@@ -1431,7 +1586,7 @@ function EmployeeDashboard() {
           display: inline-block;
           margin-top: 0.75rem;
           padding: 0.5rem 1rem;
-          background: #2b6cb0;
+          background: #9333ea;
           color: white;
           text-decoration: none;
           border-radius: 6px;
@@ -1441,7 +1596,7 @@ function EmployeeDashboard() {
         }
 
         .btn-message-employer:hover {
-          background: #2c5282;
+          background: #7c3aed;
         }
 
         .location-match-badge {
@@ -1525,14 +1680,14 @@ function EmployeeDashboard() {
         }
 
         .btn.primary {
-          background: #2b6cb0;
+          background: #9333ea;
           color: white;
         }
 
         .btn.primary:hover {
-          background: #2c5282;
+          background: #7c3aed;
           transform: translateY(-1px);
-          box-shadow: 0 2px 8px rgba(43, 108, 176, 0.3);
+          box-shadow: 0 2px 8px rgba(147, 51, 234, 0.3);
         }
 
         .btn.secondary {
@@ -1628,6 +1783,225 @@ function EmployeeDashboard() {
           .applied-badge {
             width: 100%;
             text-align: center;
+          }
+        }
+
+        /* Employer Profile Modal Styles */
+        .employer-profile-modal {
+          max-width: 800px;
+          max-height: 90vh;
+          overflow-y: auto;
+        }
+
+        .employer-info-section {
+          margin-bottom: 2rem;
+        }
+
+        .employer-header {
+          display: flex;
+          gap: 1.5rem;
+          align-items: start;
+          margin-bottom: 1.5rem;
+        }
+
+        .employer-avatar {
+          width: 100px;
+          height: 100px;
+          border-radius: 50%;
+          overflow: hidden;
+          flex-shrink: 0;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .employer-avatar img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .avatar-placeholder {
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-size: 2.5rem;
+          font-weight: bold;
+        }
+
+        .employer-details h3 {
+          margin: 0 0 0.5rem 0;
+          color: #2d3748;
+          font-size: 1.5rem;
+        }
+
+        .employer-location,
+        .employer-rating {
+          margin: 0.25rem 0;
+          color: #4a5568;
+          font-size: 1rem;
+        }
+
+        .employer-bio {
+          background: #f7fafc;
+          padding: 1rem;
+          border-radius: 8px;
+          margin-top: 1rem;
+        }
+
+        .employer-bio h4 {
+          margin: 0 0 0.5rem 0;
+          color: #2d3748;
+        }
+
+        .employer-bio p {
+          margin: 0;
+          color: #4a5568;
+          line-height: 1.6;
+        }
+
+        .employer-jobs-section {
+          margin-bottom: 2rem;
+        }
+
+        .employer-jobs-section h4 {
+          margin: 0 0 1rem 0;
+          color: #2d3748;
+          font-size: 1.25rem;
+          padding-bottom: 0.5rem;
+          border-bottom: 2px solid #e2e8f0;
+        }
+
+        .completed-jobs-list {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+          max-height: 400px;
+          overflow-y: auto;
+          padding-right: 0.5rem;
+        }
+
+        .completed-job-card {
+          background: #f7fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          padding: 1rem;
+        }
+
+        .job-header-small {
+          display: flex;
+          justify-content: space-between;
+          align-items: start;
+          margin-bottom: 0.5rem;
+        }
+
+        .job-header-small h5 {
+          margin: 0;
+          color: #2d3748;
+          font-size: 1.1rem;
+        }
+
+        .job-price-small {
+          color: #2b6cb0;
+          font-weight: bold;
+          font-size: 1rem;
+        }
+
+        .job-meta-small {
+          display: flex;
+          gap: 1rem;
+          margin-bottom: 0.75rem;
+          color: #718096;
+          font-size: 0.875rem;
+        }
+
+        .worker-info-small {
+          background: white;
+          padding: 0.75rem;
+          border-radius: 6px;
+          margin-top: 0.75rem;
+        }
+
+        .worker-info-small p {
+          margin: 0 0 0.5rem 0;
+          color: #4a5568;
+        }
+
+        .job-rating {
+          margin-top: 0.5rem;
+        }
+
+        .job-rating span {
+          color: #d97706;
+          font-weight: 600;
+        }
+
+        .rating-comment {
+          margin: 0.5rem 0 0 0;
+          color: #4a5568;
+          font-style: italic;
+          font-size: 0.875rem;
+        }
+
+        .job-description-small {
+          margin: 0.75rem 0 0 0;
+          color: #4a5568;
+          font-size: 0.9rem;
+          line-height: 1.5;
+        }
+
+        .no-jobs-message {
+          text-align: center;
+          color: #718096;
+          padding: 2rem;
+          font-style: italic;
+        }
+
+        .employer-contact-section {
+          padding-top: 1rem;
+          border-top: 2px solid #e2e8f0;
+        }
+
+        .employer-contact-section .btn {
+          width: 100%;
+        }
+
+        /* Search Input Styles */
+        .form-group.full-width {
+          grid-column: 1 / -1;
+        }
+
+        .search-input {
+          width: 100%;
+          padding: 0.875rem 1rem;
+          font-size: 1rem;
+          border: 2px solid #cbd5e0;
+          border-radius: 8px;
+          transition: all 0.2s;
+        }
+
+        .search-input:focus {
+          outline: none;
+          border-color: #667eea;
+          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        @media (max-width: 768px) {
+          .employer-header {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+          }
+
+          .employer-avatar {
+            width: 80px;
+            height: 80px;
+          }
+
+          .completed-jobs-list {
+            max-height: 300px;
           }
         }
       `}</style>

@@ -9,6 +9,7 @@ const API_BASE = import.meta.env.VITE_API_URL || 'https://resi-backend-ihyu.verc
 
 function SearchJobs() {
   const [searchQuery, setSearchQuery] = useState({
+    keyword: '',
     skill: '',
     barangay: '',
     minPrice: '',
@@ -37,20 +38,39 @@ function SearchJobs() {
     await searchJobs(searchQuery)
   }
 
+  const clearFilters = () => {
+    setSearchQuery({
+      keyword: '',
+      skill: '',
+      barangay: '',
+      minPrice: '',
+      maxPrice: ''
+    })
+    searchJobs({})
+  }
+
   const searchJobs = async (query) => {
     setLoading(true)
     setHasSearched(true)
     
+    console.log('🔍 Frontend Search Query:', query);
+    
     try {
       // Build query parameters
       const params = new URLSearchParams()
+      if (query.keyword) params.append('keyword', query.keyword)
       if (query.skill) params.append('skill', query.skill)
       if (query.barangay) params.append('barangay', query.barangay)
       if (query.minPrice) params.append('minPrice', query.minPrice)
       if (query.maxPrice) params.append('maxPrice', query.maxPrice)
 
-      const response = await fetch(`${API_BASE}/jobs/search?${params}`)
+      const url = `${API_BASE}/jobs/search?${params}`;
+      console.log('📡 Request URL:', url);
+
+      const response = await fetch(url)
       const data = await response.json()
+      
+      console.log('📊 Response:', data);
       
       if (data.success && data.data) {
         setJobs(data.data)
@@ -173,6 +193,20 @@ function SearchJobs() {
       {/* Search Form */}
       <div className="search-form-card">
         <form onSubmit={handleSubmit} className="search-form">
+          {/* Keyword Search Bar */}
+          <div className="form-group full-width">
+            <label htmlFor="keyword">Search by Title or Keyword</label>
+            <input
+              type="text"
+              id="keyword"
+              name="keyword"
+              value={searchQuery.keyword}
+              onChange={handleInputChange}
+              placeholder="Search by job title, description, or keyword..."
+              className="search-input"
+            />
+          </div>
+
           <div className="form-row">
             <div className="form-group">
               <label htmlFor="skill">Skill</label>
@@ -244,16 +278,26 @@ function SearchJobs() {
             </div>
           </div>
 
-          <button type="submit" className="search-btn" disabled={loading}>
-            {loading ? (
-              <>
-                <div className="spinner"></div>
-                Searching...
-              </>
-            ) : (
-              'Search Jobs'
-            )}
-          </button>
+          <div className="button-group">
+            <button type="submit" className="search-btn" disabled={loading}>
+              {loading ? (
+                <>
+                  <div className="spinner"></div>
+                  Searching...
+                </>
+              ) : (
+                'Search Jobs'
+              )}
+            </button>
+            <button 
+              type="button" 
+              className="clear-btn" 
+              onClick={clearFilters}
+              disabled={loading}
+            >
+              Clear Filters
+            </button>
+          </div>
         </form>
       </div>
 
@@ -467,6 +511,24 @@ function SearchJobs() {
           flex-direction: column;
         }
 
+        .form-group.full-width {
+          grid-column: 1 / -1;
+        }
+
+        .search-input {
+          padding: 0.875rem 1rem;
+          font-size: 1.05rem;
+          border: 2px solid #e2e8f0;
+          border-radius: 8px;
+          transition: all 0.2s;
+        }
+
+        .search-input:focus {
+          outline: none;
+          border-color: #2b6cb0;
+          box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.1);
+        }
+
         label {
           margin-bottom: 0.5rem;
           font-weight: 600;
@@ -487,8 +549,15 @@ function SearchJobs() {
           box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.1);
         }
 
+        .button-group {
+          display: flex;
+          gap: 1rem;
+          margin-top: 1.5rem;
+        }
+
         .search-btn {
-          background: #2b6cb0;
+          flex: 1;
+          background: #9333ea;
           color: white;
           border: none;
           padding: 0.75rem 2rem;
@@ -498,15 +567,38 @@ function SearchJobs() {
           transition: background-color 0.2s;
           display: flex;
           align-items: center;
+          justify-content: center;
           gap: 0.5rem;
-          margin-top: 1rem;
         }
 
         .search-btn:hover:not(:disabled) {
-          background: #2c5282;
+          background: #7c3aed;
         }
 
         .search-btn:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        .clear-btn {
+          flex: 1;
+          background: white;
+          color: #9333ea;
+          border: 2px solid #9333ea;
+          padding: 0.75rem 2rem;
+          border-radius: 8px;
+          font-size: 1rem;
+          cursor: pointer;
+          transition: all 0.2s;
+          font-weight: 600;
+        }
+
+        .clear-btn:hover:not(:disabled) {
+          background: #9333ea;
+          color: white;
+        }
+
+        .clear-btn:disabled {
           opacity: 0.6;
           cursor: not-allowed;
         }
@@ -702,11 +794,11 @@ function SearchJobs() {
         }
 
         .message-btn {
-          background: #2b6cb0;
+          background: #9333ea;
         }
 
         .message-btn:hover {
-          background: #2c5282;
+          background: #7c3aed;
         }
 
         .apply-btn:hover:not(:disabled) {

@@ -16,8 +16,14 @@ function Chat() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [modalSearchQuery, setModalSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
+  const [modalSearchResults, setModalSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
+  const [modalSearching, setModalSearching] = useState(false);
+  const [showNewChatModal, setShowNewChatModal] = useState(false);
+  const [recommendedUsers, setRecommendedUsers] = useState([]);
+  const [loadingRecommended, setLoadingRecommended] = useState(false);
   const [shouldScroll, setShouldScroll] = useState(true);
   const messagesEndRef = useRef(null);
   const socketRef = useRef(null);
@@ -42,7 +48,7 @@ function Chat() {
     }
   }, []);
 
-  // Search users when searchQuery changes
+  // Search users when searchQuery changes (sidebar search)
   useEffect(() => {
     if (searchQuery.trim().length > 0) {
       setSearching(true);
@@ -68,6 +74,29 @@ function Chat() {
       setSearching(false);
     }
   }, [searchQuery, user._id]);
+
+  // Search users when modalSearchQuery changes (modal search)
+  useEffect(() => {
+    if (modalSearchQuery.trim().length > 0) {
+      setModalSearching(true);
+      apiService.searchUsers({ search: modalSearchQuery.trim() })
+        .then(res => {
+          console.log('Modal search response:', res);
+          const users = res?.users || res?.data?.users || res?.data?.data?.users || [];
+          const filteredUsers = users.filter(u => u._id !== user._id);
+          setModalSearchResults(filteredUsers);
+        })
+        .catch((err) => {
+          console.error('Modal search error:', err);
+          showError('Failed to search users. Please try again.');
+          setModalSearchResults([]);
+        })
+        .finally(() => setModalSearching(false));
+    } else {
+      setModalSearchResults([]);
+      setModalSearching(false);
+    }
+  }, [modalSearchQuery, user._id]);
 
   // Socket.io connection and real-time listeners (only works when backend supports WebSocket)
   useEffect(() => {
@@ -189,13 +218,22 @@ function Chat() {
   const loadConversations = async () => {
     try {
       setLoading(true);
-      const response = await apiService.getInbox();
       
-      // Group messages by sender to create conversations
-      const messagesData = response?.data?.data?.messages || response?.data?.messages || [];
+      // Fetch both inbox and sent messages to build complete conversation list
+      const [inboxResponse, sentResponse] = await Promise.all([
+        apiService.getInbox(),
+        apiService.getSentMessages()
+      ]);
+      
+      const inboxMessages = inboxResponse?.data?.data?.messages || inboxResponse?.data?.messages || [];
+      const sentMessages = sentResponse?.data?.data || sentResponse?.data || [];
+      
+      // Combine all messages
+      const allMessages = [...inboxMessages, ...sentMessages];
       const conversationMap = new Map();
       
-      messagesData.forEach(msg => {
+      allMessages.forEach(msg => {
+        // Determine the other user (not current user)
         const otherUser = msg.sender._id === user._id ? msg.recipient : msg.sender;
         const userId = otherUser._id;
         
@@ -206,14 +244,25 @@ function Chat() {
             lastMessage: msg,
             unreadCount: 0
           });
+        } else {
+          // Update to most recent message
+          const existing = conversationMap.get(userId);
+          if (new Date(msg.createdAt) > new Date(existing.lastMessage.createdAt)) {
+            existing.lastMessage = msg;
+          }
         }
         
+        // Count unread messages (only from inbox, not sent)
         if (!msg.isRead && msg.recipient._id === user._id) {
           conversationMap.get(userId).unreadCount++;
         }
       });
       
-      setConversations(Array.from(conversationMap.values()));
+      // Convert to array and sort by most recent message
+      const conversationsArray = Array.from(conversationMap.values())
+        .sort((a, b) => new Date(b.lastMessage.createdAt) - new Date(a.lastMessage.createdAt));
+      
+      setConversations(conversationsArray);
     } catch (error) {
       console.error('Failed to load conversations:', error);
       showError('Failed to load conversations');
@@ -221,6 +270,36 @@ function Chat() {
       setLoading(false);
     }
   };
+
+  const loadRecommendedUsers = async () => {
+    try {
+      setLoadingRecommended(true);
+      // Get users that are opposite type (if employee, show employers and vice versa)
+      const oppositeType = user.userType === 'employee' ? 'employer' : 'employee';
+      
+      const response = await apiService.searchUsers({ userType: oppositeType });
+      const users = response?.users || response?.data?.users || response?.data?.data?.users || [];
+      
+      // Exclude self and users we already have conversations with
+      const conversationUserIds = new Set(conversations.map(c => c.user._id));
+      const filtered = users
+        .filter(u => u._id !== user._id && !conversationUserIds.has(u._id))
+        .slice(0, 5); // Limit to 5 recommendations
+      
+      setRecommendedUsers(filtered);
+    } catch (error) {
+      console.error('Failed to load recommended users:', error);
+    } finally {
+      setLoadingRecommended(false);
+    }
+  };
+
+  // Load recommended users when conversations are loaded
+  useEffect(() => {
+    if (conversations.length >= 0 && !loadingRecommended) {
+      loadRecommendedUsers();
+    }
+  }, [conversations.length]);
 
   const loadMessages = async (recipientId, silent = false) => {
     try {
@@ -327,6 +406,15 @@ function Chat() {
       setNewMessage('');
       setShouldScroll(true);
       scrollToBottom();
+      
+      // Reload conversations to update the list with new message
+      await loadConversations();
+      
+      // Update the selected conversation to the real one from the list
+      setSelectedConversation(prev => {
+        const updated = conversations.find(c => c._id === prev._id);
+        return updated || prev;
+      });
     } catch (error) {
       console.error('Failed to send message:', error);
       showError('Failed to send message');
@@ -409,14 +497,15 @@ function Chat() {
         <div className={`conversations-sidebar ${selectedConversation ? 'mobile-hide' : ''}`}>
           <div className="sidebar-header">
             <h2>Messages</h2>
-            <div className="search-box">
+            <div className="search-wrapper">
+              <span className="search-icon-inline">🔍</span>
               <input
                 type="text"
+                className="search-input"
                 placeholder="Search users or conversations..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-              <span className="search-icon">🔍</span>
             </div>
           </div>
 
@@ -475,7 +564,50 @@ function Chat() {
           )}
 
           <div className="conversations-list">
-            {filteredConversations.length === 0 ? (
+            {/* Recommended Users Section - Show when not searching */}
+            {!searchQuery.trim() && recommendedUsers.length > 0 && (
+              <div className="recommended-section">
+                <div className="recommended-header">
+                  <span className="recommended-icon">💡</span>
+                  <span className="recommended-title">People you may know</span>
+                </div>
+                <div className="recommended-list">
+                  {recommendedUsers.map(userObj => (
+                    <div
+                      key={userObj._id}
+                      className="recommended-user"
+                      onClick={() => handleStartConversation(userObj)}
+                      title={`Start chat with ${userObj.firstName} ${userObj.lastName}`}
+                    >
+                      <div className="recommended-avatar">
+                        {userObj.profilePicture ? (
+                          <img 
+                            src={getProfilePictureUrl(userObj)} 
+                            alt={userObj.firstName}
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.style.display = 'none';
+                              e.target.nextSibling.style.display = 'flex';
+                            }}
+                          />
+                        ) : null}
+                        <div 
+                          className="avatar-placeholder" 
+                          style={{ display: userObj.profilePicture ? 'none' : 'flex' }}
+                        >
+                          {userObj.firstName?.[0]}{userObj.lastName?.[0]}
+                        </div>
+                      </div>
+                      <div className="recommended-name">
+                        {userObj.firstName}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {filteredConversations.length === 0 && !searchQuery.trim() ? (
               <div className="empty-state">
                 <p>No conversations yet</p>
                 <span>Start chatting with employees or employers!</span>
@@ -522,6 +654,17 @@ function Chat() {
                 </div>
               ))
             )}
+          </div>
+
+          {/* New Chat Button at Bottom */}
+          <div className="sidebar-footer">
+            <button 
+              className="new-chat-btn"
+              onClick={() => setShowNewChatModal(true)}
+              title="Start New Chat"
+            >
+              ➕ New Chat
+            </button>
           </div>
         </div>
 
@@ -618,6 +761,134 @@ function Chat() {
         </div>
       </div>
 
+      {/* New Chat Modal */}
+      {showNewChatModal && (
+        <div className="modal-overlay" onClick={() => {
+          setShowNewChatModal(false);
+          setModalSearchQuery('');
+        }}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Start New Chat</h3>
+              <button className="close-btn" onClick={() => {
+                setShowNewChatModal(false);
+                setModalSearchQuery('');
+              }}>✕</button>
+            </div>
+            <div className="modal-body">
+              <div className="search-box">
+                <input
+                  type="text"
+                  placeholder="Search users by name or email..."
+                  value={modalSearchQuery}
+                  onChange={(e) => setModalSearchQuery(e.target.value)}
+                  autoFocus
+                />
+                <span className="search-icon">🔍</span>
+              </div>
+
+              <div className="user-search-results">
+                {modalSearching ? (
+                  <div className="search-loading">
+                    <div className="spinner-sm"></div>
+                    <span>Searching users...</span>
+                  </div>
+                ) : modalSearchResults.length > 0 ? (
+                  <div className="users-list">
+                    {modalSearchResults.map(userObj => (
+                      <div
+                        key={userObj._id}
+                        className="user-item"
+                        onClick={() => {
+                          handleStartConversation(userObj);
+                          setShowNewChatModal(false);
+                          setModalSearchQuery('');
+                        }}
+                      >
+                        <div className="user-avatar">
+                          {userObj.profilePicture ? (
+                            <img 
+                              src={getProfilePictureUrl(userObj)} 
+                              alt={userObj.firstName}
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.style.display = 'none';
+                                e.target.nextSibling.style.display = 'flex';
+                              }}
+                            />
+                          ) : null}
+                          <div 
+                            className="avatar-placeholder" 
+                            style={{ display: userObj.profilePicture ? 'none' : 'flex' }}
+                          >
+                            {userObj.firstName?.[0]}{userObj.lastName?.[0]}
+                          </div>
+                        </div>
+                        <div className="user-details">
+                          <h4>{userObj.firstName} {userObj.lastName}</h4>
+                          <span className="user-type-badge">{userObj.userType}</span>
+                          {userObj.email && <p className="user-email">{userObj.email}</p>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : modalSearchQuery.trim().length > 0 ? (
+                  <div className="search-no-results">
+                    <span>No users found matching "{modalSearchQuery}"</span>
+                  </div>
+                ) : recommendedUsers.length > 0 ? (
+                  <div className="recommended-section">
+                    <h4 className="recommended-title">👥 Recommended Users</h4>
+                    <div className="users-list">
+                      {recommendedUsers.map(userObj => (
+                        <div
+                          key={userObj._id}
+                          className="user-item"
+                          onClick={() => {
+                            handleStartConversation(userObj);
+                            setShowNewChatModal(false);
+                            setModalSearchQuery('');
+                          }}
+                        >
+                          <div className="user-avatar">
+                            {userObj.profilePicture ? (
+                              <img 
+                                src={getProfilePictureUrl(userObj)} 
+                                alt={userObj.firstName}
+                                onError={(e) => {
+                                  e.target.onerror = null;
+                                  e.target.style.display = 'none';
+                                  e.target.nextSibling.style.display = 'flex';
+                                }}
+                              />
+                            ) : null}
+                            <div 
+                              className="avatar-placeholder" 
+                              style={{ display: userObj.profilePicture ? 'none' : 'flex' }}
+                            >
+                              {userObj.firstName?.[0]}{userObj.lastName?.[0]}
+                            </div>
+                          </div>
+                          <div className="user-details">
+                            <h4>{userObj.firstName} {userObj.lastName}</h4>
+                            <span className="user-type-badge">{userObj.userType}</span>
+                            {userObj.email && <p className="user-email">{userObj.email}</p>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="search-hint">
+                    <p>💡 Type a name or email to search for users</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <style>{chatStyles}</style>
     </div>
   );
@@ -694,35 +965,180 @@ const chatStyles = `
     color: #1e293b;
   }
 
-  .search-box {
+  .new-chat-section {
+    padding: 1rem;
+    background: white;
+  }
+
+  .new-chat-btn {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    background: #9333ea;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+  }
+
+  .new-chat-btn:hover {
+    background: #7c3aed;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(147, 51, 234, 0.3);
+  }
+
+  .search-wrapper {
     position: relative;
   }
 
-  .search-box input {
-    width: 100%;
-    padding: 0.75rem 2.5rem 0.75rem 1rem;
-    border: 2px solid #e2e8f0;
-    border-radius: 10px;
-    font-size: 0.95rem;
-    transition: border-color 0.2s;
-  }
-
-  .search-box input:focus {
-    outline: none;
-    border-color: #6366f1;
-  }
-
-  .search-icon {
+  .search-icon-inline {
     position: absolute;
-    right: 0.75rem;
+    left: 1rem;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 1.2rem;
+    font-size: 1rem;
+    color: #94a3b8;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .search-wrapper .search-input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+    background: #f8fafc;
+  }
+
+  .search-wrapper .search-input:focus {
+    outline: none;
+    border-color: #9333ea;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.1);
+  }
+
+  .search-wrapper .search-input::placeholder {
+    color: #94a3b8;
+  }
+
+  .sidebar-footer {
+    padding: 1rem;
+    background: white;
+    border-top: 1px solid #e2e8f0;
+    margin-top: auto;
   }
 
   .conversations-list {
     flex: 1;
     overflow-y: auto;
+  }
+
+  .recommended-section {
+    padding: 1rem;
+    border-top: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+    background: #fefce8;
+  }
+
+  .recommended-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .recommended-icon {
+    font-size: 1.25rem;
+  }
+
+  .recommended-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #854d0e;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .recommended-list {
+    display: flex;
+    gap: 0.75rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+  }
+
+  .recommended-list::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .recommended-list::-webkit-scrollbar-track {
+    background: #fef3c7;
+  }
+
+  .recommended-list::-webkit-scrollbar-thumb {
+    background: #d97706;
+    border-radius: 2px;
+  }
+
+  .recommended-user {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+
+  .recommended-user:hover {
+    transform: scale(1.05);
+  }
+
+  .recommended-avatar {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+  }
+
+  .recommended-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #fbbf24;
+  }
+
+  .recommended-avatar .avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.875rem;
+    border: 2px solid #fbbf24;
+  }
+
+  .recommended-name {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #78350f;
+    text-align: center;
+    max-width: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .conversation-item {
@@ -1272,6 +1688,223 @@ const chatStyles = `
 
     .empty-chat-state p {
       font-size: 0.9rem;
+    }
+  }
+
+  /* Modal Styles */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease-in;
+  }
+
+  .modal-content {
+    background: white;
+    border-radius: 16px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    animation: slideIn 0.3s ease-out;
+  }
+
+  .modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #1e293b;
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #64748b;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: all 0.2s;
+  }
+
+  .close-btn:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+    overflow-y: auto;
+  }
+
+  .search-box {
+    position: relative;
+    width: 100%;
+  }
+
+  .search-box input {
+    width: 100%;
+    padding: 0.875rem 3rem 0.875rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: all 0.2s;
+    background: #f8fafc;
+  }
+
+  .search-box input:focus {
+    outline: none;
+    border-color: #9333ea;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.1);
+  }
+
+  .search-box input::placeholder {
+    color: #94a3b8;
+  }
+
+  .search-box .search-icon {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.25rem;
+    color: #94a3b8;
+    pointer-events: none;
+  }
+
+  .user-search-results {
+    margin-top: 1rem;
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  .users-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .user-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .user-item:hover {
+    background: #f8fafc;
+    border-color: #9333ea;
+    transform: translateX(4px);
+  }
+
+  .user-avatar {
+    position: relative;
+    width: 50px;
+    height: 50px;
+    flex-shrink: 0;
+  }
+
+  .user-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .user-avatar .avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1rem;
+  }
+
+  .user-details {
+    flex: 1;
+  }
+
+  .user-details h4 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1rem;
+    color: #1e293b;
+  }
+
+  .user-type-badge {
+    display: inline-block;
+    padding: 0.125rem 0.5rem;
+    background: #ede9fe;
+    color: #7c3aed;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: capitalize;
+  }
+
+  .user-email {
+    margin: 0.25rem 0 0 0;
+    font-size: 0.875rem;
+    color: #64748b;
+  }
+
+  .search-hint {
+    text-align: center;
+    padding: 2rem;
+    color: #94a3b8;
+  }
+
+  .search-hint p {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateY(-20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
     }
   }
 `;

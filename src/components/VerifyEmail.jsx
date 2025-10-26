@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import apiService from '../api';
 
 function VerifyEmail() {
@@ -7,6 +7,7 @@ function VerifyEmail() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
   const { token } = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const verifyEmail = async () => {
@@ -21,6 +22,10 @@ function VerifyEmail() {
         
         if (response.ok) {
           setSuccess(true);
+          // Redirect to registration success page with verified flag after 2 seconds
+          setTimeout(() => {
+            navigate('/registration-success?verified=true');
+          }, 2000);
         } else {
           setError(data.alert || 'Email verification failed. This link may be invalid or expired.');
         }
@@ -38,7 +43,7 @@ function VerifyEmail() {
       setError('Invalid verification link. No token provided.');
       setLoading(false);
     }
-  }, [token]);
+  }, [token, navigate]);
 
   return (
     <div className="email-verification-container">
@@ -52,10 +57,12 @@ function VerifyEmail() {
           <div className="verification-success">
             <div className="verification-icon-success">✓</div>
             <h2>Email Verified Successfully!</h2>
-            <p>Your email has been verified. You can now login to your account.</p>
-            <Link to="/login" className="verification-button">
-              Go to Login
-            </Link>
+            <p>Your email has been verified. Redirecting you to complete the process...</p>
+            <div className="redirect-animation">
+              <div className="dot"></div>
+              <div className="dot"></div>
+              <div className="dot"></div>
+            </div>
           </div>
         ) : (
           <div className="verification-error">
@@ -208,6 +215,38 @@ function VerifyEmail() {
         .verification-link:hover {
           color: #6b21a8;
           text-decoration: underline;
+        }
+
+        .redirect-animation {
+          display: flex;
+          gap: 8px;
+          justify-content: center;
+          margin-top: 1rem;
+        }
+
+        .dot {
+          width: 12px;
+          height: 12px;
+          background: linear-gradient(135deg, #9333ea, #7c3aed);
+          border-radius: 50%;
+          animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .dot:nth-child(1) {
+          animation-delay: -0.32s;
+        }
+
+        .dot:nth-child(2) {
+          animation-delay: -0.16s;
+        }
+
+        @keyframes bounce {
+          0%, 80%, 100% {
+            transform: scale(0);
+          }
+          40% {
+            transform: scale(1);
+          }
         }
         
         @media (max-width: 640px) {

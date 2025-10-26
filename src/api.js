@@ -867,6 +867,20 @@ class ApiService {
     const query = new URLSearchParams(params).toString();
     return this.request(`/analytics/job-stats${query ? "?" + query : ""}`);
   }
+
+  // ================= User Profile =================
+  async getUserById(userId) {
+    return this.request(`/users/${userId}`, {
+      method: "GET"
+    });
+  }
+
+  // ================= Employer Jobs =================
+  async getCompletedJobsByEmployer(employerId) {
+    return this.request(`/jobs/employer/${employerId}/completed`, {
+      method: "GET"
+    });
+  }
 }
 
 const apiService = new ApiService();
