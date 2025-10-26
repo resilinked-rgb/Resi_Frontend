@@ -99,7 +99,9 @@ function UserModal({ user, type, onClose, onSave }) {
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h3>{type === 'edit' ? 'Edit User' : 'User Details'}</h3>
-          <button className="modal-close" onClick={onClose}>�</button>
+          {type === 'view' && (
+            <button className="modal-close" onClick={onClose}>×</button>
+          )}
         </div>
         
         <div className="modal-body">
@@ -272,7 +274,7 @@ function JobModal({ job, type, onClose }) {
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h3>Job Details</h3>
-          <button className="modal-close" onClick={onClose}>�</button>
+          <button className="modal-close" onClick={onClose}>×</button>
         </div>
         
         <div className="modal-body">
@@ -535,16 +537,19 @@ function AdminDashboard() {
         case 'users':
           const usersResponse = await apiService.getDeletedUsers()
           data = usersResponse.data?.users || usersResponse.users || []
+          console.log('Deleted Users Response:', data)
           setDeletedUsers(data)
           break
         case 'jobs':
           const jobsResponse = await apiService.getDeletedJobs()
           data = jobsResponse.data?.jobs || jobsResponse.jobs || []
+          console.log('Deleted Jobs Response:', data)
           setDeletedJobs(data)
           break
         case 'goals':
           const goalsResponse = await apiService.getDeletedGoals()
           data = goalsResponse.data?.goals || goalsResponse.goals || []
+          console.log('Deleted Goals Response:', data)
           setDeletedGoals(data)
           break
         default:
@@ -694,7 +699,7 @@ function AdminDashboard() {
     try {
       const apiService = await import('../api').then(module => module.default);
       await apiService.updateSupportTicket(ticketId, { status: newStatus });
-      showSuccess(`Ticket ${newStatus} successfully`);
+      success(`Ticket ${newStatus} successfully`);
       await loadSupportTickets();
     } catch (error) {
       console.error('Error updating ticket status:', error);
@@ -706,7 +711,7 @@ function AdminDashboard() {
     try {
       const apiService = await import('../api').then(module => module.default);
       await apiService.updateReportStatus(reportId, newStatus);
-      showSuccess(`Report ${newStatus} successfully`);
+      success(`Report ${newStatus} successfully`);
       await loadReports();
     } catch (error) {
       console.error('Error updating report status:', error);
@@ -1370,15 +1375,17 @@ function AdminDashboard() {
                           
                           <div className="job-meta">
                             <div className="meta-item">
-                              <span className="icon">??</span>
-                              {job.barangay || job.location}
+                              <span className="icon">📍</span>
+                              {job.barangay || job.location || 'No location'}
                             </div>
                             <div className="meta-item">
-                              <span className="icon">??</span>
-                              {job.postedBy?.firstName} {job.postedBy?.lastName}
+                              <span className="icon">👤</span>
+                              {job.postedBy?.firstName && job.postedBy?.lastName 
+                                ? `${job.postedBy.firstName} ${job.postedBy.lastName}`
+                                : job.postedBy?.email || 'Unknown'}
                             </div>
                             <div className="meta-item">
-                              <span className="icon">??</span>
+                              <span className="icon">📅</span>
                               {formatDate(job.datePosted || job.createdAt, 'short')}
                             </div>
                             <div className="meta-item">
@@ -1419,7 +1426,7 @@ function AdminDashboard() {
               <div className="users-content">
                 {users.length === 0 ? (
                   <div className="no-data">
-                    <div className="no-data-icon">??</div>
+                    <div className="no-data-icon">👥</div>
                     <h3>No users found</h3>
                     <p>There are no users matching your search criteria.</p>
                   </div>
@@ -1636,19 +1643,21 @@ function AdminDashboard() {
                         
                         <div className="job-meta">
                           <div className="meta-item">
-                            <span className="icon">??</span>
-                            {job.barangay || job.location}
+                            <span className="icon">📍</span>
+                            {job.barangay || job.location || 'No location'}
                           </div>
                           <div className="meta-item">
-                            <span className="icon">??</span>
-                            {job.postedBy?.firstName} {job.postedBy?.lastName}
+                            <span className="icon">👤</span>
+                            {job.postedBy?.firstName && job.postedBy?.lastName 
+                              ? `${job.postedBy.firstName} ${job.postedBy.lastName}`
+                              : job.postedBy?.email || 'Unknown'}
                           </div>
                           <div className="meta-item">
-                            <span className="icon">?</span>
+                            <span className="icon">📅</span>
                             {formatDate(job.datePosted || job.createdAt, 'short')}
                           </div>
                           <div className="meta-item">
-                            <span className="icon">???</span>
+                            <span className="icon">👥</span>
                             {job.applicants?.length || 0} applicants
                           </div>
                           <div className="meta-item">
@@ -1847,7 +1856,7 @@ function AdminDashboard() {
                       <div className="activity-feed">
                         {analyticsData?.recentActivity?.slice(0, 4).map((activity) => (
                           <div key={activity._id} className="activity-item">
-                            <span className="activity-icon">{activity.type === 'user' ? '??' : '??'}</span>
+                            <span className="activity-icon">{activity.type === 'user' ? '👤' : '💼'}</span>
                             <span className="activity-text">{activity.description}</span>
                             <span className="activity-time">{formatDate(activity.createdAt, 'short')}</span>
                           </div>
@@ -1965,7 +1974,7 @@ function AdminDashboard() {
                             </td>
                             <td>
                               <span className={`report-type-badge ${report.reportedUser ? 'user' : 'job'}`}>
-                                {report.reportedUser ? '?? User' : '?? Job'}
+                                {report.reportedUser ? '👤 User' : '💼 Job'}
                               </span>
                             </td>
                             <td>
@@ -2003,28 +2012,31 @@ function AdminDashboard() {
                                 {report.status === 'pending' && (
                                   <>
                                     <button
+                                      key="resolve"
                                       className="btn-action resolve"
                                       onClick={() => handleReportStatusUpdate(report._id, 'resolved')}
                                       title="Mark as Resolved"
                                     >
-                                      ?
+                                      ✓
                                     </button>
                                     <button
+                                      key="dismiss"
                                       className="btn-action dismiss"
                                       onClick={() => handleReportStatusUpdate(report._id, 'dismissed')}
                                       title="Dismiss Report"
                                     >
-                                      ?
+                                      ✕
                                     </button>
                                   </>
                                 )}
                                 {report.status !== 'pending' && (
                                   <button
+                                    key="reopen"
                                     className="btn-action reopen"
                                     onClick={() => handleReportStatusUpdate(report._id, 'pending')}
                                     title="Reopen Report"
                                   >
-                                    ?
+                                    ↻
                                   </button>
                                 )}
                               </div>
@@ -2150,40 +2162,46 @@ function AdminDashboard() {
                               <div className="action-buttons">
                                 {ticket.status === 'open' && (
                                   <button
+                                    key="in-progress"
                                     className="btn-action"
                                     onClick={() => handleTicketStatusUpdate(ticket._id, 'in-progress')}
                                     title="Mark as In Progress"
-                                    style={{ background: '#ffa726', color: 'white' }}
+                                    style={{ background: '#ffa726', color: 'white', padding: '8px 12px', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '16px' }}
                                   >
-                                    ?
+                                    ▶️
                                   </button>
                                 )}
                                 {(ticket.status === 'open' || ticket.status === 'in-progress') && (
                                   <button
+                                    key="resolve"
                                     className="btn-action resolve"
                                     onClick={() => handleTicketStatusUpdate(ticket._id, 'resolved')}
                                     title="Mark as Resolved"
+                                    style={{ background: '#4caf50', color: 'white', padding: '8px 12px', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '16px' }}
                                   >
-                                    ?
+                                    ✓
                                   </button>
                                 )}
                                 {ticket.status === 'resolved' && (
                                   <button
+                                    key="close"
                                     className="btn-action"
                                     onClick={() => handleTicketStatusUpdate(ticket._id, 'closed')}
                                     title="Close Ticket"
-                                    style={{ background: '#757575', color: 'white' }}
+                                    style={{ background: '#757575', color: 'white', padding: '8px 12px', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '16px' }}
                                   >
-                                    ?
+                                    ✕
                                   </button>
                                 )}
                                 {ticket.status === 'closed' && (
                                   <button
+                                    key="reopen"
                                     className="btn-action reopen"
                                     onClick={() => handleTicketStatusUpdate(ticket._id, 'open')}
                                     title="Reopen Ticket"
+                                    style={{ background: '#2196f3', color: 'white', padding: '8px 12px', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '16px' }}
                                   >
-                                    ?
+                                    ↻
                                   </button>
                                 )}
                               </div>
@@ -2266,7 +2284,7 @@ function AdminDashboard() {
                                 </td>
                                 <td>{user.barangay || 'N/A'}</td>
                                 <td>
-                                  {formatDate(user.updatedAt, 'short')}
+                                  {user.deletedAt ? formatDate(user.deletedAt, 'short') : 'N/A'}
                                 </td>
                                 <td className="actions">
                                   <button 
@@ -2306,24 +2324,26 @@ function AdminDashboard() {
                           <div key={job._id} className="deleted-job-card">
                             <div className="job-header">
                               <h4>{job.title}</h4>
-                              <div className="job-price">?{job.price?.toLocaleString() || '0'}</div>
+                              <div className="job-price">₱{job.price?.toLocaleString() || '0'}</div>
                             </div>
                             
                             <div className="job-meta">
                               <div className="meta-item">
-                                <span className="icon">??</span>
-                                {job.barangay || job.location}
+                                <span className="icon">📍</span>
+                                {job.barangay || job.location || 'No location'}
                               </div>
                               <div className="meta-item">
-                                <span className="icon">??</span>
-                                {job.postedBy?.firstName} {job.postedBy?.lastName}
+                                <span className="icon">👤</span>
+                                {job.postedBy?.firstName && job.postedBy?.lastName 
+                                  ? `${job.postedBy.firstName} ${job.postedBy.lastName}`
+                                  : job.postedBy?.email || 'Unknown'}
                               </div>
                               <div className="meta-item">
-                                <span className="icon">??</span>
-                                {formatDate(job.updatedAt || job.createdAt, 'short')}
+                                <span className="icon">📅</span>
+                                {job.deletedAt ? formatDate(job.deletedAt, 'short') : 'N/A'}
                               </div>
                               <div className="meta-item">
-                                <span className="icon">???</span>
+                                <span className="icon">🗑️</span>
                                 Deleted
                               </div>
                             </div>
@@ -2363,7 +2383,7 @@ function AdminDashboard() {
                         <table className="deleted-items-table">
                           <thead>
                             <tr>
-                              <th>Title</th>
+                              <th>Description</th>
                               <th>Target</th>
                               <th>Progress</th>
                               <th>Owner</th>
@@ -2376,18 +2396,20 @@ function AdminDashboard() {
                               <tr key={goal._id} className="deleted-item">
                                 <td>
                                   <div className="goal-title">
-                                    {goal.title}
+                                    {goal.description || 'No description'}
                                   </div>
                                 </td>
-                                <td>?{goal.targetAmount?.toLocaleString() || '0'}</td>
+                                <td>₱{goal.targetAmount?.toLocaleString() || '0'}</td>
                                 <td>
-                                  {((goal.currentAmount / goal.targetAmount) * 100).toFixed(1)}%
+                                  {goal.currentAmount && goal.targetAmount 
+                                    ? ((goal.currentAmount / goal.targetAmount) * 100).toFixed(1) 
+                                    : '0'}%
                                 </td>
                                 <td>
                                   {goal.user?.firstName} {goal.user?.lastName}
                                 </td>
                                 <td>
-                                  {formatDate(goal.updatedAt, 'short')}
+                                  {goal.deletedAt ? formatDate(goal.deletedAt, 'short') : 'N/A'}
                                 </td>
                                 <td className="actions">
                                   <button 
@@ -2442,7 +2464,6 @@ function AdminDashboard() {
           <div className="modal-content confirmation-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>Delete User</h3>
-              <button className="modal-close" onClick={() => setShowDeleteUserModal(false)}>�</button>
             </div>
             <div className="modal-body">
               <p>Are you sure you want to delete this user?</p>
@@ -2466,7 +2487,6 @@ function AdminDashboard() {
           <div className="modal-content confirmation-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>Delete Job</h3>
-              <button className="modal-close" onClick={() => setShowDeleteJobModal(false)}>�</button>
             </div>
             <div className="modal-body">
               <p>Are you sure you want to delete this job?</p>
@@ -2490,7 +2510,6 @@ function AdminDashboard() {
           <div className="modal-content confirmation-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>Restore {itemToRestore.type ? itemToRestore.type.slice(0, -1).charAt(0).toUpperCase() + itemToRestore.type.slice(0, -1).slice(1) : 'Item'}</h3>
-              <button className="modal-close" onClick={() => setShowRestoreModal(false)}>�</button>
             </div>
             <div className="modal-body">
               <p>Are you sure you want to restore this {itemToRestore.type ? itemToRestore.type.slice(0, -1) : 'item'}?</p>
@@ -2520,15 +2539,14 @@ function AdminDashboard() {
         <div className="modal-overlay" onClick={() => setShowPermanentDeleteModal(false)}>
           <div className="modal-content confirmation-modal danger-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header danger-header">
-              <h3>?? Permanent Deletion Warning</h3>
-              <button className="modal-close" onClick={() => setShowPermanentDeleteModal(false)}>�</button>
+              <h3>⚠️ Permanent Deletion Warning</h3>
             </div>
             <div className="modal-body">
               <p className="danger-text">
                 You are about to <strong>PERMANENTLY DELETE</strong> this {itemToDeletePermanently.type ? itemToDeletePermanently.type.slice(0, -1) : 'item'}.
               </p>
               <div className="warning-box">
-                <p><strong>?? This action:</strong></p>
+                <p><strong>⚠️ This action:</strong></p>
                 <ul>
                   <li><strong>CANNOT be undone</strong></li>
                   <li>Will remove <strong>ALL data</strong> related to this {itemToDeletePermanently.type ? itemToDeletePermanently.type.slice(0, -1) : 'item'}</li>
