@@ -316,7 +316,7 @@ function Register() {
           setError("Please select a user type");
           return false;
         }
-        if ((formData.userType === 'employee' || formData.userType === 'both') && 
+        if (formData.userType === 'employee' && 
             (!formData.skills || formData.skills.length === 0)) {
           setError("Please select at least one skill");
           return false;
@@ -387,8 +387,8 @@ function Register() {
       setError("Password does not meet requirements.");
       return;
     }
-    // Validate that at least one skill is selected if employee or both
-    if ((formData.userType === 'employee' || formData.userType === 'both') && 
+    // Validate that at least one skill is selected if employee
+    if (formData.userType === 'employee' && 
         (!formData.skills || formData.skills.length === 0)) {
       setError("Please select at least one skill")
       return
@@ -804,11 +804,10 @@ function Register() {
                 >
                   <option value="employee">Employee</option>
                   <option value="employer">Employer</option>
-                  <option value="both">Both</option>
                 </select>
               </div>
 
-              {(formData.userType === 'employee' || formData.userType === 'both') && (
+              {formData.userType === 'employee' && (
                 <div className="form-group">
                   <label htmlFor="skills">Skills <span style={{color:'red'}}>*</span></label>
                   <div className="custom-select-container">
