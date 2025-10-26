@@ -20,6 +20,8 @@ import EditJob from './components/EditJob'
 import AdminDashboard from './components/AdminDashboard'
 import Settings from './components/Settings'
 import Help from './components/Help'
+import About from './components/About'
+import Privacy from './components/Privacy'
 import UserDetails from './components/UserDetails'
 import ResetRequest from './components/ResetRequest'
 import ResetPassword from './components/ResetPassword'
@@ -116,6 +118,8 @@ function App() {
             <Route path="/reset-password/:token" element={<ResetPassword />} />
             <Route path="/reset-password/:token" element={<ResetPassword />} />
             <Route path="/help" element={<Help />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/privacy" element={<Privacy />} />
             <Route path="/verify-email/:token" element={<VerifyEmail />} />
             <Route path="/verify-email-change/:token" element={<VerifyEmailChange />} />
             

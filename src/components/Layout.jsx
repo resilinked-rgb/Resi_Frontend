@@ -53,6 +53,9 @@ function Layout({ children }) {
             <ul className="footer-links">
               <li><Link to="/search-jobs">Find Jobs</Link></li>
               <li><Link to="/help">Help Center</Link></li>
+              <li><Link to="/about">About Us</Link></li>
+              <li><Link to="/privacy">Privacy Policy</Link></li>
+              <li><Link to="/terms-of-service">Terms of Service</Link></li>
               <li><Link to="/register">Join Us</Link></li>
             </ul>
           </div>
