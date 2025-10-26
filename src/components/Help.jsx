@@ -5,6 +5,7 @@ import { AlertContext } from '../context/AlertContext'
 import apiService from '../api'
 import styles from './Help.module.css'
 
+// Help Center with comprehensive FAQ and support options
 function Help() {
   const { user, token } = useContext(AuthContext)
   const { success, error: showError } = useContext(AlertContext)
