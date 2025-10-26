@@ -90,6 +90,17 @@ function Profile() {
       return
     }
 
+    // Simple confirmation before sending
+    const confirmed = window.confirm(
+      `Are you sure you want to send a verification email?\n\n` +
+      `New email: ${newEmailInput}\n\n` +
+      `A verification link will be sent to your current email address.`
+    )
+    
+    if (!confirmed) {
+      return
+    }
+
     try {
       setRequestingEmailChange(true)
       const response = await apiService.requestEmailChange(newEmailInput)
@@ -109,13 +120,20 @@ function Profile() {
   }
 
   const handleCancelEmailChange = async () => {
-    if (!window.confirm('Are you sure you want to cancel the email change request?')) {
+    const confirmed = window.confirm(
+      'Are you sure you want to cancel this email change request?\n\n' +
+      `Current email will remain: ${profile?.email}\n` +
+      `New email will not be applied: ${pendingEmailChange?.newEmail}\n\n` +
+      'This action cannot be undone.'
+    )
+    
+    if (!confirmed) {
       return
     }
 
     try {
       const response = await apiService.cancelEmailChange()
-      success(response.alert || 'Email change request cancelled')
+      success(response.alert || 'Email change request cancelled successfully')
       setPendingEmailChange(null)
     } catch (error) {
       console.error('Cancel email change error:', error)

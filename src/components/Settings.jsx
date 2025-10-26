@@ -22,6 +22,8 @@ function Settings() {
   const [showPasswordModal, setShowPasswordModal] = useState(false)
   const [showEmailModal, setShowEmailModal] = useState(false)
   const [showSupportModal, setShowSupportModal] = useState(false)
+  const [showCancelEmailConfirm, setShowCancelEmailConfirm] = useState(false)
+  const [showSendVerificationConfirm, setShowSendVerificationConfirm] = useState(false)
   
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
@@ -158,6 +160,21 @@ function Settings() {
       return
     }
     
+    // Show confirmation dialog
+    const confirmed = window.confirm(
+      '🔐 Confirm Password Change\n\n' +
+      'You are about to change your password.\n\n' +
+      '⚠️ After changing your password:\n' +
+      '• You will need to use the new password to log in\n' +
+      '• All other active sessions will remain logged in\n' +
+      '• Make sure you remember your new password\n\n' +
+      'Continue with password change?'
+    )
+    
+    if (!confirmed) {
+      return
+    }
+    
     try {
       const response = await apiService.changePassword({
         currentPassword: passwordData.currentPassword,
@@ -165,7 +182,7 @@ function Settings() {
       })
       
       if (response.success) {
-        success('Password changed successfully')
+        success('Password changed successfully! Please use your new password next time you log in.')
         setShowPasswordModal(false)
         setPasswordData({
           currentPassword: '',
@@ -235,18 +252,20 @@ function Settings() {
 
   const checkPendingEmailChange = async () => {
     try {
-      const userData = JSON.parse(localStorage.getItem('userData') || '{}')
-      const response = await apiService.checkPendingEmailChange(userData.userId)
-      if (response.pending) {
-        setPendingEmailChange(response.pendingChange)
+      const response = await apiService.getPendingEmailChange()
+      if (response.hasPending && response.emailChange) {
+        setPendingEmailChange(response.emailChange)
+      } else {
+        setPendingEmailChange(null)
       }
     } catch (error) {
       // Silently fail - not critical
       console.error('Error checking pending email change:', error)
+      setPendingEmailChange(null)
     }
   }
 
-  const handleRequestEmailChange = async () => {
+  const handleRequestEmailChange = () => {
     if (!newEmailInput.trim()) {
       showError('Please enter a new email address')
       return
@@ -257,14 +276,20 @@ function Settings() {
       return
     }
 
+    // Show custom confirmation modal
+    setShowSendVerificationConfirm(true)
+  }
+
+  const confirmSendVerification = async () => {
+    setShowSendVerificationConfirm(false)
+
     try {
       setRequestingEmailChange(true)
-      const userData = JSON.parse(localStorage.getItem('userData') || '{}')
-      const response = await apiService.requestEmailChange(userData.userId, newEmailInput)
+      const response = await apiService.requestEmailChange(newEmailInput)
       
       if (response.success) {
         success('Verification email sent! Check your current email to confirm the change.')
-        setPendingEmailChange(response.pendingChange)
+        setPendingEmailChange(response.emailChange)
         setNewEmailInput('')
         setShowEmailModal(false)
       }
@@ -275,12 +300,18 @@ function Settings() {
     }
   }
 
-  const handleCancelEmailChange = async () => {
+  const handleCancelEmailChange = () => {
+    // Show custom confirmation modal
+    setShowCancelEmailConfirm(true)
+  }
+
+  const confirmCancelEmailChange = async () => {
+    setShowCancelEmailConfirm(false)
+
     try {
-      const userData = JSON.parse(localStorage.getItem('userData') || '{}')
-      await apiService.cancelEmailChange(userData.userId)
+      await apiService.cancelEmailChange()
       setPendingEmailChange(null)
-      success('Email change request cancelled')
+      success('Email change request cancelled successfully')
     } catch (error) {
       showError(error.message || 'Failed to cancel email change')
     }
@@ -419,12 +450,6 @@ function Settings() {
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>Change Password</h3>
-              <button 
-                className="close-btn"
-                onClick={() => setShowPasswordModal(false)}
-              >
-                &times;
-              </button>
             </div>
             
             <form onSubmit={handlePasswordSubmit} className="modal-form">
@@ -440,14 +465,23 @@ function Settings() {
                     }))}
                     required
                   />
-                  <button
-                    type="button"
-                    className="password-toggle-btn"
+                  <div 
+                    className="password-toggle-icon" 
                     onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                    aria-label="Toggle password visibility"
+                    title={showCurrentPassword ? "Hide password" : "Show password"}
                   >
-                    {showCurrentPassword ? '👁️' : '👁️‍🗨️'}
-                  </button>
+                    {showCurrentPassword ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                      </svg>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -464,14 +498,23 @@ function Settings() {
                     required
                     minLength="8"
                   />
-                  <button
-                    type="button"
-                    className="password-toggle-btn"
+                  <div 
+                    className="password-toggle-icon" 
                     onClick={() => setShowNewPassword(!showNewPassword)}
-                    aria-label="Toggle password visibility"
+                    title={showNewPassword ? "Hide password" : "Show password"}
                   >
-                    {showNewPassword ? '👁️' : '👁️‍🗨️'}
-                  </button>
+                    {showNewPassword ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                      </svg>
+                    )}
+                  </div>
                 </div>
               </div>
               {passwordData.newPassword && (
@@ -503,14 +546,23 @@ function Settings() {
                     required
                     minLength="8"
                   />
-                  <button
-                    type="button"
-                    className="password-toggle-btn"
+                  <div 
+                    className="password-toggle-icon" 
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    aria-label="Toggle password visibility"
+                    title={showConfirmPassword ? "Hide password" : "Show password"}
                   >
-                    {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
-                  </button>
+                    {showConfirmPassword ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                      </svg>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -537,12 +589,6 @@ function Settings() {
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>Contact Support</h3>
-              <button 
-                className="close-btn"
-                onClick={() => setShowSupportModal(false)}
-              >
-                &times;
-              </button>
             </div>
             
             <form onSubmit={handleSupportSubmit} className="modal-form">
@@ -641,12 +687,6 @@ function Settings() {
           <div className="modal-content email-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>🔐 Change Email Address</h3>
-              <button 
-                className="close-btn"
-                onClick={() => setShowEmailModal(false)}
-              >
-                &times;
-              </button>
             </div>
             
             <div className="modal-form" style={{ padding: '1.5rem' }}>
@@ -723,6 +763,96 @@ function Settings() {
                   </div>
                 </>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel Email Change Confirmation Modal */}
+      {showCancelEmailConfirm && (
+        <div className="modal-overlay" onClick={() => setShowCancelEmailConfirm(false)}>
+          <div className="modal-content cancel-confirm-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>⚠️ Cancel Email Change Request</h3>
+            </div>
+            
+            <div className="cancel-confirm-content">
+              <p className="confirm-message">Are you sure you want to cancel this email change request?</p>
+              
+              <div className="email-info-box">
+                <div className="info-item">
+                  <span className="info-label">Current email will remain:</span>
+                  <span className="info-value">{user?.email}</span>
+                </div>
+                <div className="info-item">
+                  <span className="info-label">New email will not be applied:</span>
+                  <span className="info-value">{pendingEmailChange?.newEmail}</span>
+                </div>
+              </div>
+
+              <p className="warning-text">⚠️ This action cannot be undone.</p>
+
+              <div className="modal-actions">
+                <button 
+                  className="cancel-btn"
+                  onClick={() => setShowCancelEmailConfirm(false)}
+                >
+                  Keep Request
+                </button>
+                <button 
+                  className="confirm-cancel-btn"
+                  onClick={confirmCancelEmailChange}
+                >
+                  Yes, Cancel Request
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Send Verification Email Confirmation Modal */}
+      {showSendVerificationConfirm && (
+        <div className="modal-overlay" onClick={() => setShowSendVerificationConfirm(false)}>
+          <div className="modal-content send-verify-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>📧 Send Verification Email</h3>
+            </div>
+            
+            <div className="send-verify-content">
+              <p className="confirm-message">Are you sure you want to send a verification email?</p>
+              
+              <div className="email-info-box">
+                <div className="info-item">
+                  <span className="info-label">Current Email:</span>
+                  <span className="info-value">{user?.email}</span>
+                </div>
+                <div className="info-item">
+                  <span className="info-label">New Email:</span>
+                  <span className="info-value">{newEmailInput}</span>
+                </div>
+              </div>
+
+              <div className="info-notice">
+                <p>✉️ A verification link will be sent to your <strong>current email address</strong>.</p>
+                <p>⏰ The verification link will expire in 1 hour.</p>
+              </div>
+
+              <div className="modal-actions">
+                <button 
+                  className="cancel-btn"
+                  onClick={() => setShowSendVerificationConfirm(false)}
+                >
+                  Cancel
+                </button>
+                <button 
+                  className="confirm-send-btn"
+                  onClick={confirmSendVerification}
+                  disabled={requestingEmailChange}
+                >
+                  {requestingEmailChange ? 'Sending...' : '📧 Send Verification'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -989,6 +1119,34 @@ function Settings() {
           padding-right: 3rem;
         }
 
+        .password-toggle-icon {
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 24px;
+          height: 24px;
+          padding: 2px;
+          color: #64748b;
+          transition: color 0.2s ease, transform 0.1s ease;
+          user-select: none;
+          position: absolute;
+          right: 1rem;
+          top: 50%;
+          transform: translateY(-50%);
+          z-index: 2;
+          border-radius: 50%;
+        }
+        
+        .password-toggle-icon:hover {
+          color: #9333ea;
+          background: rgba(147, 51, 234, 0.05);
+        }
+        
+        .password-toggle-icon:active {
+          transform: translateY(-50%) scale(0.95);
+        }
+
         .password-toggle-btn {
           position: absolute;
           right: 0.75rem;
@@ -1168,6 +1326,151 @@ function Settings() {
 
         .cancel-request-btn:hover {
           background: #dc2626;
+        }
+
+        /* Cancel Email Confirmation Modal Styles */
+        .cancel-confirm-modal {
+          max-width: 500px;
+        }
+
+        .cancel-confirm-content {
+          padding: 1.5rem;
+        }
+
+        .confirm-message {
+          font-size: 1.05rem;
+          color: #1e293b;
+          margin-bottom: 1.5rem;
+          font-weight: 500;
+        }
+
+        .email-info-box {
+          background: #f8fafc;
+          border: 2px solid #e2e8f0;
+          border-radius: 10px;
+          padding: 1.25rem;
+          margin-bottom: 1.25rem;
+        }
+
+        .info-item {
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+          margin-bottom: 1rem;
+        }
+
+        .info-item:last-child {
+          margin-bottom: 0;
+        }
+
+        .info-label {
+          font-size: 0.85rem;
+          color: #64748b;
+          font-weight: 500;
+        }
+
+        .info-value {
+          font-size: 1rem;
+          color: #1e293b;
+          font-weight: 600;
+        }
+
+        .warning-text {
+          color: #dc2626;
+          font-size: 0.95rem;
+          font-weight: 600;
+          margin-bottom: 1.5rem;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .modal-actions {
+          display: flex;
+          gap: 1rem;
+          justify-content: flex-end;
+        }
+
+        .cancel-btn {
+          padding: 0.75rem 1.5rem;
+          border: 2px solid #e2e8f0;
+          background: white;
+          color: #475569;
+          border-radius: 8px;
+          font-size: 1rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .cancel-btn:hover {
+          background: #f8fafc;
+          border-color: #cbd5e0;
+        }
+
+        .confirm-cancel-btn {
+          padding: 0.75rem 1.5rem;
+          border: none;
+          background: #ef4444;
+          color: white;
+          border-radius: 8px;
+          font-size: 1rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .confirm-cancel-btn:hover {
+          background: #dc2626;
+        }
+
+        /* Send Verification Confirmation Modal Styles */
+        .send-verify-modal {
+          max-width: 520px;
+        }
+
+        .send-verify-content {
+          padding: 1.5rem;
+        }
+
+        .info-notice {
+          background: #eff6ff;
+          border: 2px solid #3b82f6;
+          border-radius: 10px;
+          padding: 1rem;
+          margin-bottom: 1.5rem;
+        }
+
+        .info-notice p {
+          margin: 0 0 0.5rem 0;
+          color: #1e40af;
+          font-size: 0.95rem;
+          line-height: 1.6;
+        }
+
+        .info-notice p:last-child {
+          margin-bottom: 0;
+        }
+
+        .confirm-send-btn {
+          padding: 0.75rem 1.5rem;
+          border: none;
+          background: #2b6cb0;
+          color: white;
+          border-radius: 8px;
+          font-size: 1rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .confirm-send-btn:hover:not(:disabled) {
+          background: #2c5282;
+        }
+
+        .confirm-send-btn:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
         }
 
         @media (max-width: 768px) {
