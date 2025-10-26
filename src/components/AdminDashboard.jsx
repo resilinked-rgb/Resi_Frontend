@@ -99,7 +99,7 @@ function UserModal({ user, type, onClose, onSave }) {
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h3>{type === 'edit' ? 'Edit User' : 'User Details'}</h3>
-          <button className="modal-close" onClick={onClose}>×</button>
+          <button className="modal-close" onClick={onClose}>ï¿½</button>
         </div>
         
         <div className="modal-body">
@@ -272,7 +272,7 @@ function JobModal({ job, type, onClose }) {
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h3>Job Details</h3>
-          <button className="modal-close" onClick={onClose}>×</button>
+          <button className="modal-close" onClick={onClose}>ï¿½</button>
         </div>
         
         <div className="modal-body">
@@ -455,7 +455,7 @@ function AdminDashboard() {
   const loadDashboardStats = async () => {
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://resi-backend.vercel.app/api'}/admin/dashboard`, {
+  const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://resi-backend-ihyu.vercel.app/api'}/admin/dashboard`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
       
@@ -571,7 +571,7 @@ function AdminDashboard() {
       
       if (searchQuery) params.append('q', searchQuery)
 
-      const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://resi-backend.vercel.app/api'
+  const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://resi-backend-ihyu.vercel.app/api'
       const response = await fetch(`${apiBaseUrl}/admin/users?${params}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
@@ -748,7 +748,7 @@ function AdminDashboard() {
   const viewUser = async (userId) => {
     try {
       const token = localStorage.getItem('token')
-      const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://resi-backend.vercel.app/api'
+  const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://resi-backend-ihyu.vercel.app/api'
       const response = await fetch(`${apiBaseUrl}/admin/users/${userId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
@@ -2442,7 +2442,7 @@ function AdminDashboard() {
           <div className="modal-content confirmation-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>Delete User</h3>
-              <button className="modal-close" onClick={() => setShowDeleteUserModal(false)}>×</button>
+              <button className="modal-close" onClick={() => setShowDeleteUserModal(false)}>ï¿½</button>
             </div>
             <div className="modal-body">
               <p>Are you sure you want to delete this user?</p>
@@ -2466,7 +2466,7 @@ function AdminDashboard() {
           <div className="modal-content confirmation-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>Delete Job</h3>
-              <button className="modal-close" onClick={() => setShowDeleteJobModal(false)}>×</button>
+              <button className="modal-close" onClick={() => setShowDeleteJobModal(false)}>ï¿½</button>
             </div>
             <div className="modal-body">
               <p>Are you sure you want to delete this job?</p>
@@ -2490,7 +2490,7 @@ function AdminDashboard() {
           <div className="modal-content confirmation-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>Restore {itemToRestore.type ? itemToRestore.type.slice(0, -1).charAt(0).toUpperCase() + itemToRestore.type.slice(0, -1).slice(1) : 'Item'}</h3>
-              <button className="modal-close" onClick={() => setShowRestoreModal(false)}>×</button>
+              <button className="modal-close" onClick={() => setShowRestoreModal(false)}>ï¿½</button>
             </div>
             <div className="modal-body">
               <p>Are you sure you want to restore this {itemToRestore.type ? itemToRestore.type.slice(0, -1) : 'item'}?</p>
@@ -2521,7 +2521,7 @@ function AdminDashboard() {
           <div className="modal-content confirmation-modal danger-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header danger-header">
               <h3>?? Permanent Deletion Warning</h3>
-              <button className="modal-close" onClick={() => setShowPermanentDeleteModal(false)}>×</button>
+              <button className="modal-close" onClick={() => setShowPermanentDeleteModal(false)}>ï¿½</button>
             </div>
             <div className="modal-body">
               <p className="danger-text">

@@ -1,8 +1,9 @@
 class ApiService {
   constructor() {
+    // FOR LOCAL TESTING: Use localhost, for production use Vercel
     this.baseURL =
-      import.meta.env.VITE_API_URL ||
-      "https://resi-backend.vercel.app/api";
+  import.meta.env.VITE_API_URL ||
+  "https://resi-backend-ihyu.vercel.app/api";
     this.DEBUG = import.meta.env.MODE === 'development' && import.meta.env.VITE_DEBUG === 'true';
   }
 

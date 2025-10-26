@@ -6,7 +6,7 @@ import apiService from '../api';
 import { getProfilePictureUrl } from '../utils/imageHelper';
 import io from 'socket.io-client';
 
-const SOCKET_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+const SOCKET_URL = import.meta.env.VITE_API_BASE_URL || 'https://resi-backend-ihyu.vercel.app';
 
 function Chat() {
   const [conversations, setConversations] = useState([]);

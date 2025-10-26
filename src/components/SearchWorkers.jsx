@@ -5,7 +5,7 @@ import { AlertContext } from '../context/AlertContext'
 import { getProfilePictureUrl } from '../utils/imageHelper'
 
 // Use environment variable for API base URL
-const API_BASE = import.meta.env.VITE_API_URL || 'https://resi-backend.vercel.app/api'
+const API_BASE = import.meta.env.VITE_API_URL || 'https://resi-backend-ihyu.vercel.app/api'
 
 // Helper function for price formatting
 const formatPrice = (price) => {

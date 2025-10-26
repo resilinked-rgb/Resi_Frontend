@@ -8,7 +8,11 @@ import TermsOfServiceModal from './TermsOfServiceModal'
 function Register() {
   // TOS Modal state
   const [showTOSModal, setShowTOSModal] = useState(false);
-
+  
+  // Multi-step form state
+  const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 4; // Step 1: Basic Info, Step 2: Contact & Location, Step 3: Role & Skills, Step 4: ID & TOS
+  
   // Add touched and fieldErrors state for password fields
   const [touched, setTouched] = useState({
     password: false,
@@ -144,7 +148,7 @@ function Register() {
     profilePicture: null,
     otherBarangay: '',
     otherSkill: '',
-    acceptedTOS: false
+    acceptedTOS: false // Added TOS acceptance
   })
   
   const [skillsDropdownOpen, setSkillsDropdownOpen] = useState(false)
@@ -259,8 +263,98 @@ function Register() {
     checkPasswordsMatch()
   }, [formData.password, formData.confirmPassword])
 
+  // Step navigation
+  const nextStep = () => {
+    if (currentStep < totalSteps) {
+      setCurrentStep(currentStep + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const prevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  // Validate current step
+  const validateStep = () => {
+    switch (currentStep) {
+      case 1: // Basic Info
+        if (!formData.firstName || !formData.lastName || !formData.email) {
+          showError("Please fill in all required fields");
+          return false;
+        }
+        if (!formData.password || !formData.confirmPassword) {
+          showError("Please enter and confirm your password");
+          return false;
+        }
+        if (formData.password !== formData.confirmPassword) {
+          showError("Passwords do not match");
+          return false;
+        }
+        if (!validatePasswordStrength(formData.password)) {
+          showError("Password does not meet requirements");
+          return false;
+        }
+        return true;
+
+      case 2: // Contact & Location
+        if (!formData.mobileNo || !formData.address || !formData.barangay || !formData.gender) {
+          showError("Please fill in all required fields");
+          return false;
+        }
+        if (formData.barangay === 'Other' && !formData.otherBarangay) {
+          showError("Please specify your barangay");
+          return false;
+        }
+        return true;
+
+      case 3: // Role & Skills
+        if (!formData.userType) {
+          showError("Please select your role");
+          return false;
+        }
+        if (formData.userType === 'employee' && formData.skills.length === 0) {
+          showError("Please select at least one skill");
+          return false;
+        }
+        return true;
+
+      case 4: // ID & TOS
+        if (!formData.idType || !formData.idNumber) {
+          showError("Please provide ID information");
+          return false;
+        }
+        if (!formData.idFrontImage) {
+          showError("Please upload front ID photo");
+          return false;
+        }
+        if (!formData.acceptedTOS) {
+          showError("You must accept the Terms of Service to register");
+          return false;
+        }
+        return true;
+
+      default:
+        return true;
+    }
+  };
+
+  const handleNext = () => {
+    if (validateStep()) {
+      nextStep();
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault()
+
+    // Validate final step before submitting
+    if (!validateStep()) {
+      return;
+    }
 
     // Always check latest requirements before validating
     const latestRequirements = (() => {
@@ -291,17 +385,19 @@ function Register() {
       setError("Password does not meet requirements.");
       return;
     }
+    
+    // Validate TOS acceptance
+    if (!formData.acceptedTOS) {
+      setError("You must accept the Terms of Service to register");
+      showError("You must accept the Terms of Service to register");
+      return;
+    }
+    
     // Validate that at least one skill is selected if employee or both
     if ((formData.userType === 'employee' || formData.userType === 'both') && 
         (!formData.skills || formData.skills.length === 0)) {
       setError("Please select at least one skill")
       return
-    }
-
-    // Validate TOS acceptance
-    if (!formData.acceptedTOS) {
-      setError("You must accept the Terms of Service to register");
-      return;
     }
 
     setLoading(true)
@@ -391,11 +487,31 @@ function Register() {
         </div>
 
         <form onSubmit={handleSubmit} className="register-form">
+          {/* Step Indicator */}
+          <div className="step-indicator">
+            {[1, 2, 3, 4].map((step) => (
+              <div key={step} className={`step ${currentStep === step ? 'active' : ''} ${currentStep > step ? 'completed' : ''}`}>
+                <div className="step-number">{step}</div>
+                <div className="step-label">
+                  {step === 1 && 'Basic Info'}
+                  {step === 2 && 'Contact & Location'}
+                  {step === 3 && 'Role & Skills'}
+                  {step === 4 && 'ID & Verification'}
+                </div>
+              </div>
+            ))}
+          </div>
+
           {error && (
             <div className="error-message">
               {error}
             </div>
           )}
+
+          {/* Step 1: Basic Info */}
+          {currentStep === 1 && (
+            <div className="form-step">
+              <h3 className="step-title">Let's start with the basics</h3>
 
           <div className="form-row">
             <div className="form-group">
@@ -827,22 +943,20 @@ function Register() {
           {/* Skills section has been moved to the multi-select dropdown above */}
 
           {/* Terms of Service Checkbox */}
-          <div className="tos-container" style={{ marginTop: '1.5rem', marginBottom: '1rem' }}>
-            <label className="tos-checkbox-label" style={{ display: 'flex', alignItems: 'flex-start', cursor: 'pointer' }}>
+          <div className="tos-container">
+            <label className="tos-checkbox-label">
               <input
                 type="checkbox"
                 name="acceptedTOS"
                 checked={formData.acceptedTOS}
                 onChange={(e) => setFormData(prev => ({ ...prev, acceptedTOS: e.target.checked }))}
                 className="tos-checkbox"
-                style={{ marginTop: '4px', marginRight: '10px', cursor: 'pointer' }}
               />
-              <span className="tos-text" style={{ fontSize: '0.9rem', lineHeight: '1.5', color: '#444' }}>
+              <span className="tos-text">
                 I have read and agree to the{' '}
                 <span 
-                  onClick={(e) => { e.preventDefault(); setShowTOSModal(true); }} 
+                  onClick={() => setShowTOSModal(true)} 
                   className="tos-link"
-                  style={{ color: '#7c3aed', fontWeight: '700', textDecoration: 'underline', cursor: 'pointer' }}
                 >
                   Terms of Service
                 </span>. 
@@ -887,6 +1001,12 @@ function Register() {
           display: flex;
           align-items: center;
           justify-content: center;
+          background: linear-gradient(135deg, #9333ea 0%, #7c3aed 25%, #6b21a8 75%, #581c87 100%);
+          padding: 2rem 1rem;
+          position: relative;
+          overflow: hidden;
+        }
+
         .register-container::before {
           content: '';
           position: absolute;
@@ -1261,6 +1381,60 @@ function Register() {
         .password-feedback.error::before {
           content: '✗';
           font-weight: bold;
+        }
+
+        .tos-container {
+          margin: 2rem 0;
+          padding: 1.5rem;
+          background: rgba(147, 51, 234, 0.05);
+          border: 2px solid rgba(147, 51, 234, 0.2);
+          border-radius: 16px;
+          transition: all 0.3s ease;
+        }
+
+        .tos-container:hover {
+          background: rgba(147, 51, 234, 0.08);
+          border-color: rgba(147, 51, 234, 0.3);
+        }
+
+        .tos-checkbox-label {
+          display: flex;
+          align-items: flex-start;
+          gap: 1rem;
+          cursor: pointer;
+          user-select: none;
+        }
+
+        .tos-checkbox {
+          width: 20px;
+          height: 20px;
+          min-width: 20px;
+          margin-top: 0.2rem;
+          cursor: pointer;
+          accent-color: #9333ea;
+        }
+
+        .tos-text {
+          font-size: 0.9rem;
+          line-height: 1.6;
+          color: #334155;
+        }
+
+        .tos-text strong {
+          color: #dc2626;
+          font-weight: 700;
+        }
+
+        .tos-link {
+          color: #7c3aed;
+          font-weight: 700;
+          text-decoration: underline;
+          cursor: pointer;
+          transition: color 0.2s ease;
+        }
+
+        .tos-link:hover {
+          color: #9333ea;
         }
 
         .register-btn {

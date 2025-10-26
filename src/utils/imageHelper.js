@@ -3,7 +3,7 @@
  * Constructs proper image URLs based on how the image is stored
  */
 
-const API_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+const API_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://resi-backend-ihyu.vercel.app';
 
 /**
  * Get the full URL for an image
