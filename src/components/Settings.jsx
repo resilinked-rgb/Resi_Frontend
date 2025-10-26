@@ -20,6 +20,7 @@ function Settings() {
   const [notFound, setNotFound] = useState(false)
   const [saving, setSaving] = useState(false)
   const [showPasswordModal, setShowPasswordModal] = useState(false)
+  const [showEmailModal, setShowEmailModal] = useState(false)
   const [showSupportModal, setShowSupportModal] = useState(false)
   
   const [passwordData, setPasswordData] = useState({
@@ -39,6 +40,10 @@ function Settings() {
     message: '',
     priority: 'medium'
   })
+
+  const [newEmailInput, setNewEmailInput] = useState('')
+  const [requestingEmailChange, setRequestingEmailChange] = useState(false)
+  const [pendingEmailChange, setPendingEmailChange] = useState(null)
   
   const { user, isLoggedIn } = useContext(AuthContext)
   const { success, error: showError } = useContext(AlertContext)
@@ -130,8 +135,7 @@ function Settings() {
       length: password.length >= 8,
       uppercase: /[A-Z]/.test(password),
       lowercase: /[a-z]/.test(password),
-      number: /\d/.test(password),
-      special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+      number: /\d/.test(password)
     }
     
     return {
@@ -229,6 +233,65 @@ function Settings() {
     }
   }
 
+  const checkPendingEmailChange = async () => {
+    try {
+      const userData = JSON.parse(localStorage.getItem('userData') || '{}')
+      const response = await apiService.checkPendingEmailChange(userData.userId)
+      if (response.pending) {
+        setPendingEmailChange(response.pendingChange)
+      }
+    } catch (error) {
+      // Silently fail - not critical
+      console.error('Error checking pending email change:', error)
+    }
+  }
+
+  const handleRequestEmailChange = async () => {
+    if (!newEmailInput.trim()) {
+      showError('Please enter a new email address')
+      return
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmailInput)) {
+      showError('Please enter a valid email address')
+      return
+    }
+
+    try {
+      setRequestingEmailChange(true)
+      const userData = JSON.parse(localStorage.getItem('userData') || '{}')
+      const response = await apiService.requestEmailChange(userData.userId, newEmailInput)
+      
+      if (response.success) {
+        success('Verification email sent! Check your current email to confirm the change.')
+        setPendingEmailChange(response.pendingChange)
+        setNewEmailInput('')
+        setShowEmailModal(false)
+      }
+    } catch (error) {
+      showError(error.message || 'Failed to request email change')
+    } finally {
+      setRequestingEmailChange(false)
+    }
+  }
+
+  const handleCancelEmailChange = async () => {
+    try {
+      const userData = JSON.parse(localStorage.getItem('userData') || '{}')
+      await apiService.cancelEmailChange(userData.userId)
+      setPendingEmailChange(null)
+      success('Email change request cancelled')
+    } catch (error) {
+      showError(error.message || 'Failed to cancel email change')
+    }
+  }
+
+  useEffect(() => {
+    if (user) {
+      checkPendingEmailChange()
+    }
+  }, [user])
+
 
 
   if (loading) {
@@ -301,13 +364,22 @@ function Settings() {
         {/* Account Security */}
         <div className="settings-section">
           <h2>Account Security</h2>
-          <button 
-            className="action-btn primary"
-            onClick={() => setShowPasswordModal(true)}
-          >
-            <span className="icon">🔑</span>
-            Change Password
-          </button>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <button 
+              className="action-btn primary"
+              onClick={() => setShowEmailModal(true)}
+            >
+              <span className="icon">📧</span>
+              Change Email
+            </button>
+            <button 
+              className="action-btn primary"
+              onClick={() => setShowPasswordModal(true)}
+            >
+              <span className="icon">🔑</span>
+              Change Password
+            </button>
+          </div>
         </div>
 
         {/* Support */}
@@ -412,7 +484,6 @@ function Settings() {
                         {key === 'uppercase' && 'One uppercase letter'}
                         {key === 'lowercase' && 'One lowercase letter'}
                         {key === 'number' && 'One number'}
-                        {key === 'special' && 'One special character'}
                       </li>
                     ))}
                   </ul>
@@ -560,6 +631,99 @@ function Settings() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Email Change Modal */}
+      {showEmailModal && (
+        <div className="modal-overlay" onClick={() => setShowEmailModal(false)}>
+          <div className="modal-content email-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>🔐 Change Email Address</h3>
+              <button 
+                className="close-btn"
+                onClick={() => setShowEmailModal(false)}
+              >
+                &times;
+              </button>
+            </div>
+            
+            <div className="modal-form" style={{ padding: '1.5rem' }}>
+              {pendingEmailChange ? (
+                <div className="pending-change-notice">
+                  <h4>⏳ Email Change Pending</h4>
+                  <p>
+                    <strong>Current Email:</strong> {pendingEmailChange.currentEmail}
+                  </p>
+                  <p>
+                    <strong>New Email:</strong> {pendingEmailChange.newEmail}
+                  </p>
+                  <p style={{ fontSize: '0.9rem', color: '#666' }}>
+                    Check your email ({pendingEmailChange.currentEmail}) for the verification link.
+                    Expires: {new Date(pendingEmailChange.expiresAt).toLocaleString()}
+                  </p>
+                  <button 
+                    onClick={handleCancelEmailChange}
+                    className="cancel-request-btn"
+                  >
+                    Cancel Request
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="security-info-box">
+                    <p className="security-title">
+                      🔒 Important Security Information
+                    </p>
+                    <ul>
+                      <li><strong>The verification link will be sent to your CURRENT email address: {user?.email}</strong></li>
+                      <li>This is a security measure to prevent unauthorized email changes</li>
+                      <li>You must click the verification link to complete the email change</li>
+                      <li>The verification link expires in 1 hour</li>
+                    </ul>
+                  </div>
+                  
+                  <div className="current-email-box">
+                    <p>
+                      <strong>Current Email:</strong> <span className="email-highlight">{user?.email}</span>
+                    </p>
+                  </div>
+                  
+                  <div className="form-group">
+                    <label htmlFor="newEmail">New Email Address</label>
+                    <input
+                      type="email"
+                      id="newEmail"
+                      value={newEmailInput}
+                      onChange={(e) => setNewEmailInput(e.target.value)}
+                      placeholder="Enter your new email address"
+                      required
+                    />
+                    <small style={{ color: '#64748b', fontSize: '0.85rem', marginTop: '0.5rem', display: 'block' }}>
+                      Enter the email address you want to change to
+                    </small>
+                  </div>
+                  
+                  <div className="modal-actions">
+                    <button 
+                      type="button" 
+                      className="cancel-btn"
+                      onClick={() => setShowEmailModal(false)}
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      onClick={handleRequestEmailChange}
+                      className="submit-btn"
+                      disabled={requestingEmailChange}
+                    >
+                      {requestingEmailChange ? 'Sending...' : 'Send Verification Email'}
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -919,6 +1083,91 @@ function Settings() {
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
+        }
+
+        /* Email Modal Styles */
+        .email-modal {
+          max-width: 600px;
+        }
+
+        .security-info-box {
+          background: #fef3c7;
+          border: 2px solid #f59e0b;
+          border-radius: 12px;
+          padding: 1.25rem;
+          margin-bottom: 1.5rem;
+        }
+
+        .security-title {
+          color: #92400e;
+          margin-bottom: 0.75rem;
+          font-weight: 700;
+          font-size: 1rem;
+          margin-top: 0;
+        }
+
+        .security-info-box ul {
+          color: #78350f;
+          font-size: 0.95rem;
+          margin-bottom: 0;
+          line-height: 1.6;
+          padding-left: 1.25rem;
+        }
+
+        .security-info-box li {
+          margin-bottom: 0.5rem;
+        }
+
+        .current-email-box {
+          background: #f8fafc;
+          padding: 1rem;
+          border-radius: 8px;
+          margin-bottom: 1.5rem;
+          border: 1px solid #e2e8f0;
+        }
+
+        .current-email-box p {
+          margin: 0;
+          color: #475569;
+        }
+
+        .email-highlight {
+          color: #9333ea;
+          font-weight: 600;
+        }
+
+        .pending-change-notice {
+          background: #fef3c7;
+          border: 1px solid #f59e0b;
+          border-radius: 8px;
+          padding: 1rem;
+          margin-bottom: 1rem;
+        }
+
+        .pending-change-notice h4 {
+          color: #92400e;
+          margin-top: 0;
+          margin-bottom: 0.75rem;
+        }
+
+        .pending-change-notice p {
+          color: #78350f;
+          margin-bottom: 0.5rem;
+        }
+
+        .cancel-request-btn {
+          margin-top: 1rem;
+          padding: 0.5rem 1rem;
+          background: #ef4444;
+          color: white;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: 600;
+        }
+
+        .cancel-request-btn:hover {
+          background: #dc2626;
         }
 
         @media (max-width: 768px) {

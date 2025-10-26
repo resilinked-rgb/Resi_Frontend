@@ -1,12 +1,12 @@
-import { useState, useEffect, useContext } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useSearchParams, useNavigate, useParams } from 'react-router-dom'
-import { AlertContext } from '../context/AlertContext'
+import { useAlert } from '../context/AlertContext'
 
 function ResetPassword() {
   const [searchParams] = useSearchParams()
   const { token: urlToken } = useParams()
   const navigate = useNavigate()
-  const { showAlert } = useContext(AlertContext)
+  const { success, error: showError } = useAlert()
 
   const [formData, setFormData] = useState({
     token: urlToken || searchParams.get('token') || '',
@@ -41,6 +41,7 @@ function ResetPassword() {
   })
 
   const [fieldErrors, setFieldErrors] = useState({})
+  const [formError, setFormError] = useState('')
 
   useEffect(() => {
     // Auto-focus appropriate field
@@ -87,14 +88,6 @@ function ResetPassword() {
       newRequirements.number = false
     }
 
-    // Special character check
-    if (/[^A-Za-z0-9]/.test(password)) {
-      score += 1
-      newRequirements.special = true
-    } else {
-      newRequirements.special = false
-    }
-
     // Password match check
     if (formData.confirmPassword && password === formData.confirmPassword) {
       newRequirements.match = true
@@ -107,19 +100,19 @@ function ResetPassword() {
     let level = 'Weak'
     let color = '#ef4444'
 
-    if (score >= 5) {
+    if (score >= 4) {
       level = 'Strong'
       color = '#10b981'
-    } else if (score >= 4) {
+    } else if (score >= 3) {
       level = 'Good'
       color = '#f59e0b'
-    } else if (score >= 3) {
+    } else if (score >= 2) {
       level = 'Fair'
       color = '#f97316'
     }
 
     setPasswordStrength({ score, level, color })
-    return score >= 5
+    return score >= 4
   }
 
   const validateField = (name, value) => {
@@ -184,6 +177,11 @@ function ResetPassword() {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
     
+    // Clear form error banner when user starts typing
+    if (formError) {
+      setFormError('')
+    }
+    
     // Clear field errors when user starts typing
     if (touched[name] && fieldErrors[name]) {
       setFieldErrors(prev => ({
@@ -194,8 +192,15 @@ function ResetPassword() {
     
     if (name === 'newPassword') {
       checkPasswordStrength(value)
+      // Re-check match if confirm password exists
+      if (formData.confirmPassword) {
+        const match = value === formData.confirmPassword
+        setRequirements(prev => ({ ...prev, match }))
+      }
     } else if (name === 'confirmPassword') {
-      setTimeout(checkPasswordMatch, 0)
+      // Check match with new password
+      const match = formData.newPassword === value
+      setRequirements(prev => ({ ...prev, match }))
     }
   }
 
@@ -204,8 +209,11 @@ function ResetPassword() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     
+    // Clear any previous form error
+    setFormError('')
+    
     if (!validateForm()) {
-      showAlert('warning', 'Please fill all fields with valid information')
+      setFormError('Please fill all fields with valid information')
       return
     }
 
@@ -225,7 +233,7 @@ function ResetPassword() {
 
       if (response.ok) {
         setShowSuccess(true)
-        showAlert('success', 'Password reset successfully!')
+        success('Password reset successfully!')
       } else {
         throw new Error(data.message || 'Failed to reset password')
       }
@@ -238,9 +246,11 @@ function ResetPassword() {
         errorMessage = 'Invalid or expired reset token. Please request a new reset link.'
       } else if (err.message.includes('network') || err.message.includes('fetch')) {
         errorMessage = 'Unable to connect to server. Please check your internet connection.'
+      } else if (err.message) {
+        errorMessage = err.message
       }
       
-      showAlert('error', errorMessage)
+      setFormError(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -264,15 +274,19 @@ function ResetPassword() {
   if (showSuccess) {
     return (
       <div className="reset-password-container fade-in">
-        <div className="reset-card">
-          <div className="success-content">
-            <div className="success-message">
-              <h2>Password Reset Successful</h2>
-              <p>Your password has been reset. Please log in with your new password.</p>
+        <div className="reset-card success-card">
+          <div className="verification-success">
+            <div className="verification-icon-success">✓</div>
+            <h2>Password Reset Successful!</h2>
+            <p>Your password has been changed. You can now log in with your new password.</p>
+            <div className="redirect-animation">
+              <div className="dot"></div>
+              <div className="dot"></div>
+              <div className="dot"></div>
             </div>
             <button 
               onClick={handleGoToLogin}
-              className="btn btn-primary"
+              className="verification-button"
             >
               Go to Login
             </button>
@@ -290,6 +304,13 @@ function ResetPassword() {
           <h1>Reset Your Password</h1>
           <p>Enter your new password below</p>
         </div>
+
+        {formError && (
+          <div className="form-error-banner">
+            <span className="error-icon">⚠️</span>
+            <span className="error-message">{formError}</span>
+          </div>
+        )}
         
         <form onSubmit={handleSubmit} className="reset-form">
           <div className="form-group">
@@ -338,14 +359,6 @@ function ResetPassword() {
                 placeholder="Enter new password"
                 className={fieldErrors.newPassword ? 'error' : formData.newPassword && !fieldErrors.newPassword ? 'valid' : ''}
               />
-              <div className="input-status">
-                {fieldErrors.newPassword && touched.newPassword && (
-                  <span className="error-icon" title={fieldErrors.newPassword}>
-                    ❌
-                  </span>
-                )}
-                {/* Removed success icon for valid password */}
-              </div>
               <div 
                 className="password-toggle-icon" 
                 onClick={() => setShowPassword(!showPassword)}
@@ -406,14 +419,6 @@ function ResetPassword() {
                 placeholder="Confirm new password"
                 className={fieldErrors.confirmPassword ? 'error' : formData.confirmPassword && !fieldErrors.confirmPassword && requirements.match ? 'valid' : ''}
               />
-              <div className="input-status">
-                {fieldErrors.confirmPassword && touched.confirmPassword && (
-                  <span className="error-icon" title={fieldErrors.confirmPassword}>
-                    ❌
-                  </span>
-                )}
-                {/* Removed success icon for passwords match */}
-              </div>
               <div 
                 className="password-toggle-icon" 
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
@@ -426,7 +431,7 @@ function ResetPassword() {
                   </svg>
                 ) : (
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
                     <line x1="1" y1="1" x2="23" y2="23"></line>
                   </svg>
                 )}
@@ -454,9 +459,6 @@ function ResetPassword() {
                 </li>
                 <li className={requirements.number ? 'met' : ''}>
                   At least one number
-                </li>
-                <li className={requirements.special ? 'met' : ''}>
-                  At least one special character
                 </li>
                 <li className={requirements.match ? 'met' : ''}>
                   Passwords match
@@ -580,6 +582,41 @@ function ResetPassword() {
         .reset-form {
           margin-bottom: 2rem;
         }
+
+        .form-error-banner {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          padding: 1rem 1.25rem;
+          background: rgba(220, 38, 38, 0.1);
+          border: 2px solid #dc2626;
+          border-radius: 16px;
+          margin-bottom: 1.5rem;
+          animation: slideDown 0.3s ease;
+        }
+
+        .form-error-banner .error-icon {
+          font-size: 1.25rem;
+          flex-shrink: 0;
+        }
+
+        .form-error-banner .error-message {
+          color: #dc2626;
+          font-weight: 600;
+          font-size: 0.95rem;
+          line-height: 1.4;
+        }
+
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
         
         .form-group {
           margin-bottom: 1.75rem;
@@ -600,10 +637,31 @@ function ResetPassword() {
           display: flex;
           align-items: center;
         }
+
+        .password-toggle-icon {
+          position: absolute;
+          right: 1rem;
+          top: 50%;
+          transform: translateY(-50%);
+          cursor: pointer;
+          color: #64748b;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0.25rem;
+          border-radius: 6px;
+          transition: all 0.2s ease;
+          z-index: 10;
+        }
+
+        .password-toggle-icon:hover {
+          color: #9333ea;
+          background: rgba(147, 51, 234, 0.1);
+        }
         
         .form-group input {
           width: 100%;
-          padding: 1rem 3rem 1rem 1.25rem;
+          padding: 1rem 3.5rem 1rem 1.25rem;
           border: 2px solid rgba(147, 51, 234, 0.1);
           border-radius: 16px;
           font-size: 1rem;
@@ -966,6 +1024,103 @@ function ResetPassword() {
           to { 
             opacity: 1; 
           }
+        }
+
+        /* Success state styles */
+        .success-card {
+          max-width: 500px;
+          text-align: center;
+        }
+
+        .verification-success {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .verification-icon-success {
+          width: 80px;
+          height: 80px;
+          border-radius: 50%;
+          background-color: #ecfdf5;
+          color: #059669;
+          border: 2px solid #10b981;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 40px;
+          font-weight: bold;
+          margin-bottom: 1.5rem;
+        }
+
+        .verification-success h2 {
+          margin-bottom: 1rem;
+          font-size: 1.875rem;
+          font-weight: 700;
+          color: #1e293b;
+        }
+
+        .verification-success p {
+          margin-bottom: 1.5rem;
+          color: #64748b;
+          line-height: 1.6;
+          font-size: 1.125rem;
+        }
+
+        .redirect-animation {
+          display: flex;
+          gap: 8px;
+          justify-content: center;
+          margin: 1rem 0;
+        }
+
+        .dot {
+          width: 12px;
+          height: 12px;
+          background: linear-gradient(135deg, #9333ea, #7c3aed);
+          border-radius: 50%;
+          animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .dot:nth-child(1) {
+          animation-delay: -0.32s;
+        }
+
+        .dot:nth-child(2) {
+          animation-delay: -0.16s;
+        }
+
+        @keyframes bounce {
+          0%, 80%, 100% {
+            transform: scale(0);
+          }
+          40% {
+            transform: scale(1);
+          }
+        }
+
+        .verification-button {
+          margin-top: 1rem;
+          display: inline-block;
+          background: linear-gradient(135deg, #9333ea, #7c3aed);
+          color: white;
+          border: none;
+          padding: 0.875rem 2rem;
+          border-radius: 12px;
+          font-size: 1rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s;
+          text-decoration: none;
+          box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+          width: 100%;
+          max-width: 250px;
+        }
+
+        .verification-button:hover {
+          background: linear-gradient(135deg, #8b31da, #6c2edd);
+          transform: translateY(-1px);
+          box-shadow: 0 6px 16px rgba(124, 58, 237, 0.3);
         }
         
         @media (max-width: 768px) {

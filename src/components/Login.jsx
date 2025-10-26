@@ -154,7 +154,6 @@ function Login() {
         // Check if account is verified
         if (fullUser && fullUser.isVerified === false) {
           setError('Please verify your email first')
-          showError('Please verify your email first')
           setLoading(false)
           return
         }
@@ -177,21 +176,20 @@ function Login() {
         // Show specific error for incorrect credentials
         if (data.error === 'Invalid credentials' || data.alert === 'Invalid credentials') {
           setError('Incorrect email or password. Please try again.')
-          showError('Incorrect email or password. Please try again.')
         } else if (data.error === 'Account not verified' || data.alert === 'Account not verified' || data.alert === 'Please verify your email first') {
           setError('Please verify your email first')
-          showError('Please verify your email first')
         } else {
           const errorMessage = data.alert || data.error || 'Invalid email or password'
           setError(errorMessage)
-          showError(errorMessage)
         }
       }
     } catch (err) {
-      // Error already handled by API service - don't log sensitive details
-      const errorMessage = err.message || 'Connection error. Please try again.'
+      // Sanitize error messages to not expose backend details
+      let errorMessage = 'Connection error. Please try again.'
+      if (err.message && !err.message.toLowerCase().includes('backend') && !err.message.toLowerCase().includes('server')) {
+        errorMessage = err.message
+      }
       setError(errorMessage)
-      showError(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -216,13 +214,13 @@ function Login() {
           <p>Log in to your account</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="login-form">
-          {error && (
-            <div className="error-message" id="loginError">
-              {error}
-            </div>
-          )}
+        {error && (
+          <div className="form-error-banner">
+            ❌ {error}
+          </div>
+        )}
 
+        <form onSubmit={handleSubmit} className="login-form">
           <div className="form-group">
             <label htmlFor="email">Email Address</label>
             <div className="input-wrapper">
@@ -420,6 +418,33 @@ function Login() {
           margin: 0;
           font-size: 1.1rem;
           font-weight: 500;
+        }
+
+        .form-error-banner {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          padding: 1rem 1.25rem;
+          background: rgba(220, 38, 38, 0.1);
+          border: 2px solid #dc2626;
+          border-radius: 16px;
+          margin-bottom: 1.5rem;
+          animation: slideDown 0.3s ease;
+          color: #dc2626;
+          font-weight: 600;
+          font-size: 0.95rem;
+          line-height: 1.4;
+        }
+
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
 
         .form-group {

@@ -201,7 +201,10 @@ class ApiService {
     try {
       await this.request("/auth/logout", { method: "POST" });
     } catch {
-      console.warn("Backend logout failed, but local state cleared");
+      // Logout failed on server, but local state is cleared
+      if (this.DEBUG) {
+        console.warn("Server logout failed, but local state cleared");
+      }
     }
   }
 
@@ -849,7 +852,7 @@ class ApiService {
       );
       return await response.json();
     } catch {
-      throw new Error("Backend health check failed");
+      throw new Error("Service health check failed");
     }
   }
 

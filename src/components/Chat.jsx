@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useAlert } from '../context/AlertContext';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import apiService from '../api';
 import { getProfilePictureUrl } from '../utils/imageHelper';
 import io from 'socket.io-client';
@@ -24,7 +24,9 @@ function Chat() {
   const [showNewChatModal, setShowNewChatModal] = useState(false);
   const [recommendedUsers, setRecommendedUsers] = useState([]);
   const [loadingRecommended, setLoadingRecommended] = useState(false);
+  const [searchFocused, setSearchFocused] = useState(false);
   const [shouldScroll, setShouldScroll] = useState(true);
+  const [pendingRecipient, setPendingRecipient] = useState(null);
   const messagesEndRef = useRef(null);
   const socketRef = useRef(null);
   const isFirstLoadRef = useRef(true);
@@ -32,21 +34,152 @@ function Chat() {
   const { user } = useAuth();
   const { success, error: showError } = useAlert();
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Get the current user's ID consistently
   const currentUserId = user?.userId || user?._id;
 
   // Load conversations on mount and handle support contact from navigation state
   useEffect(() => {
+    console.log('🚀 Chat component mounted');
+    console.log('📍 Location state:', location.state);
     loadConversations();
     
-    // If coming from Help page with support contact, start conversation
+    // Store the recipient info to process after conversations load
     if (location.state?.supportContact) {
-      handleStartConversation(location.state.supportContact);
+      console.log('💼 Support contact detected:', location.state.supportContact);
+      setPendingRecipient({ type: 'direct', user: location.state.supportContact });
       // Clear the state so it doesn't trigger again
       window.history.replaceState({}, document.title);
     }
+    // If coming from "Message Employer" with recipientEmail/recipientId/recipientName
+    else if (location.state?.recipientEmail || location.state?.recipientId || location.state?.recipientName) {
+      // Use email first, then ID, then name as fallback
+      const searchTerm = location.state.recipientEmail || location.state.recipientId || location.state.recipientName;
+      console.log('📧 Message recipient detected:', {
+        email: location.state.recipientEmail,
+        id: location.state.recipientId,
+        name: location.state.recipientName,
+        searchTerm
+      });
+      setPendingRecipient({ type: 'search', searchTerm });
+      // Clear the state so it doesn't trigger again
+      window.history.replaceState({}, document.title);
+    } else {
+      console.log('ℹ️ No pending recipient');
+    }
   }, []);
+
+  // Handle pending recipient after conversations are loaded
+  useEffect(() => {
+    if (!loading && conversations.length >= 0 && pendingRecipient) {
+      console.log('🎯 Processing pending recipient:', pendingRecipient);
+      console.log('📋 Current conversations:', conversations.length);
+      
+      if (pendingRecipient.type === 'direct') {
+        // Direct user object from support contact
+        console.log('👤 Direct user:', pendingRecipient.user);
+        const existingConv = conversations.find(conv => conv.user._id === pendingRecipient.user._id);
+        if (existingConv) {
+          console.log('✅ Found existing conversation:', existingConv);
+          setSelectedConversation(existingConv);
+        } else {
+          console.log('🆕 Creating new conversation');
+          setSelectedConversation({
+            _id: pendingRecipient.user._id,
+            user: pendingRecipient.user,
+            lastMessage: {},
+            unreadCount: 0
+          });
+          setMessages([]);
+        }
+        setPendingRecipient(null);
+      } else if (pendingRecipient.type === 'search') {
+        // Check if searchTerm looks like a MongoDB ObjectId (24 hex characters)
+        const isObjectId = /^[0-9a-fA-F]{24}$/.test(pendingRecipient.searchTerm);
+        
+        if (isObjectId) {
+          // It's an ID - fetch user directly by ID
+          console.log('🆔 Fetching user by ID:', pendingRecipient.searchTerm);
+          apiService.request(`/users/${pendingRecipient.searchTerm}`)
+            .then(res => {
+              console.log('👤 User by ID response:', res);
+              const userObj = res?.user || res?.data?.user || null;
+              
+              if (userObj && userObj._id) {
+                console.log('✅ Found user:', userObj);
+                
+                // Check if conversation already exists
+                const existingConv = conversations.find(conv => conv.user._id === userObj._id);
+                if (existingConv) {
+                  console.log('✅ Found existing conversation with user');
+                  setSelectedConversation(existingConv);
+                } else {
+                  console.log('🆕 Creating new conversation with user');
+                  setSelectedConversation({
+                    _id: userObj._id,
+                    user: userObj,
+                    lastMessage: {},
+                    unreadCount: 0
+                  });
+                  setMessages([]);
+                }
+              } else {
+                console.log('❌ User not found by ID');
+                showError('Could not find the recipient. Please try searching manually.');
+              }
+            })
+            .catch(err => {
+              console.error('❌ Failed to fetch user by ID:', err);
+              showError('Could not find the recipient. Please try searching manually.');
+            })
+            .finally(() => {
+              setPendingRecipient(null);
+            });
+        } else {
+          // It's not an ID - search by name/email
+          console.log('🔍 Searching for user by name/email:', pendingRecipient.searchTerm);
+          apiService.searchUsers({ search: pendingRecipient.searchTerm })
+            .then(res => {
+              console.log('🔍 Search response:', res);
+              const users = res?.users || res?.data?.users || res?.data?.data?.users || [];
+              console.log('👥 Found users:', users);
+              
+              if (users.length > 0) {
+                const userToMessage = users[0];
+                console.log('✅ Selecting user:', userToMessage);
+                
+                // Check if conversation already exists
+                const existingConv = conversations.find(conv => conv.user._id === userToMessage._id);
+                if (existingConv) {
+                  console.log('✅ Found existing conversation with user');
+                  setSelectedConversation(existingConv);
+                } else {
+                  console.log('🆕 Creating new conversation with user');
+                  setSelectedConversation({
+                    _id: userToMessage._id,
+                    user: userToMessage,
+                    lastMessage: {},
+                    unreadCount: 0
+                  });
+                  setMessages([]);
+                }
+              } else {
+                console.log('❌ No users found');
+                showError('Could not find the recipient. Please try searching manually.');
+              }
+            })
+            .catch(err => {
+              console.error('❌ Failed to find recipient:', err);
+              showError('Could not find the recipient. Please try searching manually.');
+            })
+            .finally(() => {
+              setPendingRecipient(null);
+            });
+        }
+      }
+    }
+  }, [loading, conversations, pendingRecipient]);
 
   // Search users when searchQuery changes (sidebar search)
   useEffect(() => {
@@ -228,13 +361,68 @@ function Chat() {
       const inboxMessages = inboxResponse?.data?.data?.messages || inboxResponse?.data?.messages || [];
       const sentMessages = sentResponse?.data?.data || sentResponse?.data || [];
       
-      // Combine all messages
-      const allMessages = [...inboxMessages, ...sentMessages];
+      // Combine all messages and remove duplicates by _id
+      const messageMap = new Map();
+      [...inboxMessages, ...sentMessages].forEach(msg => {
+        if (!messageMap.has(msg._id)) {
+          messageMap.set(msg._id, msg);
+        }
+      });
+      const allMessages = Array.from(messageMap.values());
       const conversationMap = new Map();
       
+      // Debug: Log current user info
+      const currentUserId = user._id || user.id;
+      console.log('🔍 Current User:', {
+        id: currentUserId,
+        fullUser: user,
+        totalMessages: allMessages.length
+      });
+      
       allMessages.forEach(msg => {
+        // Skip messages with missing sender or recipient (deleted users)
+        const hasSender = msg.sender && typeof msg.sender === 'object' && msg.sender._id;
+        const hasRecipient = msg.recipient && typeof msg.recipient === 'object' && msg.recipient._id;
+        
+        if (!hasSender || !hasRecipient) {
+          console.warn('Skipping message with deleted user:', {
+            id: msg._id,
+            hasSender,
+            hasRecipient
+          });
+          return;
+        }
+        
         // Determine the other user (not current user)
-        const otherUser = msg.sender._id === user._id ? msg.recipient : msg.sender;
+        // Match by ID or email as fallback
+        const currentUserId = user._id || user.id;
+        const currentUserEmail = user.email;
+        
+        const isCurrentUserSender = 
+          msg.sender._id === currentUserId || 
+          (currentUserEmail && msg.sender.email === currentUserEmail);
+        
+        const isCurrentUserRecipient = 
+          msg.recipient._id === currentUserId || 
+          (currentUserEmail && msg.recipient.email === currentUserEmail);
+        
+        // Skip if somehow both or neither match (shouldn't happen)
+        if ((!isCurrentUserSender && !isCurrentUserRecipient) || (isCurrentUserSender && isCurrentUserRecipient)) {
+          console.warn('Message does not involve current user:', {
+            messageId: msg._id,
+            currentUserId,
+            currentUserEmail,
+            senderId: msg.sender._id,
+            senderEmail: msg.sender.email,
+            recipientId: msg.recipient._id,
+            recipientEmail: msg.recipient.email,
+            isCurrentUserSender,
+            isCurrentUserRecipient
+          });
+          return;
+        }
+        
+        const otherUser = isCurrentUserSender ? msg.recipient : msg.sender;
         const userId = otherUser._id;
         
         if (!conversationMap.has(userId)) {
@@ -252,8 +440,12 @@ function Chat() {
           }
         }
         
-        // Count unread messages (only from inbox, not sent)
-        if (!msg.isRead && msg.recipient._id === user._id) {
+        // Count unread messages (only received messages that aren't read)
+        const isMessageForCurrentUser = 
+          msg.recipient._id === currentUserId || 
+          (currentUserEmail && msg.recipient.email === currentUserEmail);
+        
+        if (!msg.isRead && isMessageForCurrentUser) {
           conversationMap.get(userId).unreadCount++;
         }
       });
@@ -262,7 +454,19 @@ function Chat() {
       const conversationsArray = Array.from(conversationMap.values())
         .sort((a, b) => new Date(b.lastMessage.createdAt) - new Date(a.lastMessage.createdAt));
       
-      setConversations(conversationsArray);
+      // Ensure uniqueness by user ID before setting state
+      const uniqueConversationsArray = Array.from(
+        new Map(conversationsArray.map(conv => [conv._id, conv])).values()
+      );
+      
+      console.log('📊 Conversations loaded:', {
+        total: conversationsArray.length,
+        unique: uniqueConversationsArray.length,
+        ids: uniqueConversationsArray.map(c => c._id),
+        userNames: uniqueConversationsArray.map(c => `${c.user.firstName} ${c.user.lastName}`)
+      });
+      
+      setConversations(uniqueConversationsArray);
     } catch (error) {
       console.error('Failed to load conversations:', error);
       showError('Failed to load conversations');
@@ -277,15 +481,19 @@ function Chat() {
       // Get users that are opposite type (if employee, show employers and vice versa)
       const oppositeType = user.userType === 'employee' ? 'employer' : 'employee';
       
+      console.log('Loading recommended users, oppositeType:', oppositeType);
       const response = await apiService.searchUsers({ userType: oppositeType });
+      console.log('Search users response:', response);
+      
       const users = response?.users || response?.data?.users || response?.data?.data?.users || [];
+      console.log('Extracted users:', users.length, users);
       
-      // Exclude self and users we already have conversations with
-      const conversationUserIds = new Set(conversations.map(c => c.user._id));
+      // Exclude self only, show all other users including those with conversations
       const filtered = users
-        .filter(u => u._id !== user._id && !conversationUserIds.has(u._id))
-        .slice(0, 5); // Limit to 5 recommendations
+        .filter(u => u._id !== user._id && u._id !== user.id)
+        .slice(0, 10); // Increased limit to 10 recommendations
       
+      console.log('Filtered recommended users:', filtered.length, filtered);
       setRecommendedUsers(filtered);
     } catch (error) {
       console.error('Failed to load recommended users:', error);
@@ -301,6 +509,13 @@ function Chat() {
     }
   }, [conversations.length]);
 
+  // Load recommended users when search is focused
+  useEffect(() => {
+    if (searchFocused && recommendedUsers.length === 0 && !loadingRecommended) {
+      loadRecommendedUsers();
+    }
+  }, [searchFocused]);
+
   const loadMessages = async (recipientId, silent = false) => {
     try {
       if (!silent) setLoading(true);
@@ -315,16 +530,44 @@ function Chat() {
       
       // Filter messages for this conversation
       const conversationMsgs = [...inboxMsgs, ...sentMsgs]
-        .filter(msg => 
-          (msg.sender._id === recipientId || msg.recipient._id === recipientId)
-        )
+        .filter(msg => {
+          // Skip messages with missing sender or recipient (deleted users)
+          const hasSender = msg.sender && typeof msg.sender === 'object' && msg.sender._id;
+          const hasRecipient = msg.recipient && typeof msg.recipient === 'object' && msg.recipient._id;
+          
+          if (!hasSender || !hasRecipient) {
+            console.warn('Skipping message with deleted user:', {
+              id: msg._id,
+              hasSender,
+              hasRecipient,
+              sender: msg.sender,
+              recipient: msg.recipient
+            });
+            return false;
+          }
+          
+          // Match by ID or email
+          const matchesSender = msg.sender._id === recipientId || 
+                                (selectedConversation?.user?.email && msg.sender.email === selectedConversation.user.email);
+          const matchesRecipient = msg.recipient._id === recipientId || 
+                                   (selectedConversation?.user?.email && msg.recipient.email === selectedConversation.user.email);
+          
+          return matchesSender || matchesRecipient;
+        })
         .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
       
       setMessages(conversationMsgs);
       
       // Mark unread messages as seen (do this even during polling)
+      const currentUserId = user._id || user.id;
+      const currentUserEmail = user.email;
+      
       const unreadMessageIds = conversationMsgs
-        .filter(msg => !msg.isRead && msg.recipient._id === user._id)
+        .filter(msg => {
+          const isForCurrentUser = msg.recipient._id === currentUserId || 
+                                    (currentUserEmail && msg.recipient.email === currentUserEmail);
+          return !msg.isRead && isForCurrentUser;
+        })
         .map(msg => msg._id);
       
       if (unreadMessageIds.length > 0) {
@@ -332,9 +575,11 @@ function Chat() {
       }
       
       // Mark unread messages as read
-      const unreadMsgs = conversationMsgs.filter(msg => 
-        !msg.isRead && msg.recipient._id === user._id
-      );
+      const unreadMsgs = conversationMsgs.filter(msg => {
+        const isForCurrentUser = msg.recipient._id === currentUserId || 
+                                  (currentUserEmail && msg.recipient.email === currentUserEmail);
+        return !msg.isRead && isForCurrentUser;
+      });
       
       for (const msg of unreadMsgs) {
         try {
@@ -437,6 +682,18 @@ function Chat() {
           .toLowerCase()
           .includes(searchQuery.toLowerCase())
       );
+  
+  // Debug: Check for duplicates
+  const conversationIds = filteredConversations.map(c => c._id);
+  const uniqueIds = [...new Set(conversationIds)];
+  if (conversationIds.length !== uniqueIds.length) {
+    console.error('⚠️ Duplicate conversations detected!', {
+      total: conversationIds.length,
+      unique: uniqueIds.length,
+      duplicates: conversationIds.filter((id, index) => conversationIds.indexOf(id) !== index)
+    });
+  }
+
   // Start new conversation with searched user
   const handleStartConversation = (userObj) => {
     // Check if conversation already exists
@@ -453,6 +710,10 @@ function Chat() {
       });
       setMessages([]);
     }
+  };
+
+  const handleViewProfile = (userId) => {
+    navigate(`/profile/${userId}`);
   };
 
   const formatTime = (date) => {
@@ -505,109 +766,143 @@ function Chat() {
                 placeholder="Search users or conversations..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setSearchFocused(true)}
+                onBlur={() => setTimeout(() => setSearchFocused(false), 200)}
               />
             </div>
           </div>
 
-          {/* Show search status */}
-          {searchQuery.trim().length > 0 && (
+          {/* Show search/recommended when focused or typing */}
+          {(searchQuery.trim().length > 0 || searchFocused) && (
             <div className="search-results-list">
-              <div className="search-results-header">
-                {searching ? 'Searching...' : `Users ${searchResults.length > 0 ? `(${searchResults.length})` : ''}`}
-              </div>
+              {searchQuery.trim().length > 0 && (
+                <div className="search-results-header">
+                  {searching ? 'Searching...' : `Search Results ${searchResults.length > 0 ? `(${searchResults.length})` : ''}`}
+                </div>
+              )}
               {searching ? (
                 <div className="search-loading">
                   <div className="spinner-sm"></div>
                   <span>Searching users...</span>
                 </div>
-              ) : searchResults.length > 0 ? (
-                searchResults.map(userObj => (
-                  <div
-                    key={userObj._id}
-                    className="conversation-item"
-                    onClick={() => handleStartConversation(userObj)}
-                  >
-                    <div className="conv-avatar">
-                      {userObj.profilePicture ? (
-                        <img 
-                          src={getProfilePictureUrl(userObj)} 
-                          alt={userObj.firstName}
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.style.display = 'none';
-                            e.target.nextSibling.style.display = 'flex';
-                          }}
-                        />
-                      ) : null}
-                      <div 
-                        className="avatar-placeholder" 
-                        style={{ display: userObj.profilePicture ? 'none' : 'flex' }}
-                      >
-                        {userObj.firstName?.[0]}{userObj.lastName?.[0]}
-                      </div>
-                      <span className="online-indicator"></span>
-                    </div>
-                    <div className="conv-info">
-                      <div className="conv-header">
-                        <h3>{userObj.firstName} {userObj.lastName}</h3>
-                        <span className="user-type">{userObj.userType}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))
               ) : (
-                <div className="search-no-results">
-                  <span>No users found</span>
-                </div>
+                <>
+                  {/* Only show search results section if there's a search query */}
+                  {searchQuery.trim().length > 0 && (
+                    <>
+                      {searchResults.length > 0 ? (
+                        <>
+                          <div className="results-section-label">Users Found</div>
+                          {searchResults.map(userObj => (
+                            <div
+                              key={userObj._id}
+                              className="conversation-item"
+                              onClick={() => handleStartConversation(userObj)}
+                            >
+                              <div className="conv-avatar">
+                                {userObj.profilePicture ? (
+                                  <img 
+                                    src={getProfilePictureUrl(userObj)} 
+                                    alt={userObj.firstName}
+                                    onError={(e) => {
+                                      e.target.onerror = null;
+                                      e.target.style.display = 'none';
+                                      e.target.nextSibling.style.display = 'flex';
+                                    }}
+                                  />
+                                ) : null}
+                                <div 
+                                  className="avatar-placeholder" 
+                                  style={{ display: userObj.profilePicture ? 'none' : 'flex' }}
+                                >
+                                  {userObj.firstName?.[0]}{userObj.lastName?.[0]}
+                                </div>
+                                <span className="online-indicator"></span>
+                              </div>
+                              <div className="conv-info">
+                                <div className="conv-header">
+                                  <h3>{userObj.firstName} {userObj.lastName}</h3>
+                                  <span className="user-type">{userObj.userType}</span>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </>
+                      ) : (
+                        <div className="search-no-results">
+                          <span>No users found matching "{searchQuery}"</span>
+                        </div>
+                      )}
+                    </>
+                  )}
+                  
+                  {/* Show recommended users when focused or searching */}
+                  {loadingRecommended ? (
+                    <>
+                      <div className="results-section-label">
+                        💡 Recommended People
+                      </div>
+                      <div className="search-loading">
+                        <div className="spinner-sm"></div>
+                        <span>Loading recommendations...</span>
+                      </div>
+                    </>
+                  ) : recommendedUsers.length > 0 ? (
+                    <>
+                      <div className="results-section-label">
+                        💡 Recommended People
+                      </div>
+                      <div className="recommended-horizontal-list">
+                        {recommendedUsers.map(userObj => (
+                          <div
+                            key={userObj._id}
+                            className="recommended-user-card"
+                            onClick={() => handleStartConversation(userObj)}
+                            title={`Start chat with ${userObj.firstName} ${userObj.lastName}`}
+                          >
+                            <div className="recommended-user-avatar">
+                              {userObj.profilePicture ? (
+                                <img 
+                                  src={getProfilePictureUrl(userObj)} 
+                                  alt={userObj.firstName}
+                                  onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.style.display = 'none';
+                                    e.target.nextSibling.style.display = 'flex';
+                                  }}
+                                />
+                              ) : null}
+                              <div 
+                                className="avatar-placeholder" 
+                                style={{ display: userObj.profilePicture ? 'none' : 'flex' }}
+                              >
+                                {userObj.firstName?.[0]}{userObj.lastName?.[0]}
+                              </div>
+                            </div>
+                            <div className="recommended-user-name">
+                              {userObj.firstName}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  ) : searchFocused && !searchQuery.trim() ? (
+                    <>
+                      <div className="results-section-label">
+                        💡 Recommended People
+                      </div>
+                      <div className="search-no-results">
+                        <span>No recommendations available</span>
+                      </div>
+                    </>
+                  ) : null}
+                </>
               )}
             </div>
           )}
 
           <div className="conversations-list">
-            {/* Recommended Users Section - Show when not searching */}
-            {!searchQuery.trim() && recommendedUsers.length > 0 && (
-              <div className="recommended-section">
-                <div className="recommended-header">
-                  <span className="recommended-icon">💡</span>
-                  <span className="recommended-title">People you may know</span>
-                </div>
-                <div className="recommended-list">
-                  {recommendedUsers.map(userObj => (
-                    <div
-                      key={userObj._id}
-                      className="recommended-user"
-                      onClick={() => handleStartConversation(userObj)}
-                      title={`Start chat with ${userObj.firstName} ${userObj.lastName}`}
-                    >
-                      <div className="recommended-avatar">
-                        {userObj.profilePicture ? (
-                          <img 
-                            src={getProfilePictureUrl(userObj)} 
-                            alt={userObj.firstName}
-                            onError={(e) => {
-                              e.target.onerror = null;
-                              e.target.style.display = 'none';
-                              e.target.nextSibling.style.display = 'flex';
-                            }}
-                          />
-                        ) : null}
-                        <div 
-                          className="avatar-placeholder" 
-                          style={{ display: userObj.profilePicture ? 'none' : 'flex' }}
-                        >
-                          {userObj.firstName?.[0]}{userObj.lastName?.[0]}
-                        </div>
-                      </div>
-                      <div className="recommended-name">
-                        {userObj.firstName}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {filteredConversations.length === 0 && !searchQuery.trim() ? (
+            {filteredConversations.length === 0 && !searchQuery.trim() && !searchFocused ? (
               <div className="empty-state">
                 <p>No conversations yet</p>
                 <span>Start chatting with employees or employers!</span>
@@ -676,7 +971,11 @@ function Chat() {
                 <button className="back-button" onClick={() => setSelectedConversation(null)}>
                   ← Back
                 </button>
-                <div className="chat-user-info">
+                <div 
+                  className="chat-user-info clickable" 
+                  onClick={() => handleViewProfile(selectedConversation.user._id)}
+                  title="View profile"
+                >
                   <div className="chat-avatar">
                     {selectedConversation.user.profilePicture ? (
                       <img 
@@ -899,6 +1198,8 @@ const chatStyles = `
     border-bottom: 1px solid #e2e8f0;
     background: #f3f4f6;
     padding: 0.5rem 0;
+    max-height: 500px;
+    overflow-y: auto;
   }
   .search-results-header {
     font-size: 0.95rem;
@@ -927,6 +1228,119 @@ const chatStyles = `
     color: #94a3b8;
     font-size: 0.9rem;
   }
+  
+  .results-section-label {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #64748b;
+    background: #f1f5f9;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-top: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  
+  .recommended-item {
+    background: linear-gradient(90deg, #fefce8 0%, #ffffff 100%);
+    border-left: 3px solid #eab308;
+  }
+  
+  .recommended-item:hover {
+    background: linear-gradient(90deg, #fef3c7 0%, #fefce8 100%);
+  }
+
+  .recommended-horizontal-list {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+  }
+
+  .recommended-horizontal-list::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .recommended-horizontal-list::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+  }
+
+  .recommended-horizontal-list::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+  }
+
+  .recommended-horizontal-list::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+
+  .recommended-user-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    min-width: 80px;
+    cursor: pointer;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    background: white;
+  }
+
+  .recommended-user-card:hover {
+    background: #f8fafc;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .recommended-user-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+    border: 3px solid #e2e8f0;
+    transition: border-color 0.2s ease;
+  }
+
+  .recommended-user-card:hover .recommended-user-avatar {
+    border-color: #9333ea;
+  }
+
+  .recommended-user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .recommended-user-avatar .avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+  }
+
+  .recommended-user-name {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #475569;
+    text-align: center;
+    white-space: normal;
+    word-break: break-word;
+    max-width: 80px;
+    line-height: 1.2;
+  }
+  
   .chat-container {
     max-width: 1400px;
     margin: 0 auto;
@@ -1285,6 +1699,18 @@ const chatStyles = `
     display: flex;
     align-items: center;
     gap: 1rem;
+  }
+
+  .chat-user-info.clickable {
+    cursor: pointer;
+    padding: 0.5rem;
+    margin: -0.5rem;
+    border-radius: 8px;
+    transition: background 0.2s;
+  }
+
+  .chat-user-info.clickable:hover {
+    background: #f1f5f9;
   }
 
   .chat-avatar img,

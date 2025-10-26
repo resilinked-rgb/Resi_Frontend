@@ -419,8 +419,9 @@ function SearchJobs() {
                       </button>
                       {isLoggedIn && job.postedBy?.email && (
                         <Link
-                          to="/messages"
+                          to="/chat"
                           state={{
+                            recipientId: job.postedBy._id,
                             recipientEmail: job.postedBy.email,
                             recipientName: `${job.postedBy.firstName} ${job.postedBy.lastName}`,
                             subject: `Regarding: ${job.title}`

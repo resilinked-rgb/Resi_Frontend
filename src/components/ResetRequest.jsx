@@ -1,15 +1,15 @@
-import { useState, useEffect, useContext } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { AlertContext } from '../context/AlertContext'
+import { useAlert } from '../context/AlertContext'
 
 function ResetRequest() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
-  const [showSuccess, setShowSuccess] = useState(false)
+  const [showSuccessView, setShowSuccessView] = useState(false)
   const [emailError, setEmailError] = useState('')
   const [touched, setTouched] = useState(false)
   const [searchParams] = useSearchParams()
-  const { showAlert } = useContext(AlertContext)
+  const { success, error: showError } = useAlert()
 
   useEffect(() => {
     // Pre-fill email if coming from login page
@@ -59,19 +59,19 @@ function ResetRequest() {
     const trimmedEmail = email.trim()
     
     if (!trimmedEmail) {
-      showAlert('warning', 'Please enter your email address')
+      showError('Please enter your email address')
       return
     }
 
     if (!validateEmail(trimmedEmail)) {
-      showAlert('error', 'Please enter a valid email format')
+      showError('Please enter a valid email format')
       return
     }
 
     setLoading(true)
 
     try {
-  const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/reset/request`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/reset/request`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json'
@@ -82,8 +82,8 @@ function ResetRequest() {
       const data = await response.json()
 
       if (response.ok) {
-        setShowSuccess(true)
-        showAlert('success', 'Reset link successfully sent to your email!')
+        setShowSuccessView(true)
+        success('Reset link successfully sent to your email!')
       } else {
         throw new Error(data.message || 'Failed to send reset email')
       }
@@ -98,14 +98,14 @@ function ResetRequest() {
         errorMessage = 'Email address not found in our records.'
       }
       
-      showAlert('error', errorMessage)
+      showError(errorMessage)
     } finally {
       setLoading(false)
     }
   }
 
   const handleTryAgain = () => {
-    setShowSuccess(false)
+    setShowSuccessView(false)
   }
 
   const handleKeyDown = (e) => {
@@ -119,28 +119,26 @@ function ResetRequest() {
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [])
 
-  if (showSuccess) {
+  if (showSuccessView) {
     return (
       <div className="reset-request-container fade-in">
-        <div className="reset-card">
-          <div className="success-content">
-            <div className="success-message">
-              <h2>Reset Link Sent</h2>
-              <p>Please check your email for the password reset link.</p>
-              <p className="note">If you don't see the email, check your spam folder.</p>
+        <div className="reset-card success-card">
+          <div className="logo-container">
+            <img src="/logo.png" alt="ResiLinked Logo" className="logo-image" />
+          </div>
+
+          <div className="verification-success">
+            <div className="verification-icon-success">✓</div>
+            <h2>Email Sent Successfully!</h2>
+            <p>Check your email for the password reset link. Click the link to reset your password, then come back here to login.</p>
+            <div className="redirect-animation">
+              <div className="dot"></div>
+              <div className="dot"></div>
+              <div className="dot"></div>
             </div>
-            <div className="action-buttons">
-              <button 
-                type="button" 
-                className="btn btn-secondary"
-                onClick={handleTryAgain}
-              >
-                Try Again
-              </button>
-              <Link to="/login" className="btn btn-primary">
-                Back to Login
-              </Link>
-            </div>
+            <Link to="/login" className="verification-button">
+              Go to Login
+            </Link>
           </div>
         </div>
       </div>
@@ -150,8 +148,11 @@ function ResetRequest() {
   return (
     <div className="reset-request-container fade-in">
       <div className="reset-card">
+        <div className="logo-container">
+          <img src="/logo.png" alt="ResiLinked Logo" className="logo-image" />
+        </div>
+        
         <div className="card-header">
-          <img src="/logo.png" alt="ResiLinked Logo" className="reset-logo" />
           <h1>Reset Your Password</h1>
           <p>Enter your email address and we'll send you a link to reset your password.</p>
         </div>
@@ -234,16 +235,188 @@ function ResetRequest() {
             0 32px 64px rgba(147, 51, 234, 0.2),
             0 0 0 1px rgba(255, 255, 255, 0.1),
             inset 0 1px 0 rgba(255, 255, 255, 0.2);
-          padding: 3rem 2.5rem;
+          padding: 60px 40px;
           width: 100%;
-          max-width: 480px;
+          max-width: 900px;
           position: relative;
           border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .success-card-large {
+          max-width: 900px;
+          padding: 60px 40px;
+        }
+
+        .logo-container {
+          width: 100px;
+          height: 100px;
+          margin: 0 auto 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .logo-image {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          border-radius: 20px;
+          box-shadow: 0 8px 32px rgba(147, 51, 234, 0.3);
+        }
+
+        .success-main-title {
+          font-size: 42px;
+          font-weight: bold;
+          color: #1a202c;
+          margin: 0 0 40px 0;
+          text-align: center;
+        }
+
+        .progress-bar-container {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          position: relative;
+          margin: 60px 0;
+          padding: 0 20px;
+        }
+
+        .progress-line-bg {
+          position: absolute;
+          top: 30px;
+          left: 15%;
+          right: 15%;
+          height: 4px;
+          background: #e5e7eb;
+          z-index: 0;
+          border-radius: 2px;
+          overflow: hidden;
+        }
+
+        .progress-line-fill {
+          position: absolute;
+          top: 0;
+          left: 0;
+          height: 100%;
+          background: linear-gradient(90deg, #9333ea 0%, #7c3aed 100%);
+          transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+          border-radius: 2px;
+        }
+
+        .progress-step-item {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          position: relative;
+          z-index: 1;
+          transition: all 0.5s ease;
+        }
+
+        .progress-circle {
+          width: 60px;
+          height: 60px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 4px solid white;
+          transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-circle.completed {
+          background: linear-gradient(135deg, #9333ea, #7c3aed);
+          border-color: #9333ea;
+        }
+
+        .progress-circle.current {
+          background: white;
+          border-color: #9333ea;
+        }
+
+        .progress-circle.pending {
+          background: #f1f5f9;
+          border-color: #e2e8f0;
+        }
+
+        .progress-icon {
+          width: 28px;
+          height: 28px;
+          color: white;
+        }
+
+        .progress-circle.current .progress-icon {
+          color: #9333ea;
+        }
+
+        .progress-circle.pending .progress-icon {
+          color: #94a3b8;
+        }
+
+        .progress-labels {
+          margin-top: 15px;
+          text-align: center;
+          transition: all 0.3s ease;
+        }
+
+        .progress-label {
+          font-size: 16px;
+          font-weight: 700;
+          color: #9ca3af;
+          margin-bottom: 4px;
+          transition: color 0.3s ease;
+        }
+
+        .progress-label.active {
+          color: #1a202c;
+        }
+
+        .progress-description {
+          font-size: 13px;
+          color: #d1d5db;
+          font-weight: 500;
+          transition: color 0.3s ease;
+        }
+
+        .progress-description.active {
+          color: #6b7280;
+        }
+
+        .message-box {
+          background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+          border: 2px solid #9333ea;
+          border-radius: 16px;
+          padding: 24px;
+          margin-bottom: 30px;
+          transition: all 0.3s ease;
+        }
+
+        .message-text {
+          font-size: 16px;
+          color: #581c87;
+          line-height: 1.6;
+          margin: 0;
+        }
+
+        .pulse-animation {
+          animation: pulse-animation 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-animation {
+          0%, 100% {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(147, 51, 234, 0.4);
+          }
+          50% {
+            transform: scale(1.15);
+            box-shadow: 0 12px 30px rgba(147, 51, 234, 0.6);
+          }
         }
         
         .card-header {
           text-align: center;
-          margin-bottom: 3rem;
+          margin-bottom: 2rem;
         }
 
         .reset-logo {
@@ -505,6 +678,73 @@ function ResetRequest() {
           text-decoration: none;
         }
         
+        /* Success state styles */
+        .success-card {
+          max-width: 500px;
+          text-align: center;
+        }
+
+        .verification-success {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .verification-icon-success {
+          width: 80px;
+          height: 80px;
+          border-radius: 50%;
+          background-color: #ecfdf5;
+          color: #059669;
+          border: 2px solid #10b981;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 40px;
+          font-weight: bold;
+          margin-bottom: 1.5rem;
+          animation: bounceIn 0.6s ease;
+        }
+
+        @keyframes bounceIn {
+          0% {
+            opacity: 0;
+            transform: scale(0.3);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.05);
+          }
+          70% {
+            transform: scale(0.9);
+          }
+          100% {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+
+        .verification-success h2 {
+          margin-bottom: 1rem;
+          font-size: 1.875rem;
+          font-weight: 700;
+          color: #1e293b;
+        }
+
+        .verification-success p {
+          margin-bottom: 0.75rem;
+          color: #64748b;
+          line-height: 1.6;
+          font-size: 1.125rem;
+        }
+
+        .verification-success .note {
+          font-size: 0.95rem;
+          font-style: italic;
+          color: #94a3b8;
+          margin-bottom: 2rem;
+        }
+        
         .success-content {
           text-align: center;
         }
@@ -592,6 +832,13 @@ function ResetRequest() {
           box-shadow: 0 10px 28px rgba(147, 51, 234, 0.35);
           text-decoration: none;
         }
+
+        .btn-large {
+          padding: 1.25rem 3rem;
+          font-size: 1.125rem;
+          font-weight: 700;
+          min-width: 250px;
+        }
         
         .btn-secondary {
           background: rgba(147, 51, 234, 0.1);
@@ -626,6 +873,60 @@ function ResetRequest() {
             padding: 2rem 1.5rem;
             border-radius: 20px;
             margin: 0.5rem;
+          }
+
+          .success-card-large {
+            padding: 40px 30px;
+          }
+
+          .logo-container {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 15px;
+          }
+
+          .success-main-title {
+            font-size: 32px;
+            margin-bottom: 30px;
+          }
+
+          .progress-bar-container {
+            margin: 40px 0;
+            padding: 0 10px;
+          }
+
+          .progress-circle {
+            width: 50px;
+            height: 50px;
+            border: 3px solid white;
+          }
+
+          .progress-icon {
+            width: 24px;
+            height: 24px;
+          }
+
+          .progress-line-bg {
+            top: 25px;
+            left: 12%;
+            right: 12%;
+          }
+
+          .progress-label {
+            font-size: 14px;
+          }
+
+          .progress-description {
+            font-size: 11px;
+          }
+
+          .message-box {
+            padding: 20px;
+            margin-bottom: 25px;
+          }
+
+          .message-text {
+            font-size: 14px;
           }
           
           .card-header h1 {
@@ -672,6 +973,71 @@ function ResetRequest() {
           .reset-card {
             padding: 1.5rem 1rem;
             margin: 0.25rem;
+          }
+
+          .success-card-large {
+            padding: 30px 20px;
+            border-radius: 20px;
+          }
+
+          .logo-container {
+            width: 70px;
+            height: 70px;
+          }
+
+          .success-main-title {
+            font-size: 24px;
+            margin-bottom: 25px;
+          }
+
+          .progress-bar-container {
+            margin: 30px 0;
+            padding: 0 5px;
+            flex-wrap: wrap;
+            gap: 20px;
+          }
+
+          .progress-step-item {
+            flex: 0 0 calc(50% - 10px);
+            min-width: 120px;
+          }
+
+          .progress-line-bg {
+            display: none;
+          }
+
+          .progress-circle {
+            width: 45px;
+            height: 45px;
+          }
+
+          .progress-icon {
+            width: 20px;
+            height: 20px;
+          }
+
+          .progress-labels {
+            margin-top: 10px;
+          }
+
+          .progress-label {
+            font-size: 12px;
+            margin-bottom: 2px;
+          }
+
+          .progress-description {
+            font-size: 10px;
+          }
+
+          .message-box {
+            padding: 16px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+          }
+
+          .message-text {
+            font-size: 13px;
+            line-height: 1.5;
           }
 
           .card-header {

@@ -528,16 +528,13 @@ function SearchWorkers() {
                     </div>
                     
                     <div className="worker-actions">
-                      <button 
+                      <Link 
+                        to={`/profile/${worker._id}`}
                         className="view-profile-btn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          viewProfile(worker._id);
-                        }}
-                        type="button"
+                        onClick={(e) => e.stopPropagation()}
                       >
                         View Profile
-                      </button>
+                      </Link>
                       <button 
                         className="contact-btn"
                         onClick={(e) => {
@@ -800,8 +797,9 @@ function SearchWorkers() {
               
               <div className="contact-actions">
                 <Link
-                  to="/messages"
+                  to="/chat"
                   state={{
+                    recipientId: currentWorker._id,
                     recipientEmail: currentWorker.email,
                     recipientName: `${currentWorker.firstName} ${currentWorker.lastName}`,
                     subject: `Job Opportunity Inquiry`
@@ -1309,9 +1307,13 @@ function SearchWorkers() {
         .view-profile-btn, .contact-btn, .invite-btn {
           color: white;
           border: none;
-          padding: 0.5rem 0.3rem;
+          padding: 0;
+          margin: 0;
           border-radius: 6px;
           font-size: 0.8rem;
+          font-weight: 400;
+          font-family: inherit;
+          line-height: 32px; /* Match height for vertical centering */
           cursor: pointer;
           transition: all 0.2s ease;
           position: relative;
@@ -1320,10 +1322,14 @@ function SearchWorkers() {
           text-align: center;
           width: 31%;
           height: 32px; /* Fixed height for all buttons */
-          display: flex;
+          min-height: 32px;
+          max-height: 32px;
+          display: inline-flex;
           align-items: center;
           justify-content: center;
           box-sizing: border-box;
+          text-decoration: none; /* For Link elements */
+          vertical-align: middle;
         }
         
         /* Individual button colors */

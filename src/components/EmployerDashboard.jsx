@@ -152,6 +152,10 @@ function EmployerDashboard() {
     try {
       // Use apiService instead of direct fetch
       const apps = await apiService.getMyApplicationsReceived();
+      console.log('📋 Loaded applications:', apps);
+      if (apps.length > 0 && apps[0].applicants?.length > 0) {
+        console.log('👤 Sample applicant structure:', apps[0].applicants[0]);
+      }
       setApplications(apps);
     } catch (error) {
       console.error('Error loading applications:', error);
@@ -384,6 +388,16 @@ function EmployerDashboard() {
       return;
     }
 
+    // Check if job is already completed
+    if (jobToComplete.status === 'completed' || jobToComplete.completed) {
+      showError('This job has already been completed');
+      setShowCompleteModal(false);
+      setJobToComplete(null);
+      setRating(0);
+      setRatingComment('');
+      return;
+    }
+
     try {
       // First complete the job
       const result = await apiService.completeJob(jobToComplete._id);
@@ -403,8 +417,8 @@ function EmployerDashboard() {
       setRatingComment('');
       
       // Refresh the jobs list and dashboard stats
-      loadMyJobs();
-      loadDashboardStats();
+      await loadMyJobs();
+      await loadDashboardStats();
     } catch (error) {
       console.error('Error completing job:', error);
       showError(error.message || 'Failed to complete job');
@@ -682,64 +696,136 @@ function EmployerDashboard() {
           <>
             {/* My Jobs Tab */}
             {currentTab === 'my-jobs' && (
-              <div className="jobs-grid">
+              <div className="jobs-container">
                 {myJobs.length > 0 ? (
-                  myJobs.map(job => (
-                    <div key={job._id} className="job-card">
-                      <div className="job-header">
-                        <h3>{job.title}</h3>
-                        <div className="job-price">{formatPrice(job.price)}</div>
-                      </div>
-                      
-                        <div className="job-meta">
-                          <div className="meta-item">
-                            <span className="icon">📍</span>
-                            {job.barangay}
-                          </div>
-                          <div className="meta-item">
-                            <span className="icon">👥</span>
-                            {job.applicants ? job.applicants.length : 0} applicants
-                          </div>
-                          <div className="meta-item">
-                            <span className={`status ${job.isOpen !== false ? 'active' : (job.completed ? 'completed' : 'closed')}`}>
-                              {job.completed ? 'Completed' : (job.isOpen !== false ? 'Active' : 'Closed')}
-                            </span>
-                          </div>
-                          {job.assignedTo && (
-                            <div className="meta-item">
-                              <span className="icon">👤</span>
-                              Assigned to: {job.assignedTo.firstName} {job.assignedTo.lastName}
+                  <>
+                    {/* Active Jobs Section */}
+                    <div className="jobs-section">
+                      <h2 className="section-title">Active Jobs</h2>
+                      <div className="jobs-grid">
+                        {myJobs.filter(job => job.status !== 'completed' && !job.completed).length > 0 ? (
+                          myJobs.filter(job => job.status !== 'completed' && !job.completed).map(job => (
+                            <div key={job._id} className="job-card">
+                              <div className="job-header">
+                                <h3>{job.title}</h3>
+                                <div className="job-price">{formatPrice(job.price)}</div>
+                              </div>
+                              
+                              <div className="job-meta">
+                                <div className="meta-item">
+                                  <span className="icon">📍</span>
+                                  {job.barangay}
+                                </div>
+                                <div className="meta-item">
+                                  <span className="icon">👥</span>
+                                  {job.applicants ? job.applicants.length : 0} applicants
+                                </div>
+                                <div className="meta-item">
+                                  <span className={`status ${job.isOpen !== false ? 'active' : 'closed'}`}>
+                                    {job.isOpen !== false ? 'Active' : 'Closed'}
+                                  </span>
+                                </div>
+                                {job.assignedTo && (
+                                  <div className="meta-item">
+                                    <span className="icon">👤</span>
+                                    Assigned to: {job.assignedTo.firstName} {job.assignedTo.lastName}
+                                  </div>
+                                )}
+                              </div>
+                              
+                              <p className="job-description">
+                                {job.description?.substring(0, 100)}
+                                {job.description?.length > 100 ? '...' : ''}
+                              </p>
+                              
+                              <div className="job-actions">
+                                <button 
+                                  className="btn secondary"
+                                  onClick={() => editJob(job)}
+                                >
+                                  Edit
+                                </button>
+                                {job.assignedTo && job.status !== 'completed' && !job.completed && (
+                                  <button 
+                                    className="btn success"
+                                    onClick={() => openCompleteModal(job)}
+                                  >
+                                    Mark Completed
+                                  </button>
+                                )}
+                                <button 
+                                  className="btn danger"
+                                  onClick={() => openDeleteModal(job)}
+                                >
+                                  Delete
+                                </button>
+                              </div>
                             </div>
-                          )}
-                        </div>                      <p className="job-description">
-                        {job.description?.substring(0, 100)}
-                        {job.description?.length > 100 ? '...' : ''}
-                      </p>
-                      
-                      <div className="job-actions">
-                        <button 
-                          className="btn secondary"
-                          onClick={() => editJob(job)}
-                        >
-                          Edit
-                        </button>
-                        {job.assignedTo && !job.completed && (
-                          <button 
-                            className="btn success"
-                            onClick={() => openCompleteModal(job)}
-                          >
-                            Mark Completed
-                          </button>
+                          ))
+                        ) : (
+                          <div className="no-data">
+                            <p>No active jobs</p>
+                          </div>
                         )}
-                        <button 
-                          className="btn danger"
-                          onClick={() => openDeleteModal(job)}
-                        >
-                          Delete
-                        </button>
                       </div>
                     </div>
-                  ))
+
+                    {/* Completed Jobs Section */}
+                    <div className="jobs-section">
+                      <h2 className="section-title">Completed Jobs</h2>
+                      <div className="jobs-grid">
+                        {myJobs.filter(job => job.status === 'completed' || job.completed).length > 0 ? (
+                          myJobs.filter(job => job.status === 'completed' || job.completed).map(job => (
+                            <div key={job._id} className="job-card completed">
+                              <div className="job-header">
+                                <h3>{job.title}</h3>
+                                <div className="job-price">{formatPrice(job.price)}</div>
+                              </div>
+                              
+                              <div className="job-meta">
+                                <div className="meta-item">
+                                  <span className="icon">📍</span>
+                                  {job.barangay}
+                                </div>
+                                <div className="meta-item">
+                                  <span className="status completed">Completed</span>
+                                </div>
+                                {job.assignedTo && (
+                                  <div className="meta-item">
+                                    <span className="icon">👤</span>
+                                    <Link 
+                                      to={`/profile/${job.assignedTo._id}`}
+                                      className="employee-link"
+                                    >
+                                      {job.assignedTo.firstName} {job.assignedTo.lastName}
+                                    </Link>
+                                  </div>
+                                )}
+                              </div>
+                              
+                              <p className="job-description">
+                                {job.description?.substring(0, 100)}
+                                {job.description?.length > 100 ? '...' : ''}
+                              </p>
+                              
+                              <div className="job-actions">
+                                <button 
+                                  className="btn danger"
+                                  onClick={() => openDeleteModal(job)}
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="no-data">
+                            <p>No completed jobs yet</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </>
                 ) : (
                   <div className="no-data">
                     <p>You haven't posted any jobs yet</p>
@@ -771,13 +857,15 @@ function EmployerDashboard() {
                                 <>
                                   <button 
                                     className="btn primary"
-                                    onClick={() => handleApplication(app._id, 'accept', job._id, app.user?._id)}
+                                    onClick={() => handleApplication(app._id, 'accept', job._id, app.user?._id || app.userId)}
+                                    disabled={!app.user?._id && !app.userId}
                                   >
                                     Accept
                                   </button>
                                   <button 
                                     className="btn danger"
-                                    onClick={() => handleApplication(app._id, 'reject', job._id, app.user?._id)}
+                                    onClick={() => handleApplication(app._id, 'reject', job._id, app.user?._id || app.userId)}
+                                    disabled={!app.user?._id && !app.userId}
                                   >
                                     Reject
                                   </button>
@@ -841,13 +929,13 @@ function EmployerDashboard() {
                         >
                           Contact
                         </button>
-                        <button 
+                        <Link 
+                          to={`/profile/${worker._id}`}
                           className="btn secondary" 
-                          onClick={() => viewWorkerProfile(worker)}
                           aria-label={`View ${worker.firstName}'s profile`}
                         >
                           View Profile
-                        </button>
+                        </Link>
                         <button 
                           className="btn accent" 
                           onClick={() => openInviteModal(worker)}
@@ -1348,6 +1436,45 @@ function EmployerDashboard() {
           gap: 1.5rem;
         }
 
+        .jobs-container {
+          display: flex;
+          flex-direction: column;
+          gap: 3rem;
+        }
+
+        .jobs-section {
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+        }
+
+        .section-title {
+          color: #2d3748;
+          font-size: 1.5rem;
+          font-weight: 600;
+          margin: 0;
+          padding-bottom: 0.5rem;
+          border-bottom: 3px solid #9333ea;
+          display: inline-block;
+        }
+
+        .job-card.completed {
+          background: #f8f9fa;
+          border-color: #d1ecf1;
+        }
+
+        .employee-link {
+          color: #9333ea;
+          text-decoration: none;
+          font-weight: 500;
+          transition: color 0.2s;
+        }
+
+        .employee-link:hover {
+          color: #7c3aed;
+          text-decoration: underline;
+        }
+
         .applications-grid {
           display: flex;
           flex-direction: column;
@@ -1385,6 +1512,10 @@ function EmployerDashboard() {
         .worker-card-avatar {
           width: 60px;
           height: 60px;
+          min-width: 60px;
+          min-height: 60px;
+          max-width: 60px;
+          max-height: 60px;
           border-radius: 50%;
           overflow: hidden;
           flex-shrink: 0;
@@ -1397,7 +1528,10 @@ function EmployerDashboard() {
         .worker-card-avatar img {
           width: 100%;
           height: 100%;
+          max-width: 60px;
+          max-height: 60px;
           object-fit: cover;
+          object-position: center;
         }
 
         .worker-card-avatar .avatar-placeholder {
@@ -1749,6 +1883,10 @@ function EmployerDashboard() {
         .worker-profile-avatar {
           width: 80px;
           height: 80px;
+          min-width: 80px;
+          min-height: 80px;
+          max-width: 80px;
+          max-height: 80px;
           border-radius: 50%;
           background: linear-gradient(135deg, #4c1d95, #6d28d9);
           color: white;
@@ -1757,6 +1895,17 @@ function EmployerDashboard() {
           justify-content: center;
           font-size: 2rem;
           font-weight: bold;
+          overflow: hidden;
+          flex-shrink: 0;
+        }
+
+        .worker-profile-avatar img {
+          width: 100%;
+          height: 100%;
+          max-width: 80px;
+          max-height: 80px;
+          object-fit: cover;
+          object-position: center;
         }
 
         .worker-profile-info h3 {
@@ -2053,6 +2202,10 @@ function EmployerDashboard() {
         .contact-avatar {
           width: 70px;
           height: 70px;
+          min-width: 70px;
+          min-height: 70px;
+          max-width: 70px;
+          max-height: 70px;
           border-radius: 50%;
           background: linear-gradient(135deg, #4c1d95, #6d28d9);
           color: white;
@@ -2063,6 +2216,17 @@ function EmployerDashboard() {
           font-weight: bold;
           border: 3px solid white;
           box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+          overflow: hidden;
+          flex-shrink: 0;
+        }
+        
+        .contact-avatar img {
+          width: 100%;
+          height: 100%;
+          max-width: 70px;
+          max-height: 70px;
+          object-fit: cover;
+          object-position: center;
         }
         
         .contact-details {
@@ -2197,6 +2361,54 @@ function EmployerDashboard() {
           margin: 0 0 1rem 0;
           font-size: 0.9rem;
           color: #64748b;
+        }
+        
+        .direct-message-link {
+          margin: 1rem 0;
+        }
+        
+        .chat-link-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.75rem 1.5rem;
+          background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%);
+          color: white;
+          text-decoration: none;
+          border-radius: 8px;
+          font-weight: 600;
+          font-size: 0.95rem;
+          transition: all 0.2s;
+          box-shadow: 0 2px 8px rgba(147, 51, 234, 0.3);
+        }
+        
+        .chat-link-btn:hover {
+          background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+          box-shadow: 0 4px 12px rgba(147, 51, 234, 0.4);
+          transform: translateY(-1px);
+        }
+        
+        .divider-text {
+          display: flex;
+          align-items: center;
+          text-align: center;
+          margin: 1.5rem 0 1rem 0;
+        }
+        
+        .divider-text::before,
+        .divider-text::after {
+          content: '';
+          flex: 1;
+          border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .divider-text span {
+          padding: 0 1rem;
+          color: #94a3b8;
+          font-size: 0.85rem;
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
         }
         
         .message-form {
@@ -2464,6 +2676,10 @@ function EmployerDashboard() {
         .worker-avatar {
           width: 60px;
           height: 60px;
+          min-width: 60px;
+          min-height: 60px;
+          max-width: 60px;
+          max-height: 60px;
           border-radius: 50%;
           background: linear-gradient(135deg, #4c1d95, #6d28d9);
           color: white;
@@ -2474,6 +2690,16 @@ function EmployerDashboard() {
           font-weight: bold;
           margin-right: 1rem;
           flex-shrink: 0;
+          overflow: hidden;
+        }
+        
+        .worker-avatar img {
+          width: 100%;
+          height: 100%;
+          max-width: 60px;
+          max-height: 60px;
+          object-fit: cover;
+          object-position: center;
         }
         
         .worker-details {
@@ -2892,6 +3118,21 @@ function EmployerDashboard() {
               <div className="message-section">
                 <h4>Send a Message</h4>
                 <p className="message-info">Send a direct message to {currentWorker.firstName} through the platform</p>
+                
+                <div className="direct-message-link">
+                  <Link 
+                    to="/chat" 
+                    state={{ recipientId: currentWorker._id, recipientName: `${currentWorker.firstName} ${currentWorker.lastName}` }}
+                    className="chat-link-btn"
+                    onClick={() => setShowContactModal(false)}
+                  >
+                    💬 Open Chat with {currentWorker.firstName}
+                  </Link>
+                </div>
+                
+                <div className="divider-text">
+                  <span>or send via form below</span>
+                </div>
                 
                 <div className="message-form">
                   <textarea 

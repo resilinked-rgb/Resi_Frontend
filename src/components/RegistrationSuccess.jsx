@@ -99,7 +99,7 @@ const RegistrationSuccess = () => {
           </div>
 
           {progressSteps.map((step, index) => {
-            const Icon = step.icon
+            const StepIcon = step.icon
             const status = getStepStatus(step.id)
             const isCompleted = status === 'completed'
             const isCurrent = status === 'current'
@@ -113,11 +113,11 @@ const RegistrationSuccess = () => {
                 <div 
                   className={`progress-circle ${status} ${isCurrent ? 'pulse-animation' : ''}`}
                 >
-                  <Icon 
+                  {StepIcon && <StepIcon 
                     className="progress-icon"
                     color="white"
                     strokeWidth={2.5}
-                  />
+                  />}
                 </div>
 
                 {/* Label */}

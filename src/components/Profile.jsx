@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useAlert } from '../context/AlertContext'
 import apiService from '../api'
@@ -7,8 +7,13 @@ import GoalManagement from './GoalManagement'
 import { getProfilePictureUrl } from '../utils/imageHelper'
 
 function Profile() {
+  const { userId } = useParams() // Get userId from URL if viewing someone else's profile
+  const navigate = useNavigate()
   const [profile, setProfile] = useState(null)
   const [ratings, setRatings] = useState([])
+  const [completedJobs, setCompletedJobs] = useState([]) // For viewing employer's completed jobs
+  const [completedJobsCarouselIndex, setCompletedJobsCarouselIndex] = useState(0)
+  const [showAllCompletedJobs, setShowAllCompletedJobs] = useState(false)
   const [recommendedJobs, setRecommendedJobs] = useState([])
   const [recommendedWorkers, setRecommendedWorkers] = useState([])
   const [loadingJobs, setLoadingJobs] = useState(false)
@@ -47,10 +52,16 @@ function Profile() {
   const { user, updateUser, verifyToken } = useAuth()
   const { success, error: showError } = useAlert()
 
+  // Check if viewing own profile or someone else's
+  const isOwnProfile = !userId || userId === user?._id || userId === user?.userId
+  const viewingUser = isOwnProfile ? user : profile
+
   useEffect(() => {
     loadProfile()
-    checkPendingEmailChange()
-  }, [])
+    if (isOwnProfile) {
+      checkPendingEmailChange()
+    }
+  }, [userId])
 
   const checkPendingEmailChange = async () => {
     try {
@@ -414,26 +425,62 @@ function Profile() {
   const loadProfile = async () => {
     try {
       setLoading(true);
-      // Use the correct API call for your backend
-      const data = await apiService.getProfile('me');
-      setProfile(data.user);
-      setEditFormData({
-        firstName: data.user.firstName || '',
-        lastName: data.user.lastName || '',
-        bio: data.user.bio || '',
-        gender: data.user.gender || '',
-        userType: data.user.userType || 'employee',
-        email: data.user.email || '',
-        mobileNo: data.user.mobileNo || '',
-        address: data.user.address || '',
-        barangay: data.user.barangay || '',
-        skills: data.user.skills || []
-      });
+      
+      if (isOwnProfile) {
+        // Load own profile
+        const data = await apiService.getProfile('me');
+        setProfile(data.user);
+        setEditFormData({
+          firstName: data.user.firstName || '',
+          lastName: data.user.lastName || '',
+          bio: data.user.bio || '',
+          gender: data.user.gender || '',
+          userType: data.user.userType || 'employee',
+          email: data.user.email || '',
+          mobileNo: data.user.mobileNo || '',
+          address: data.user.address || '',
+          barangay: data.user.barangay || '',
+          skills: data.user.skills || []
+        });
+      } else {
+        // Load another user's profile
+        const data = await apiService.request(`/users/${userId}`);
+        setProfile(data.user);
+        
+        console.log('Loaded user profile:', data.user.firstName, 'UserType:', data.user.userType);
+        
+        // Load completed jobs if viewing an employer's profile
+        if (data.user.userType === 'employer' || data.user.userType === 'both') {
+          console.log('User is employer/both, loading completed jobs...');
+          loadCompletedJobs(userId);
+        } else {
+          console.log('User is not employer, skipping completed jobs');
+        }
+      }
     } catch (err) {
       setError('Failed to load profile');
       console.error('Profile load error:', err);
+      showError('Failed to load profile');
     } finally {
       setLoading(false)
+    }
+  }
+
+  const loadCompletedJobs = async (employerId) => {
+    try {
+      console.log('Loading completed jobs for employer:', employerId);
+      
+      // Fetch completed jobs posted by this employer
+      // Note: Job model uses 'completed' boolean field, not 'status'
+      const response = await apiService.request(`/jobs?postedBy=${employerId}&completed=true`);
+      console.log('Completed jobs response:', response);
+      
+      const jobs = response?.data?.jobs || response?.jobs || [];
+      console.log('Completed jobs found:', jobs.length, jobs);
+      
+      setCompletedJobs(jobs);
+    } catch (err) {
+      console.error('Failed to load completed jobs:', err);
     }
   }
 
@@ -890,26 +937,20 @@ function Profile() {
           box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important;
         }
         .remove-skill {
-          background: rgba(255, 255, 255, 0.2);
+          background: none;
           border: none;
           color: white;
           cursor: pointer;
-          font-size: 1rem;
-          font-weight: 600;
+          font-size: 1.25rem;
+          font-weight: normal;
           padding: 0;
-          margin-left: 0.25rem;
-          width: 18px;
-          height: 18px;
-          border-radius: 50%;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
+          margin-left: 0.5rem;
           line-height: 1;
-          transition: all 0.2s ease;
+          transition: opacity 0.2s ease;
+          opacity: 0.8;
         }
         .remove-skill:hover {
-          background: rgba(255, 255, 255, 0.35);
-          transform: scale(1.15);
+          opacity: 1;
         }
         .skills-checkbox-group {
           display: grid;
@@ -1053,7 +1094,22 @@ function Profile() {
                profile?.userType === 'employer' ? 'Employer' : 'User'}
             </div>
           </div>
-          <button className="edit-profile-btn" onClick={handleEditProfile}>Edit Profile</button>
+          {isOwnProfile && (
+            <button className="edit-profile-btn" onClick={handleEditProfile}>Edit Profile</button>
+          )}
+          {!isOwnProfile && (
+            <Link 
+              to="/chat" 
+              state={{ 
+                recipientId: profile?._id,
+                recipientEmail: profile?.email,
+                recipientName: `${profile?.firstName} ${profile?.lastName}`
+              }}
+              className="message-user-btn"
+            >
+              💬 Message {profile?.firstName}
+            </Link>
+          )}
         </div>
 
         <div className="profile-section">
@@ -1072,8 +1128,8 @@ function Profile() {
           <div className="profile-bio">{profile?.bio || 'No description provided.'}</div>
         </div>
 
-        {/* Show recommended jobs if the user is an employee or both */}
-        {(profile?.userType === 'employee' || profile?.userType === 'both') && (
+        {/* Show recommended jobs if viewing own profile and user is an employee or both */}
+        {isOwnProfile && (profile?.userType === 'employee' || profile?.userType === 'both') && (
           <div className="profile-section">
             <div className="section-header-with-actions">
               <h2>Recommended Jobs</h2>
@@ -1133,8 +1189,8 @@ function Profile() {
           </div>
         )}
         
-        {/* Show recommended workers if the user is an employer or both */}
-        {(profile?.userType === 'employer' || profile?.userType === 'both') && (
+        {/* Show recommended workers if viewing own profile and user is an employer or both */}
+        {isOwnProfile && (profile?.userType === 'employer' || profile?.userType === 'both') && (
           <div className="profile-section">
             <div className="section-header-with-actions">
               <h2>
@@ -1217,9 +1273,117 @@ function Profile() {
           </div>
         )}
 
-        <div className="profile-section">
-          <GoalManagement />
-        </div>
+        {/* Show Goals only for own profile */}
+        {isOwnProfile && (
+          <div className="profile-section">
+            <GoalManagement />
+          </div>
+        )}
+
+        {/* Show Completed Jobs for Employer profiles when viewing others */}
+        {!isOwnProfile && (profile?.userType === 'employer' || profile?.userType === 'both') && (
+          <div className="profile-section">
+            <div className="section-header-with-actions">
+              <h2>Completed Jobs ({completedJobs.length})</h2>
+              {completedJobs.length > 5 && !showAllCompletedJobs && (
+                <button 
+                  className="view-all-btn"
+                  onClick={() => setShowAllCompletedJobs(true)}
+                >
+                  View All
+                </button>
+              )}
+              {showAllCompletedJobs && (
+                <button 
+                  className="view-all-btn"
+                  onClick={() => {
+                    setShowAllCompletedJobs(false);
+                    setCompletedJobsCarouselIndex(0);
+                  }}
+                >
+                  Show Less
+                </button>
+              )}
+            </div>
+            <div className="completed-jobs-carousel-container">
+              {completedJobs.length > 0 ? (
+                <>
+                  {!showAllCompletedJobs && completedJobs.length > 1 && (
+                    <button
+                      className="carousel-nav-btn carousel-prev"
+                      onClick={() => setCompletedJobsCarouselIndex(prev => 
+                        prev === 0 ? Math.min(completedJobs.length - 1, 4) : prev - 1
+                      )}
+                      disabled={completedJobsCarouselIndex === 0}
+                    >
+                      ‹
+                    </button>
+                  )}
+                  <div className="completed-jobs-list">
+                    {(showAllCompletedJobs 
+                      ? completedJobs 
+                      : completedJobs.slice(
+                          completedJobsCarouselIndex, 
+                          completedJobsCarouselIndex + (showAllCompletedJobs ? completedJobs.length : 5)
+                        )
+                    ).map((job, idx) => (
+                      <div className="completed-job-card" key={job._id || idx}>
+                        <div className="job-header">
+                          <h3>{job.title}</h3>
+                          <span className="job-price">₱{job.price}</span>
+                        </div>
+                        {job.description && (
+                          <p className="job-description">{job.description}</p>
+                        )}
+                        {job.assignedTo && (
+                          <div className="job-employee">
+                            <span>Completed by: </span>
+                            <Link to={`/profile/${job.assignedTo._id}`} className="employee-link">
+                              {job.assignedTo.firstName} {job.assignedTo.lastName}
+                            </Link>
+                          </div>
+                        )}
+                        {job.rating && (
+                          <div className="job-rating">
+                            <span className="stars">{'★'.repeat(job.rating)}{'☆'.repeat(5 - job.rating)}</span>
+                            {job.ratingComment && <p className="rating-comment">{job.ratingComment}</p>}
+                          </div>
+                        )}
+                        <div className="job-date">
+                          Completed: {new Date(job.completedAt || job.updatedAt).toLocaleDateString()}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {!showAllCompletedJobs && completedJobs.length > 1 && (
+                    <button
+                      className="carousel-nav-btn carousel-next"
+                      onClick={() => setCompletedJobsCarouselIndex(prev => 
+                        prev >= Math.min(completedJobs.length - 1, 4) ? 0 : prev + 1
+                      )}
+                      disabled={completedJobsCarouselIndex >= Math.min(completedJobs.length - 1, 4)}
+                    >
+                      ›
+                    </button>
+                  )}
+                  {!showAllCompletedJobs && completedJobs.length > 1 && (
+                    <div className="carousel-dots">
+                      {Array.from({ length: Math.min(completedJobs.length, 5) }).map((_, i) => (
+                        <button
+                          key={i}
+                          className={`carousel-dot ${i === completedJobsCarouselIndex ? 'active' : ''}`}
+                          onClick={() => setCompletedJobsCarouselIndex(i)}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="no-completed-jobs">No completed jobs yet.</div>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="profile-section">
           <h2>Contact Information</h2>
@@ -1249,7 +1413,6 @@ function Profile() {
         {showEditModal && ( 
           <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <button onClick={() => setShowEditModal(false)} className="close">×</button>
               <div className="modal-header">
                 <h3>Edit Profile</h3>
               </div>
@@ -1333,40 +1496,6 @@ function Profile() {
                   </select>
                 </div>
                 
-                <div className="form-group">
-                  <label htmlFor="email">Email</label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={editFormData.email}
-                    readOnly
-                    style={{ 
-                      background: '#f3f4f6', 
-                      cursor: 'not-allowed',
-                      color: '#6b7280'
-                    }}
-                  />
-                  <small className="form-helper-text" style={{ color: '#9333ea' }}>
-                    🔒 To change your email, use the "Change Email" button below. You'll need to verify the change via your current email address.
-                  </small>
-                </div>
-                
-                <div className="form-group">
-                  <label htmlFor="userType">Account Type</label>
-                  <select
-                    id="userType"
-                    name="userType"
-                    value={editFormData.userType}
-                    onChange={handleInputChange}
-                    required
-                  >
-                    <option value="employee">Employee</option>
-                    <option value="employer">Employer</option>
-                    <option value="both">Both</option>
-                  </select>
-                  <small className="form-helper-text">Choose your account type: Employee, Employer or Both</small>
-                </div>
                 <div className="form-group">
                   <label htmlFor="address">Address</label>
                   <input
@@ -1472,21 +1601,6 @@ function Profile() {
                 </div>
                 
                 <div className="modal-actions">
-                  <button 
-                    type="button" 
-                    onClick={() => {
-                      setShowEmailChangeModal(true)
-                      setShowEditModal(false)
-                    }} 
-                    className="btn btn-warning"
-                    style={{ 
-                      background: '#f59e0b', 
-                      color: 'white',
-                      marginRight: 'auto'
-                    }}
-                  >
-                    🔐 Change Email
-                  </button>
                   <button type="button" onClick={() => setShowEditModal(false)} className="btn btn-secondary">
                     Cancel
                   </button>
@@ -2208,6 +2322,10 @@ function Profile() {
         .profile-avatar-lg {
           width: 120px;
           height: 120px;
+          min-width: 120px;
+          min-height: 120px;
+          max-width: 120px;
+          max-height: 120px;
           border-radius: 50%;
           overflow: hidden;
           background: #e2e8f0;
@@ -2222,7 +2340,10 @@ function Profile() {
         .profile-avatar-lg img {
           width: 100%;
           height: 100%;
+          max-width: 120px;
+          max-height: 120px;
           object-fit: cover;
+          object-position: center;
         }
         .avatar-placeholder-lg {
           font-size: 2.8rem;
@@ -2297,6 +2418,185 @@ function Profile() {
         }
         .edit-profile-btn:hover {
           background: #2d4059;
+        }
+        .message-user-btn {
+          margin-top: 1.2rem;
+          background: #9333ea;
+          color: #fff;
+          border: none;
+          border-radius: 8px;
+          padding: 0.5rem 1.5rem;
+          font-size: 1rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: background 0.2s;
+          text-decoration: none;
+          display: inline-block;
+        }
+        .message-user-btn:hover {
+          background: #7c3aed;
+          text-decoration: none;
+        }
+        .completed-jobs-carousel-container {
+          position: relative;
+          padding: 1rem 0;
+        }
+        .carousel-nav-btn {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          background: white;
+          border: 2px solid #e2e8f0;
+          border-radius: 50%;
+          width: 40px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          font-size: 1.5rem;
+          color: #64748b;
+          transition: all 0.2s;
+          z-index: 10;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .carousel-nav-btn:hover:not(:disabled) {
+          background: #9333ea;
+          color: white;
+          border-color: #9333ea;
+          transform: translateY(-50%) scale(1.1);
+        }
+        .carousel-nav-btn:disabled {
+          opacity: 0.3;
+          cursor: not-allowed;
+        }
+        .carousel-prev {
+          left: -20px;
+        }
+        .carousel-next {
+          right: -20px;
+        }
+        .carousel-dots {
+          display: flex;
+          justify-content: center;
+          gap: 0.5rem;
+          margin-top: 1.5rem;
+        }
+        .carousel-dot {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background: #e2e8f0;
+          border: none;
+          cursor: pointer;
+          transition: all 0.2s;
+          padding: 0;
+        }
+        .carousel-dot.active {
+          background: #9333ea;
+          width: 24px;
+          border-radius: 5px;
+        }
+        .carousel-dot:hover {
+          background: #cbd5e1;
+        }
+        .view-all-btn {
+          background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%);
+          color: white;
+          border: none;
+          padding: 0.5rem 1rem;
+          border-radius: 8px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+          font-size: 0.9rem;
+        }
+        .view-all-btn:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(147, 51, 234, 0.3);
+        }
+        .completed-jobs-list {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+        .completed-job-card {
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
+          padding: 1.5rem;
+          transition: all 0.2s;
+        }
+        .completed-job-card:hover {
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+          border-color: #cbd5e1;
+        }
+        .completed-job-card .job-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: start;
+          margin-bottom: 0.75rem;
+        }
+        .completed-job-card .job-header h3 {
+          margin: 0;
+          font-size: 1.1rem;
+          color: #1e293b;
+        }
+        .completed-job-card .job-price {
+          background: #10b981;
+          color: white;
+          padding: 0.25rem 0.75rem;
+          border-radius: 6px;
+          font-weight: 600;
+          font-size: 0.9rem;
+        }
+        .completed-job-card .job-description {
+          color: #64748b;
+          font-size: 0.95rem;
+          margin-bottom: 0.75rem;
+          line-height: 1.5;
+        }
+        .completed-job-card .job-employee {
+          margin-bottom: 0.5rem;
+          font-size: 0.9rem;
+          color: #475569;
+        }
+        .completed-job-card .employee-link {
+          color: #9333ea;
+          text-decoration: none;
+          font-weight: 600;
+        }
+        .completed-job-card .employee-link:hover {
+          text-decoration: underline;
+        }
+        .completed-job-card .job-rating {
+          margin: 0.75rem 0;
+          padding: 0.75rem;
+          background: #fef3c7;
+          border-radius: 8px;
+        }
+        .completed-job-card .job-rating .stars {
+          color: #f59e0b;
+          font-size: 1.1rem;
+          display: block;
+          margin-bottom: 0.25rem;
+        }
+        .completed-job-card .job-rating .rating-comment {
+          margin: 0.5rem 0 0 0;
+          font-size: 0.9rem;
+          color: #78350f;
+          font-style: italic;
+        }
+        .completed-job-card .job-date {
+          font-size: 0.85rem;
+          color: #94a3b8;
+          margin-top: 0.5rem;
+        }
+        .no-completed-jobs {
+          text-align: center;
+          padding: 2rem;
+          color: #94a3b8;
+          font-size: 0.95rem;
         }
         .profile-section {
           margin-bottom: 2.2rem;
@@ -2595,6 +2895,10 @@ function Profile() {
         .worker-avatar {
           width: 60px;
           height: 60px;
+          min-width: 60px;
+          min-height: 60px;
+          max-width: 60px;
+          max-height: 60px;
           border-radius: 50%;
           background: #e2e8f0;
           display: flex;
@@ -2607,7 +2911,10 @@ function Profile() {
         .worker-avatar img {
           width: 100%;
           height: 100%;
+          max-width: 60px;
+          max-height: 60px;
           object-fit: cover;
+          object-position: center;
         }
         
         .worker-initials {
@@ -3264,26 +3571,20 @@ function Profile() {
           box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important;
         }
         .remove-skill {
-          background: rgba(255, 255, 255, 0.2);
+          background: none;
           border: none;
           color: white;
           cursor: pointer;
-          font-size: 1rem;
-          font-weight: 600;
+          font-size: 1.25rem;
+          font-weight: normal;
           padding: 0;
-          margin-left: 0.25rem;
-          width: 18px;
-          height: 18px;
-          border-radius: 50%;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
+          margin-left: 0.5rem;
           line-height: 1;
-          transition: all 0.2s ease;
+          transition: opacity 0.2s ease;
+          opacity: 0.8;
         }
         .remove-skill:hover {
-          background: rgba(255, 255, 255, 0.35);
-          transform: scale(1.15);
+          opacity: 1;
         }
       `}</style>
     </div>

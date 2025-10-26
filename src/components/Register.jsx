@@ -449,13 +449,14 @@ function Register() {
       } else {
         // Handle the case where success is false but data is returned
         const errorMessage = data.alert || data.message || "Registration failed. Please try again."
-        setError(errorMessage)
         showError(errorMessage)
       }
     } catch (err) {
-      // Error already handled by API service - don't log sensitive registration data
-      const errorMessage = err.message || err.alert || "Connection error. Please try again."
-      setError(errorMessage)
+      // Sanitize error messages to not expose backend details
+      let errorMessage = "Connection error. Please try again."
+      if (err.message && !err.message.toLowerCase().includes('backend') && !err.message.toLowerCase().includes('server')) {
+        errorMessage = err.message || err.alert
+      }
       showError(errorMessage)
     } finally {
       setLoading(false)
@@ -493,12 +494,6 @@ function Register() {
         </div>
 
         <form onSubmit={handleSubmit} className="register-form">
-          {error && (
-            <div className="error-message">
-              {error}
-            </div>
-          )}
-
           {/* Step 1: Personal Information */}
           {currentStep === 1 && (
             <div className="form-step fade-in">

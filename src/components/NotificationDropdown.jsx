@@ -61,7 +61,7 @@ const NotificationDropdown = ({ isMobile = false }) => {
         break;
       case 'message':
         // Redirect to messages
-        navigate('/messages');
+        navigate('/chat');
         break;
       case 'rating':
         // Redirect to profile to see new rating

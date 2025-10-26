@@ -180,15 +180,38 @@ function EmployeeDashboard() {
 
   const handleReportSubmit = async (reason) => {
     try {
-      await apiService.reportJob({
+      console.log('📋 Report modal state:', reportModal);
+      
+      if (!reportModal.jobId) {
+        console.error('❌ No jobId in reportModal');
+        showError('Job ID is missing. Please try again.');
+        return;
+      }
+      
+      const reportData = {
         reportedJobId: reportModal.jobId,
         reason
-      });
+      };
+      console.log('📤 Submitting report with data:', reportData);
+      
+      const result = await apiService.reportJob(reportData);
+      console.log('✅ Report submission result:', result);
+      
       success('Report submitted successfully');
       closeReportModal();
     } catch (error) {
-      console.error('Error submitting report:', error);
-      showError(error.message || 'Failed to submit report');
+      console.error('❌ Error submitting report:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack
+      });
+      
+      // Check if it's a duplicate report error
+      if (error.message && error.message.includes('already have a pending report')) {
+        showError('You have already reported this job.');
+      } else {
+        showError(error.message || 'Failed to submit report');
+      }
       throw error;
     }
   };
@@ -525,12 +548,12 @@ function EmployeeDashboard() {
                         Cancel Application
                       </button>
                       {job.postedBy && (
-                        <button
-                          onClick={() => viewEmployerProfile(job.postedBy._id || job.postedBy)}
+                        <Link
+                          to={`/profile/${job.postedBy._id || job.postedBy}`}
                           className="btn secondary"
                         >
                           View Employer
-                        </button>
+                        </Link>
                       )}
                     </div>
                   </div>
@@ -574,12 +597,12 @@ function EmployeeDashboard() {
                         <span className="assigned-badge">✓ Assigned to you</span>
                       )}
                       {job.postedBy && (
-                        <button
-                          onClick={() => viewEmployerProfile(job.postedBy._id || job.postedBy)}
+                        <Link
+                          to={`/profile/${job.postedBy._id || job.postedBy}`}
                           className="btn secondary"
                         >
                           View Employer
-                        </button>
+                        </Link>
                       )}
                     </div>
                   </div>
@@ -757,14 +780,21 @@ function EmployeeDashboard() {
 
               <div className="job-detail-section">
                 <h3>Posted By</h3>
-                <p>👤 {selectedJob.postedBy?.firstName} {selectedJob.postedBy?.lastName}</p>
+                <Link 
+                  to={`/profile/${selectedJob.postedBy?._id}`}
+                  className="employer-profile-link"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <p className="employer-name">👤 {selectedJob.postedBy?.firstName} {selectedJob.postedBy?.lastName}</p>
+                </Link>
                 {selectedJob.postedBy?.email && (
                   <p className="employer-email">✉️ {selectedJob.postedBy.email}</p>
                 )}
                 <p className="date-posted">📅 Posted on {new Date(selectedJob.datePosted).toLocaleDateString()}</p>
                 <Link 
-                  to="/messages" 
+                  to="/chat" 
                   state={{ 
+                    recipientId: selectedJob.postedBy?._id,
                     recipientEmail: selectedJob.postedBy?.email,
                     recipientName: `${selectedJob.postedBy?.firstName} ${selectedJob.postedBy?.lastName}`,
                     subject: `Regarding: ${selectedJob.title}`
@@ -936,8 +966,9 @@ function EmployeeDashboard() {
                   {/* Contact Section */}
                   <div className="employer-contact-section">
                     <Link 
-                      to="/messages" 
+                      to="/chat" 
                       state={{ 
+                        recipientId: selectedEmployer._id,
                         recipientEmail: selectedEmployer.email,
                         recipientName: `${selectedEmployer.firstName} ${selectedEmployer.lastName}`,
                         subject: `Job Inquiry`
@@ -1574,6 +1605,28 @@ function EmployeeDashboard() {
         .date-posted {
           color: #718096;
           font-size: 0.9rem;
+        }
+
+        .employer-profile-link {
+          text-decoration: none;
+          display: inline-block;
+          transition: transform 0.2s;
+        }
+
+        .employer-profile-link:hover {
+          transform: translateX(4px);
+        }
+
+        .employer-profile-link .employer-name {
+          color: #9333ea;
+          font-weight: 600;
+          margin: 0;
+          cursor: pointer;
+        }
+
+        .employer-profile-link:hover .employer-name {
+          color: #7c3aed;
+          text-decoration: underline;
         }
 
         .employer-email {

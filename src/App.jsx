@@ -26,7 +26,6 @@ import ResetPassword from './components/ResetPassword'
 import VerifyEmail from './components/VerifyEmail'
 import VerifyEmailChange from './components/VerifyEmailChange'
 import Notifications from './components/Notifications'
-import Messages from './components/Messages'
 import Chat from './components/Chat'
 import Chatbot from './components/Chatbot'
 
@@ -133,6 +132,12 @@ function App() {
               </ProtectedRoute>
             } />
             
+            <Route path="/profile/:userId" element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            } />
+            
             <Route path="/post-job" element={
               <ProtectedRoute>
                 <PostJob />
@@ -184,12 +189,6 @@ function App() {
             <Route path="/notifications" element={
               <ProtectedRoute>
                 <Notifications />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/messages" element={
-              <ProtectedRoute>
-                <Messages />
               </ProtectedRoute>
             } />
 
