@@ -955,6 +955,9 @@ function Register() {
                     </div>
                   )}
                 </div>
+              </div>
+
+              <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="idBackImage">ID Back Image</label>
                   {!fileNames.idBackImage ? (
