@@ -768,7 +768,7 @@ function AdminDashboard() {
   const editUser = async (userId) => {
     try {
       const token = localStorage.getItem('token')
-      const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://resi-backend.vercel.app/api'
+  const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://resi-backend-ihyu.vercel.app/api'
       const response = await fetch(`${apiBaseUrl}/admin/users/${userId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
@@ -788,7 +788,7 @@ function AdminDashboard() {
   const saveUser = async (userId, userData) => {
     try {
       const token = localStorage.getItem('token')
-      const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://resi-backend.vercel.app/api'
+  const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://resi-backend-ihyu.vercel.app/api'
       
       console.log('Updating user with data:', userData)
       
@@ -837,7 +837,7 @@ function AdminDashboard() {
     try {
       setTabLoading(true)
       const token = localStorage.getItem('token')
-      const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://resi-backend.vercel.app/api'
+  const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://resi-backend-ihyu.vercel.app/api'
       
       const response = await fetch(`${apiBaseUrl}/admin/users/${userToDelete}`, {
         method: 'DELETE',
@@ -983,7 +983,7 @@ function AdminDashboard() {
       console.log(`Attempting to ${currentStatus ? 'disable' : 'verify'} user ${userId}`)
       
       // Ensure we have the correct API URL
-      const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://resi-backend.vercel.app/api'
+  const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://resi-backend-ihyu.vercel.app/api'
       
       // First, get the current user data so we have all required fields
       const userDataResponse = await fetch(`${apiBaseUrl}/admin/users/${userId}`, {
@@ -1078,7 +1078,7 @@ function AdminDashboard() {
   const viewJob = async (jobId) => {
     try {
       const token = localStorage.getItem('token')
-      const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://resi-backend.vercel.app/api'
+  const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://resi-backend-ihyu.vercel.app/api'
       const response = await fetch(`${apiBaseUrl}/jobs/${jobId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
@@ -1106,7 +1106,7 @@ function AdminDashboard() {
     try {
       setTabLoading(true)
       const token = localStorage.getItem('token')
-      const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://resi-backend.vercel.app/api'
+  const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://resi-backend-ihyu.vercel.app/api'
       const response = await fetch(`${apiBaseUrl}/admin/jobs/${jobToDelete}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
@@ -1136,7 +1136,7 @@ function AdminDashboard() {
   const toggleJobStatus = async (jobId, currentStatus) => {
     try {
       const token = localStorage.getItem('token')
-      const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://resi-backend.vercel.app/api'
+  const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://resi-backend-ihyu.vercel.app/api'
       const response = await fetch(`${apiBaseUrl}/jobs/${jobId}/close`, {
         method: 'PUT',
         headers: { 
@@ -1162,7 +1162,7 @@ function AdminDashboard() {
   const exportData = async (type, format = 'csv') => {
     try {
       const token = localStorage.getItem('token')
-      const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://resi-backend.vercel.app/api'
+  const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://resi-backend-ihyu.vercel.app/api'
       const response = await fetch(`${apiBaseUrl}/export/${type}?format=${format}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
