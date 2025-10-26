@@ -36,8 +36,19 @@ function Chat() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Get the current user's ID consistently
-  const currentUserId = user?.userId || user?._id;
+  // Get the current user's ID consistently - try multiple field names
+  const currentUserId = user?.userId || user?._id || user?.id;
+  
+  // Debug: Log user object structure on mount to identify the correct ID field
+  useEffect(() => {
+    console.log('👤 User object structure:', {
+      hasUserId: !!user?.userId,
+      has_id: !!user?._id,
+      hasId: !!user?.id,
+      userKeys: user ? Object.keys(user) : [],
+      calculatedId: currentUserId
+    });
+  }, [user]);
 
   // Load conversations on mount and handle support contact from navigation state
   useEffect(() => {
@@ -372,7 +383,7 @@ function Chat() {
       const conversationMap = new Map();
       
       // Debug: Log current user info
-      const currentUserId = user._id || user.id;
+      const currentUserId = user.userId || user._id || user.id;
       console.log('🔍 Current User:', {
         id: currentUserId,
         fullUser: user,
@@ -395,7 +406,7 @@ function Chat() {
         
         // Determine the other user (not current user)
         // Match by ID or email as fallback
-        const currentUserId = user._id || user.id;
+        const currentUserId = user.userId || user._id || user.id;
         const currentUserEmail = user.email;
         
         const isCurrentUserSender = 
