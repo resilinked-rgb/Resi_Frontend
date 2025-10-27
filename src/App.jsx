@@ -38,6 +38,7 @@ import Layout from './components/Layout'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { AlertProvider } from './context/AlertContext'
 import { NotificationProvider } from './context/NotificationContext'
+import { LanguageProvider } from './context/LanguageContext'
 
 // Protected Route component
 function ProtectedRoute({ children, requiredUserType = null }) {
@@ -102,9 +103,10 @@ function AdminRoute({ children }) {
 function App() {
   return (
     <AlertProvider>
-      <AuthProvider>
-        <NotificationProvider>
-          <Router>
+      <LanguageProvider>
+        <AuthProvider>
+          <NotificationProvider>
+            <Router>
             <Layout>
               <Routes>
             {/* Public routes */}
@@ -223,6 +225,7 @@ function App() {
           </Router>
         </NotificationProvider>
       </AuthProvider>
+      </LanguageProvider>
     </AlertProvider>
   )
 }export default App

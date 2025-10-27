@@ -5,6 +5,8 @@ import { useState, useEffect, useContext } from 'react'
 import { Link } from 'react-router-dom'
 import { AuthContext } from '../context/AuthContext'
 import { AlertContext } from '../context/AlertContext'
+import { useLanguage } from '../context/LanguageContext'
+import { t } from '../utils/translations'
 import apiService from '../api'
 
 function Settings() {
@@ -49,6 +51,7 @@ function Settings() {
   
   const { user, isLoggedIn } = useContext(AuthContext)
   const { success, error: showError } = useContext(AlertContext)
+  const { language, changeLanguage } = useLanguage()
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -340,14 +343,14 @@ function Settings() {
   return (
     <div className="settings-container">
       <div className="settings-header">
-        <h1>Settings</h1>
-        <Link to="/landing" className="back-btn">Back to Dashboard</Link>
+        <h1>{t(language, 'settings.title')}</h1>
+        <Link to="/landing" className="back-btn">{t(language, 'common.back')} to Dashboard</Link>
       </div>
 
       <div className="settings-content">
         {/* Notification Preferences */}
         <div className="settings-section">
-          <h2>Notification Preferences</h2>
+          <h2>{t(language, 'settings.notifications')}</h2>
           <div className="setting-item">
             <label className="switch-label">
               <input
@@ -377,38 +380,57 @@ function Settings() {
 
         {/* Language Preferences */}
         <div className="settings-section">
-          <h2>Language Preference</h2>
+          <h2>{t(language, 'settings.language')}</h2>
+          <p className="setting-description" style={{ marginBottom: '1rem' }}>
+            {t(language, 'settings.selectLanguage')}
+          </p>
           <div className="radio-group">
             <label className="radio-label">
               <input
                 type="radio"
                 name="language"
-                value="english"
-                checked={settings.languagePreference === 'english'}
-                onChange={(e) => handleLanguageChange(e.target.value)}
+                value="en"
+                checked={language === 'en'}
+                onChange={(e) => {
+                  changeLanguage(e.target.value);
+                  success(t(e.target.value, 'settings.languageUpdated'));
+                }}
               />
-              <span className="radio-text">English (App language is set to English only)</span>
+              <span className="radio-text">{t(language, 'settings.english')}</span>
+            </label>
+            <label className="radio-label">
+              <input
+                type="radio"
+                name="language"
+                value="tl"
+                checked={language === 'tl'}
+                onChange={(e) => {
+                  changeLanguage(e.target.value);
+                  success(t(e.target.value, 'settings.languageUpdated'));
+                }}
+              />
+              <span className="radio-text">{t(language, 'settings.tagalog')}</span>
             </label>
           </div>
         </div>
 
         {/* Account Security */}
         <div className="settings-section">
-          <h2>Account Security</h2>
+          <h2>{t(language, 'settings.account')}</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <button 
               className="action-btn primary"
               onClick={() => setShowEmailModal(true)}
             >
               <span className="icon">📧</span>
-              Change Email
+              {t(language, 'settings.changeEmail')}
             </button>
             <button 
               className="action-btn primary"
               onClick={() => setShowPasswordModal(true)}
             >
               <span className="icon">🔑</span>
-              Change Password
+              {t(language, 'settings.changePassword')}
             </button>
           </div>
         </div>
@@ -923,23 +945,26 @@ function Settings() {
 
         .switch {
           position: relative;
-          width: 50px;
-          height: 26px;
+          width: 54px;
+          height: 30px;
           background: #ccc;
-          border-radius: 13px;
+          border-radius: 15px;
           transition: background 0.2s;
+          cursor: pointer;
+          flex-shrink: 0;
         }
 
         .switch::before {
           content: '';
           position: absolute;
-          top: 2px;
-          left: 2px;
-          width: 22px;
-          height: 22px;
+          top: 3px;
+          left: 3px;
+          width: 24px;
+          height: 24px;
           background: white;
           border-radius: 50%;
           transition: transform 0.2s;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         .switch-label input[type="checkbox"] {
@@ -952,6 +977,20 @@ function Settings() {
 
         .switch-label input[type="checkbox"]:checked + .switch::before {
           transform: translateX(24px);
+        }
+
+        .switch-label {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          cursor: pointer;
+          font-weight: 500;
+          min-height: 44px;
+          -webkit-tap-highlight-color: transparent;
+        }
+
+        .switch-label:active .switch {
+          transform: scale(0.95);
         }
 
         .setting-description {
@@ -969,20 +1008,49 @@ function Settings() {
         .radio-label {
           display: flex;
           align-items: center;
-          gap: 0.5rem;
+          gap: 0.75rem;
           cursor: pointer;
+          padding: 0.5rem;
+          border-radius: 6px;
+          transition: background 0.2s;
+          min-height: 44px;
+          -webkit-tap-highlight-color: transparent;
+        }
+
+        .radio-label:hover {
+          background: #f7fafc;
+        }
+
+        .radio-label:active {
+          background: #edf2f7;
+          transform: scale(0.98);
+        }
+
+        .radio-label input[type="radio"] {
+          width: 20px;
+          height: 20px;
+          cursor: pointer;
+          flex-shrink: 0;
         }
 
         .action-btn {
           display: flex;
           align-items: center;
+          justify-content: center;
           gap: 0.5rem;
-          padding: 0.75rem 1.5rem;
+          padding: 0.875rem 1.5rem;
           border: none;
           border-radius: 8px;
           font-size: 1rem;
+          font-weight: 500;
           cursor: pointer;
-          transition: background-color 0.2s;
+          transition: all 0.2s;
+          min-height: 44px;
+          -webkit-tap-highlight-color: transparent;
+        }
+
+        .action-btn:active {
+          transform: scale(0.98);
         }
 
         .action-btn.primary {
@@ -1011,19 +1079,30 @@ function Settings() {
           background: #38a169;
           color: white;
           border: none;
-          padding: 0.75rem 2rem;
+          padding: 0.875rem 2rem;
           border-radius: 8px;
           font-size: 1rem;
+          font-weight: 500;
           cursor: pointer;
-          transition: background-color 0.2s;
+          transition: all 0.2s;
           display: flex;
           align-items: center;
+          justify-content: center;
           gap: 0.5rem;
           margin: 0 auto;
+          min-height: 48px;
+          min-width: 120px;
+          -webkit-tap-highlight-color: transparent;
         }
 
         .save-btn:hover:not(:disabled) {
           background: #2f855a;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(56, 161, 105, 0.3);
+        }
+
+        .save-btn:active:not(:disabled) {
+          transform: translateY(0) scale(0.98);
         }
 
         .save-btn:disabled {
@@ -1050,8 +1129,26 @@ function Settings() {
           padding: 0;
           width: 90%;
           max-width: 500px;
-          max-height: 80vh;
+          max-height: 85vh;
           overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        @media (max-width: 768px) {
+          .modal-content {
+            width: 95%;
+            max-height: 90vh;
+            border-radius: 16px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .modal-content {
+            width: 98%;
+            max-width: none;
+            border-radius: 12px;
+            margin: 1rem;
+          }
         }
 
         .modal-header {
@@ -1073,6 +1170,25 @@ function Settings() {
           font-size: 1.5rem;
           cursor: pointer;
           color: #666;
+          padding: 0.5rem;
+          min-width: 44px;
+          min-height: 44px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 6px;
+          transition: all 0.2s;
+          -webkit-tap-highlight-color: transparent;
+        }
+
+        .close-btn:hover {
+          background: #f7fafc;
+          color: #2d3748;
+        }
+
+        .close-btn:active {
+          background: #edf2f7;
+          transform: scale(0.95);
         }
 
         .modal-form {
@@ -1484,8 +1600,23 @@ function Settings() {
             gap: 1rem;
           }
 
-          .modal-content {
-            width: 95%;
+          .settings-header h1 {
+            font-size: 1.75rem;
+          }
+
+          .back-btn {
+            padding: 0.75rem 1.25rem;
+            min-height: 44px;
+            font-size: 1rem;
+          }
+
+          .settings-section {
+            padding: 1.25rem;
+          }
+
+          .action-btn {
+            width: 100%;
+            justify-content: center;
           }
 
           .password-input-container input {
@@ -1493,23 +1624,99 @@ function Settings() {
             font-size: 16px; /* Prevents zoom on iOS */
           }
 
+          .modal-form .form-group input,
+          .modal-form .form-group textarea,
+          .modal-form .form-group select {
+            font-size: 16px; /* Prevents zoom on iOS */
+            padding: 0.875rem 1rem;
+          }
+
+          .modal-actions {
+            gap: 0.75rem;
+          }
+
+          .modal-actions button {
+            flex: 1;
+            min-height: 48px;
+          }
         }
 
         @media (max-width: 480px) {
-          .modal-content {
-            width: 98%;
-            padding: 1.5rem 1rem;
+          .settings-container {
+            padding: 0.75rem;
           }
 
-          .form-group input {
+          .settings-header h1 {
+            font-size: 1.5rem;
+          }
+
+          .settings-section {
+            padding: 1rem;
+          }
+
+          .settings-section h2 {
+            font-size: 1.125rem;
+          }
+
+          .action-btn,
+          .save-btn {
+            padding: 0.75rem 1.25rem;
+            font-size: 0.9375rem;
+          }
+
+          .form-group input,
+          .form-group textarea,
+          .form-group select {
             padding: 0.75rem;
             font-size: 16px;
+          }
+
+          .modal-header {
+            padding: 1.25rem 1rem;
+          }
+
+          .modal-form {
+            padding: 1.25rem 1rem;
+          }
+
+          .modal-actions {
+            flex-direction: column;
+          }
+
+          .modal-actions button {
+            width: 100%;
           }
         }
 
         @media (max-width: 360px) {
+          .settings-container {
+            padding: 0.5rem;
+          }
+
+          .settings-header h1 {
+            font-size: 1.375rem;
+          }
+
+          .settings-section {
+            padding: 0.875rem;
+          }
+
           .form-group input {
             padding: 0.7rem 0.75rem;
+          }
+
+          .switch {
+            width: 50px;
+            height: 28px;
+          }
+
+          .switch::before {
+            width: 22px;
+            height: 22px;
+          }
+
+          .switch-label input[type="checkbox"]:checked + .switch::before {
+            transform: translateX(22px);
           }
         }
       `}</style>

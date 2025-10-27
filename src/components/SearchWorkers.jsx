@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import { AuthContext } from '../context/AuthContext'
 import { AlertContext } from '../context/AlertContext'
 import { getProfilePictureUrl } from '../utils/imageHelper'
+import { useTranslation } from '../hooks/useTranslation'
+import apiService from '../api'
 
 // Use environment variable for API base URL
 const API_BASE = import.meta.env.VITE_API_URL || 'https://resi-backend-ihyu.vercel.app/api'
@@ -40,6 +42,7 @@ function SearchWorkers() {
   
   const { user, isLoggedIn } = useContext(AuthContext)
   const { success, error: showError } = useContext(AlertContext)
+  const { t } = useTranslation()
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -206,28 +209,26 @@ function SearchWorkers() {
   const handleInviteWorker = async (worker) => {
     setCurrentWorker(worker)
     
-    // Fetch employer's jobs for invitation
+    // Fetch employer's jobs for invitation using apiService
     try {
       setLoading(true)
-      const token = localStorage.getItem('token')
       
-      const response = await fetch(`${API_BASE}/jobs/my-jobs`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
+      const data = await apiService.getMyJobs()
       
-      const data = await response.json()
-      
-      if (response.ok && data.jobs) {
+      // Backend returns jobs array directly, not wrapped in { jobs: [...] }
+      if (data && Array.isArray(data)) {
+        setMyJobs(data)
+        setShowInviteModal(true)
+      } else if (data && data.jobs) {
+        // Fallback in case format changes
         setMyJobs(data.jobs)
         setShowInviteModal(true)
       } else {
-        showError(data.message || 'Failed to load your jobs')
+        showError('Failed to load your jobs')
       }
     } catch (err) {
       console.error('Error fetching jobs:', err)
-      showError('Failed to load your jobs. Please try again later.')
+      showError(err.message || 'Failed to load your jobs. Please try again later.')
     } finally {
       setLoading(false)
     }
@@ -235,13 +236,13 @@ function SearchWorkers() {
   
   const sendMessage = async () => {
     if (!contactMessage.trim()) {
-      showError('Please enter a message')
+      showError(t('searchWorkers.enterMessage'))
       return
     }
     
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch(`${API_BASE}/notifications/send`, {
+      const response = await fetch(`${API_BASE}/messages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -249,60 +250,70 @@ function SearchWorkers() {
         },
         body: JSON.stringify({
           recipientId: currentWorker._id,
-          message: contactMessage,
-          type: 'message'
+          subject: 'Job Inquiry',
+          content: contactMessage
         })
       })
       
       const data = await response.json()
       
       if (response.ok) {
-        success('Message sent successfully')
+        success(t('searchWorkers.messageSent'))
         setContactMessage('')
         setShowContactModal(false)
       } else {
-        showError(data.message || 'Failed to send message')
+        showError(data.message || data.alert || 'Failed to send message')
       }
     } catch (err) {
       console.error('Error sending message:', err)
-      showError('Failed to send message. Please try again later.')
+      showError('Failed to send message. Please try again.')
     }
   }
   
   const sendJobInvitation = async () => {
-    if (!selectedJobForInvite) {
-      showError('Please select a job to invite the worker to')
+    if (!selectedJobForInvite || !currentWorker || !currentWorker._id) {
+      showError(t('searchWorkers.selectJobMessage'))
+      return
+    }
+    
+    // Find the selected job
+    const selectedJob = myJobs.find(job => job._id === selectedJobForInvite)
+    
+    // Check if job is active/open before sending invitation
+    if (selectedJob && selectedJob.isOpen === false) {
+      showError(t('searchWorkers.jobClosed'))
       return
     }
     
     try {
-      setSendingInvitation(true)
-      const token = localStorage.getItem('token')
-      
-      const response = await fetch(`${API_BASE}/jobs/invite`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          jobId: selectedJobForInvite,
-          workerId: currentWorker._id
-        })
+      console.log('Sending job invitation with params:', {
+        jobId: selectedJobForInvite,
+        workerId: currentWorker._id,
+        workerName: `${currentWorker.firstName} ${currentWorker.lastName}`
       })
       
-      const data = await response.json()
+      setSendingInvitation(true)
       
-      if (response.ok) {
-        success(`Invitation sent to ${currentWorker.firstName}`)
-        setSelectedJobForInvite(null)
-        setShowInviteModal(false)
+      // Use the apiService method for invitations (same as EmployerDashboard)
+      await apiService.inviteWorker(selectedJobForInvite, currentWorker._id)
+      
+      success(t('searchWorkers.invitationSent'))
+      setSelectedJobForInvite(null)
+      setShowInviteModal(false)
+    } catch (error) {
+      console.error('Error sending invitation:', error)
+      // Show more specific error message
+      if (error.message.includes('already been invited') || error.message.includes('Already invited')) {
+        showError(t('searchWorkers.alreadyInvited'))
+      } else if (error.message.includes('not found')) {
+        showError(t('searchWorkers.invitationFailed'))
+      } else if (error.message.includes('not authorized')) {
+        showError(t('searchWorkers.invitationFailed'))
+      } else if (error.message.includes('closed') || error.message.includes('no longer accepting')) {
+        showError(t('searchWorkers.jobClosed'))
       } else {
-        showError(data.message || 'Failed to send invitation')
+        showError(error.message || t('searchWorkers.invitationFailed'))
       }
-    } catch (err) {
-      console.error('Error sending invitation:', err)
-      showError('Failed to send invitation. Please try again later.')
     } finally {
       setSendingInvitation(false)
     }
@@ -316,8 +327,8 @@ function SearchWorkers() {
   return (
     <div className="search-workers-container">
       <div className="search-workers-header">
-        <h1>Search Workers</h1>
-        <Link to="/employer-dashboard" className="back-btn">Back to Dashboard</Link>
+        <h1>{t('searchWorkers.title')}</h1>
+        <Link to="/employer-dashboard" className="back-btn">{t('searchWorkers.backToDashboard')}</Link>
       </div>
 
       {/* Search Form */}
@@ -325,21 +336,21 @@ function SearchWorkers() {
         <form onSubmit={handleSubmit} className="search-form">
           {/* Keyword Search Bar */}
           <div className="form-group full-width">
-            <label htmlFor="keyword">Search by Name or Keyword</label>
+            <label htmlFor="keyword">{t('searchWorkers.searchByKeyword')}</label>
             <input
               type="text"
               id="keyword"
               name="keyword"
               value={searchQuery.keyword}
               onChange={handleInputChange}
-              placeholder="Search by worker name, skill, or keyword..."
+              placeholder={t('searchWorkers.searchPlaceholder')}
               className="search-input"
             />
           </div>
 
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="skill">Skill</label>
+              <label htmlFor="skill">{t('searchWorkers.skill')}</label>
               <select
                 id="skill"
                 name="skill"
@@ -347,11 +358,11 @@ function SearchWorkers() {
                 onChange={handleInputChange}
                 style={{ minHeight: '48px', fontSize: '1rem' }}
               >
-                <option value="">Select a skill</option>
+                <option value="">{t('searchWorkers.selectSkill')}</option>
                 {['Plumbing','Carpentry','Cleaning','Electrical','Painting','Gardening','Cooking','Driving','Babysitting','Tutoring','IT Support','Customer Service'].map(skill => (
                   <option key={skill} value={skill}>{skill}</option>
                 ))}
-                <option value="Other">Other</option>
+                <option value="Other">{t('searchWorkers.other')}</option>
               </select>
               {searchQuery.skill === 'Other' && (
                 <input
@@ -360,7 +371,7 @@ function SearchWorkers() {
                   name="otherSkill"
                   value={searchQuery.otherSkill || ''}
                   onChange={handleInputChange}
-                  placeholder="Add custom skill"
+                  placeholder={t('searchWorkers.addCustomSkill')}
                   style={{ marginTop: '0.5em' }}
                   required
                 />
@@ -368,21 +379,21 @@ function SearchWorkers() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="barangay">Location (Barangay)</label>
+              <label htmlFor="barangay">{t('searchWorkers.locationBarangay')}</label>
               <input
                 type="text"
                 id="barangay"
                 name="barangay"
                 value={searchQuery.barangay}
                 onChange={handleInputChange}
-                placeholder="e.g., Barangay San Jose"
+                placeholder={t('searchWorkers.locationPlaceholder')}
               />
             </div>
           </div>
 
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="rating">Minimum Rating</label>
+              <label htmlFor="rating">{t('searchWorkers.minimumRating')}</label>
               <select
                 id="rating"
                 name="rating"
@@ -390,12 +401,12 @@ function SearchWorkers() {
                 onChange={handleInputChange}
                 style={{ minHeight: '48px', fontSize: '1rem' }}
               >
-                <option value="">Any Rating</option>
-                <option value="5">5 Stars</option>
-                <option value="4">4+ Stars</option>
-                <option value="3">3+ Stars</option>
-                <option value="2">2+ Stars</option>
-                <option value="1">1+ Star</option>
+                <option value="">{t('searchWorkers.anyRating')}</option>
+                <option value="5">5 {t('searchWorkers.stars')}</option>
+                <option value="4">4+ {t('searchWorkers.stars')}</option>
+                <option value="3">3+ {t('searchWorkers.stars')}</option>
+                <option value="2">2+ {t('searchWorkers.stars')}</option>
+                <option value="1">1+ {t('searchWorkers.stars')}</option>
               </select>
             </div>
 
@@ -409,10 +420,10 @@ function SearchWorkers() {
               {loading ? (
                 <>
                   <div className="spinner"></div>
-                  Searching...
+                  {t('searchWorkers.searching')}
                 </>
               ) : (
-                'Search Workers'
+                t('searchWorkers.searchButton')
               )}
             </button>
             <button 
@@ -421,7 +432,7 @@ function SearchWorkers() {
               onClick={clearFilters}
               disabled={loading}
             >
-              Clear Filters
+              {t('searchWorkers.clearFilters')}
             </button>
           </div>
         </form>
@@ -432,20 +443,20 @@ function SearchWorkers() {
         {loading && (
           <div className="loading-state">
             <div className="spinner large"></div>
-            <p>Searching for workers...</p>
+            <p>{t('searchWorkers.searchingWorkers')}</p>
           </div>
         )}
 
         {!loading && hasSearched && workers.length === 0 && (
           <div className="no-results">
-            <h3>No workers found</h3>
-            <p>Try adjusting your search criteria to find more workers.</p>
+            <h3>{t('searchWorkers.noWorkersTitle')}</h3>
+            <p>{t('searchWorkers.noWorkersMessage')}</p>
           </div>
         )}
 
         {!loading && workers.length > 0 && (
           <div className="results-header">
-            <h2>Found {workers.length} worker{workers.length !== 1 ? 's' : ''}</h2>
+            <h2>{t('searchWorkers.found')} {workers.length} {workers.length !== 1 ? t('searchWorkers.workers') : t('searchWorkers.worker')}</h2>
           </div>
         )}
 
@@ -470,47 +481,48 @@ function SearchWorkers() {
                   <h3>{worker.firstName} {worker.lastName}</h3>
                 </div>
                 <div className="worker-rating">
-                  ⭐ {worker.averageRating ? worker.averageRating.toFixed(1) : 'N/A'}
+                  <span className="star-icon">★</span>
+                  {worker.averageRating ? worker.averageRating.toFixed(1) : 'N/A'}
                 </div>
               </div>
 
               <div className="worker-preview">
                 <div className="worker-preview-detail">
-                  <span className="preview-icon">📍</span> {worker.barangay || 'Location not specified'}
+                  <span className="preview-icon">📍</span> {worker.barangay || t('searchWorkers.locationNotSpecified')}
                 </div>
                 
                 {worker.skills && worker.skills.length > 0 && (
                   <div className="worker-preview-detail">
                     <span className="preview-icon">🛠️</span> {worker.skills.slice(0, 2).join(', ')}
-                    {worker.skills.length > 2 && ` +${worker.skills.length - 2} more`}
+                    {worker.skills.length > 2 && ` +${worker.skills.length - 2} ${t('searchWorkers.more')}`}
                   </div>
                 )}
                 
                 <div className="worker-preview-detail">
-                  <span className="preview-icon">📊</span> {worker.jobsCompleted || 0} jobs completed
+                  <span className="preview-icon">📊</span> {worker.jobsCompleted || 0} {t('searchWorkers.jobsCompleted')}
                 </div>
               </div>
               
               <div className="expansion-indicator">
                 {expandedWorkers[worker._id] ? '▲' : '▼'} 
-                <span className="indicator-text">{expandedWorkers[worker._id] ? 'Show less' : 'Show more'}</span>
+                <span className="indicator-text">{expandedWorkers[worker._id] ? t('searchWorkers.showLess') : t('searchWorkers.showMore')}</span>
               </div>
 
               {expandedWorkers[worker._id] && (
                 <div className="worker-content">
                   <hr className="content-divider" />
                   <p className="worker-bio">
-                    <strong>Bio:</strong> {worker.bio || 'No bio available'}
+                    <strong>{t('searchWorkers.bio')}:</strong> {worker.bio || t('searchWorkers.noBioAvailable')}
                   </p>
 
                   <div className="worker-details">
                     <div className="worker-detail">
-                      <strong>Location:</strong> {worker.barangay || 'Not specified'}
+                      <strong>{t('searchWorkers.location')}:</strong> {worker.barangay || t('searchWorkers.notSpecified')}
                     </div>
                     
                     {worker.skills && worker.skills.length > 0 && (
                       <div className="worker-detail">
-                        <strong>Skills:</strong>
+                        <strong>{t('searchWorkers.skills')}:</strong>
                         <div className="skills-list">
                           {worker.skills.map((skill, index) => (
                             <span key={index} className="skill-badge">{skill}</span>
@@ -520,11 +532,11 @@ function SearchWorkers() {
                     )}
 
                     <div className="worker-detail">
-                      <strong>Experience:</strong> {worker.yearsExperience || 'Not specified'} years
+                      <strong>{t('searchWorkers.experience')}:</strong> {worker.yearsExperience || t('searchWorkers.notSpecified')} {t('searchWorkers.years')}
                     </div>
 
                     <div className="worker-detail">
-                      <strong>Jobs Completed:</strong> {worker.jobsCompleted || 0}
+                      <strong>{t('searchWorkers.jobsCompleted')}:</strong> {worker.jobsCompleted || 0}
                     </div>
                     
                     <div className="worker-actions">
@@ -533,7 +545,7 @@ function SearchWorkers() {
                         className="view-profile-btn"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        View Profile
+                        {t('searchWorkers.viewProfile')}
                       </Link>
                       <button 
                         className="contact-btn"
@@ -543,7 +555,7 @@ function SearchWorkers() {
                         }}
                         type="button"
                       >
-                        Contact
+                        {t('searchWorkers.contact')}
                       </button>
                       <button 
                         className="invite-btn"
@@ -553,7 +565,7 @@ function SearchWorkers() {
                         }}
                         type="button"
                       >
-                        Invite to Job
+                        {t('searchWorkers.inviteToJob')}
                       </button>
                     </div>
                   </div>
@@ -569,8 +581,7 @@ function SearchWorkers() {
         <div className="modal-overlay" onClick={() => setShowWorkerModal(false)}>
           <div className="modal-content worker-profile-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>Worker Profile</h2>
-              <button className="modal-close" onClick={() => setShowWorkerModal(false)} aria-label="Close worker profile modal">×</button>
+              <h2>{t('searchWorkers.workerProfile')}</h2>
             </div>
             
             <div className="modal-body">
@@ -614,43 +625,43 @@ function SearchWorkers() {
                     className={`tab-btn ${activeProfileTab === 'profile' ? 'active' : ''}`}
                     onClick={() => setActiveProfileTab('profile')}
                   >
-                    Profile
+                    {t('searchWorkers.viewProfile')}
                   </button>
                   <button 
                     className={`tab-btn ${activeProfileTab === 'ratings' ? 'active' : ''}`}
                     onClick={() => setActiveProfileTab('ratings')}
                   >
-                    Ratings & Reviews
+                    {t('searchWorkers.ratingsAndReviews')}
                   </button>
                 </div>
                 
                 <div className={`tab-content ${activeProfileTab === 'profile' ? 'active' : ''}`} id="info-content">
                   <div className="worker-profile-section">
-                    <h4>About</h4>
-                    <p>{currentWorker.bio || 'No bio available'}</p>
+                    <h4>{t('searchWorkers.about')}</h4>
+                    <p>{currentWorker.bio || t('searchWorkers.noBioAvailable')}</p>
                   </div>
                   
                   <div className="worker-profile-section">
-                    <h4>Skills</h4>
+                    <h4>{t('searchWorkers.skills')}</h4>
                     <div className="worker-skills">
                       {currentWorker.skills?.map((skill, index) => (
                         <span key={index} className="skill-tag">{skill}</span>
-                      )) || <p>No skills listed</p>}
+                      )) || <p>{t('searchWorkers.notSpecified')}</p>}
                     </div>
                   </div>
                   
                   <div className="worker-profile-section">
-                    <h4>Experience</h4>
-                    <p>{currentWorker.yearsExperience ? `${currentWorker.yearsExperience} years` : 'No experience information provided'}</p>
+                    <h4>{t('searchWorkers.experience')}</h4>
+                    <p>{currentWorker.yearsExperience ? `${currentWorker.yearsExperience} ${t('searchWorkers.years')}` : t('searchWorkers.notSpecified')}</p>
                   </div>
                   
                   <div className="worker-profile-section">
-                    <h4>Contact Information</h4>
+                    <h4>{t('searchWorkers.contactInformation')}</h4>
                     {currentWorker.email && (
-                      <p><strong>Email:</strong> {currentWorker.email}</p>
+                      <p><strong>{t('searchWorkers.email')}:</strong> {currentWorker.email}</p>
                     )}
                     {currentWorker.mobileNo && (
-                      <p><strong>Phone:</strong> {currentWorker.mobileNo}</p>
+                      <p><strong>{t('searchWorkers.phone')}:</strong> {currentWorker.mobileNo}</p>
                     )}
                   </div>
                 </div>
@@ -669,13 +680,13 @@ function SearchWorkers() {
                             </span>
                           ))}
                         </span>
-                        <span className="rating-count">({workerRatings.length || 0} reviews)</span>
+                        <span className="rating-count">({workerRatings.length || 0} {t('searchWorkers.reviews')})</span>
                       </div>
                     </div>
                     
                     <div className="ratings-list">
                       {loadingRatings ? (
-                        <div className="loading-ratings">Loading reviews...</div>
+                        <div className="loading-ratings">{t('common.loading')}</div>
                       ) : workerRatings.length > 0 ? (
                         workerRatings.map(rating => (
                           <div key={rating._id} className="rating-card">
@@ -703,14 +714,14 @@ function SearchWorkers() {
                             )}
                             {rating.job && (
                               <div className="rating-job">
-                                <span className="job-label">Job: </span>
+                                <span className="job-label">{t('jobs.title')}: </span>
                                 <span className="job-title">{rating.job.title}</span>
                               </div>
                             )}
                           </div>
                         ))
                       ) : (
-                        <div className="no-ratings">No reviews yet</div>
+                        <div className="no-ratings">{t('searchWorkers.noRatings')}</div>
                       )}
                     </div>
                   </div>
@@ -728,7 +739,7 @@ function SearchWorkers() {
                 }}
                 aria-label={`Contact ${currentWorker.firstName}`}
               >
-                Contact
+                {t('searchWorkers.contact')}
               </button>
               <button 
                 className="btn accent"
@@ -738,14 +749,14 @@ function SearchWorkers() {
                 }}
                 aria-label={`Invite ${currentWorker.firstName} to job`}
               >
-                Invite to Job
+                {t('searchWorkers.inviteToJob')}
               </button>
               <button 
                 className="btn secondary" 
                 onClick={() => setShowWorkerModal(false)}
                 aria-label="Close modal"
               >
-                Close
+                {t('common.close')}
               </button>
             </div>
           </div>
@@ -757,8 +768,7 @@ function SearchWorkers() {
         <div className="modal-overlay" onClick={() => setShowContactModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>Contact Worker</h2>
-              <button className="modal-close" onClick={() => setShowContactModal(false)} aria-label="Close contact modal">×</button>
+              <h2>{t('searchWorkers.contactWorker')}</h2>
             </div>
             
             <div className="modal-body">
@@ -791,7 +801,7 @@ function SearchWorkers() {
                   )}
                   <p>{currentWorker.skills && currentWorker.skills.length > 0 
                     ? currentWorker.skills.slice(0, 3).join(', ') + (currentWorker.skills.length > 3 ? '...' : '')
-                    : 'No skills listed'}</p>
+                    : t('searchWorkers.notSpecified')}</p>
                 </div>
               </div>
               
@@ -807,24 +817,32 @@ function SearchWorkers() {
                   className="direct-message-btn"
                   onClick={() => setShowContactModal(false)}
                 >
-                  💬 Send Direct Message
+                  💬 {t('searchWorkers.sendMessage')}
                 </Link>
-                <p style={{textAlign: 'center', margin: '1rem 0', color: '#64748b'}}>or use quick message below</p>
+                <p style={{textAlign: 'center', margin: '1rem 0', color: '#64748b'}}>{t('common.or')}</p>
               </div>
 
               <div className="message-form">
-                <label htmlFor="contactMessage">Quick Message</label>
+                <label htmlFor="contactMessage">{t('searchWorkers.sendMessage')}</label>
                 <textarea
                   id="contactMessage"
                   value={contactMessage}
                   onChange={(e) => setContactMessage(e.target.value)}
-                  placeholder="Type a quick message here..."
+                  placeholder={t('searchWorkers.messagePlaceholder')}
                   rows={4}
                 ></textarea>
                 
-                <button className="send-message-btn" onClick={sendMessage}>
-                  Send Quick Message
-                </button>
+                <div className="modal-actions">
+                  <button 
+                    className="cancel-btn" 
+                    onClick={() => setShowContactModal(false)}
+                  >
+                    {t('common.cancel')}
+                  </button>
+                  <button className="send-message-btn" onClick={sendMessage}>
+                    {t('common.send')}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -837,9 +855,8 @@ function SearchWorkers() {
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div className="modal-title-with-status">
-                <h2>Invite to Job</h2>
+                <h2>{t('searchWorkers.inviteWorkerToJob')}</h2>
               </div>
-              <button className="modal-close" onClick={() => setShowInviteModal(false)} aria-label="Close job invitation modal">×</button>
             </div>
             
             <div className="modal-body">
@@ -862,13 +879,13 @@ function SearchWorkers() {
                   <p className="worker-skills-preview">
                     {currentWorker.skills && currentWorker.skills.length > 0 
                       ? currentWorker.skills.slice(0, 3).join(', ') + (currentWorker.skills.length > 3 ? '...' : '') 
-                      : 'No skills listed'}
+                      : t('searchWorkers.notSpecified')}
                   </p>
                 </div>
               </div>
               
               <div className="invitation-instruction">
-                <p>Select a job to invite this worker to:</p>
+                <p>{t('searchWorkers.selectJobMessage')}</p>
               </div>
               
               {myJobs.length > 0 ? (
@@ -919,16 +936,12 @@ function SearchWorkers() {
               ) : (
                 <div className="no-jobs-message">
                   <div className="icon">📭</div>
-                  <h3>No Open Jobs Available</h3>
-                  <p>You currently don't have any active job listings to invite workers to.</p>
+                  <h3>{t('searchWorkers.noJobsAvailable')}</h3>
+                  <p>{t('searchWorkers.createJobFirst')}</p>
                   <div className="no-jobs-info">
                     <div className="info-item">
                       <span className="info-icon">💡</span>
-                      <span className="info-text">Job invitations help you connect with qualified workers directly</span>
-                    </div>
-                    <div className="info-item">
-                      <span className="info-icon">🔍</span>
-                      <span className="info-text">Create a new job to invite workers</span>
+                      <span className="info-text">{t('searchWorkers.createJobFirst')}</span>
                     </div>
                   </div>
                 </div>
@@ -939,14 +952,14 @@ function SearchWorkers() {
                   className="cancel-btn" 
                   onClick={() => setShowInviteModal(false)}
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button 
                   className="invite-send-btn"
                   onClick={sendJobInvitation}
                   disabled={!selectedJobForInvite || sendingInvitation}
                 >
-                  {sendingInvitation ? 'Sending...' : 'Send Invitation'}
+                  {sendingInvitation ? t('searchWorkers.sendingInvitation') : t('searchWorkers.invite')}
                 </button>
               </div>
             </div>
@@ -1132,22 +1145,46 @@ function SearchWorkers() {
         }
 
         .worker-card {
-          background: white;
-          border-radius: 12px;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+          background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+          border-radius: 16px;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
           padding: 1.5rem;
-          transition: all 0.2s ease;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           cursor: pointer;
           position: relative;
+          border: 1px solid rgba(226, 232, 240, 0.8);
+          overflow: hidden;
+        }
+
+        .worker-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 4px;
+          background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+          transform: scaleX(0);
+          transition: transform 0.3s ease;
+        }
+
+        .worker-card:hover::before {
+          transform: scaleX(1);
         }
 
         .worker-card:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+          transform: translateY(-4px);
+          box-shadow: 0 12px 40px rgba(102, 126, 234, 0.15);
+          border-color: rgba(102, 126, 234, 0.2);
         }
         
         .worker-card.expanded {
-          box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 12px 40px rgba(102, 126, 234, 0.2);
+          border-color: rgba(102, 126, 234, 0.3);
+        }
+
+        .worker-card.expanded::before {
+          transform: scaleX(1);
         }
         
         .worker-preview {
@@ -1162,12 +1199,20 @@ function SearchWorkers() {
           align-items: center;
           color: #4a5568;
           font-size: 0.9rem;
-          background: #f7fafc;
-          padding: 0.35rem 0.75rem;
+          background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+          padding: 0.5rem 1rem;
           border-radius: 20px;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
+          border: 1px solid rgba(226, 232, 240, 0.6);
+          transition: all 0.2s ease;
+        }
+
+        .worker-preview-detail:hover {
+          background: linear-gradient(135deg, #edf2f7 0%, #e2e8f0 100%);
+          border-color: rgba(102, 126, 234, 0.3);
+          transform: translateY(-1px);
         }
         
         .preview-icon {
@@ -1181,6 +1226,18 @@ function SearchWorkers() {
           color: #718096;
           font-size: 0.85rem;
           margin-top: 0.5rem;
+          transition: all 0.3s ease;
+          padding: 0.5rem;
+          border-radius: 8px;
+        }
+
+        .expansion-indicator:hover {
+          background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+          color: #667eea;
+        }
+
+        .worker-card.expanded .expansion-indicator {
+          color: #667eea;
         }
         
         .indicator-text {
@@ -1209,8 +1266,8 @@ function SearchWorkers() {
         }
         
         .worker-avatar {
-          width: 50px;
-          height: 50px;
+          width: 60px;
+          height: 60px;
           border-radius: 50%;
           overflow: hidden;
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -1218,6 +1275,14 @@ function SearchWorkers() {
           display: flex;
           align-items: center;
           justify-content: center;
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+          border: 3px solid white;
+          transition: all 0.3s ease;
+        }
+
+        .worker-card:hover .worker-avatar {
+          box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+          transform: scale(1.05);
         }
         
         .worker-avatar img {
@@ -1242,15 +1307,37 @@ function SearchWorkers() {
           margin: 0;
           color: #2b6cb0;
           font-size: 1.25rem;
+          font-weight: 600;
+          background: linear-gradient(135deg, #2b6cb0 0%, #667eea 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
         }
 
         .worker-rating {
-          background: #ffc107;
-          color: white;
-          padding: 0.5rem 1rem;
+          background: linear-gradient(135deg, #ffd700 0%, #ffb700 100%);
+          color: #1a1a1a;
+          padding: 0.4rem 0.9rem;
           border-radius: 20px;
-          font-weight: bold;
+          font-weight: 600;
+          font-size: 0.95rem;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.4rem;
+          box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+          border: 1px solid rgba(255, 193, 7, 0.4);
+          transition: all 0.3s ease;
+        }
+
+        .worker-rating .star-icon {
+          color: #1a1a1a;
           font-size: 1.1rem;
+          filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+        }
+
+        .worker-card:hover .worker-rating {
+          box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4);
+          transform: translateY(-2px);
         }
 
         .worker-bio {
@@ -1288,11 +1375,22 @@ function SearchWorkers() {
         }
 
         .skill-badge {
-          background: #edf2f7;
+          background: linear-gradient(135deg, #edf2f7 0%, #e2e8f0 100%);
           color: #2d3748;
-          padding: 0.25rem 0.5rem;
+          padding: 0.4rem 0.8rem;
           border-radius: 12px;
           font-size: 0.875rem;
+          border: 1px solid rgba(226, 232, 240, 0.6);
+          transition: all 0.2s ease;
+          font-weight: 500;
+        }
+
+        .skill-badge:hover {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+          border-color: transparent;
         }
 
         .worker-actions {
@@ -1309,58 +1407,83 @@ function SearchWorkers() {
           border: none;
           padding: 0;
           margin: 0;
-          border-radius: 6px;
-          font-size: 0.8rem;
-          font-weight: 400;
+          border-radius: 8px;
+          font-size: 0.85rem;
+          font-weight: 500;
           font-family: inherit;
-          line-height: 32px; /* Match height for vertical centering */
+          line-height: 38px; /* Match height for vertical centering */
           cursor: pointer;
-          transition: all 0.2s ease;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           position: relative;
           z-index: 5; /* Ensure button is clickable */
           white-space: nowrap;
           text-align: center;
           width: 31%;
-          height: 32px; /* Fixed height for all buttons */
-          min-height: 32px;
-          max-height: 32px;
+          height: 38px; /* Fixed height for all buttons */
+          min-height: 38px;
+          max-height: 38px;
           display: inline-flex;
           align-items: center;
           justify-content: center;
           box-sizing: border-box;
           text-decoration: none; /* For Link elements */
           vertical-align: middle;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .view-profile-btn::before,
+        .contact-btn::before,
+        .invite-btn::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          border-radius: 8px;
+          background: rgba(255, 255, 255, 0.2);
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+
+        .view-profile-btn:hover::before,
+        .contact-btn:hover::before,
+        .invite-btn:hover::before {
+          opacity: 1;
         }
         
         /* Individual button colors */
         .view-profile-btn {
-          background: #3182ce;
+          background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%);
         }
 
         .view-profile-btn:hover {
-          background: #2c5282;
-          transform: translateY(-1px);
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          transform: translateY(-2px);
+          box-shadow: 0 6px 16px rgba(49, 130, 206, 0.4);
         }
         
         .contact-btn {
-          background: #38a169;
+          background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
         }
 
         .contact-btn:hover {
-          background: #2f855a;
-          transform: translateY(-1px);
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          transform: translateY(-2px);
+          box-shadow: 0 6px 16px rgba(56, 161, 105, 0.4);
         }
         
         .invite-btn {
-          background: #6b46c1;
+          background: linear-gradient(135deg, #6b46c1 0%, #553c9a 100%);
         }
         
         .invite-btn:hover {
-          background: #553c9a;
-          transform: translateY(-1px);
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          transform: translateY(-2px);
+          box-shadow: 0 6px 16px rgba(107, 70, 193, 0.4);
+        }
+
+        .view-profile-btn:active,
+        .contact-btn:active,
+        .invite-btn:active {
+          transform: translateY(0);
         }
 
         /* Modal Styles */
@@ -1526,20 +1649,26 @@ function SearchWorkers() {
         }
         
         .send-message-btn {
-          background: #38a169;
+          background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
           color: white;
           border: none;
           padding: 0.75rem 1.5rem;
           border-radius: 8px;
           font-size: 1rem;
+          font-weight: 500;
           cursor: pointer;
-          transition: background-color 0.2s;
-          align-self: flex-end;
-          margin-top: 0.5rem;
+          transition: all 0.3s ease;
+          flex: 1;
+          box-shadow: 0 2px 8px rgba(56, 161, 105, 0.3);
         }
         
         .send-message-btn:hover {
-          background: #2f855a;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(56, 161, 105, 0.4);
+        }
+        
+        .send-message-btn:active {
+          transform: translateY(0);
         }
         
         .invitation-instruction {

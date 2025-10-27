@@ -2,11 +2,14 @@ import { useState, useEffect, useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { AuthContext } from '../context/AuthContext'
 import { AlertContext } from '../context/AlertContext'
+import { useTranslation } from '../hooks/useTranslation'
 import apiService from '../api'
 import ReportModal from './ReportModal'
 import { getProfilePictureUrl } from '../utils/imageHelper'
 
 function EmployerDashboard() {
+  const { t } = useTranslation()
+  
   // Helper function for price formatting
   const formatPrice = (price) => {
     if (price === undefined || price === null) return '₱0';
@@ -246,17 +249,40 @@ function EmployerDashboard() {
   }
   
   // Send message function
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (!contactMessage.trim()) {
-      showError('Please enter a message');
+      showError(t('common.enterMessage'));
       return;
     }
     
-    // In a real app, this would send the message to the backend
-    // For now, we'll just show a success message
-    success(`Message sent to ${currentWorker.firstName} ${currentWorker.lastName}!`);
-    setShowContactModal(false);
-    setContactMessage('');
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE}/messages`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          recipientId: currentWorker._id,
+          subject: 'Job Inquiry',
+          content: contactMessage
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        success(t('employerDashboard.messageSent'));
+        setShowContactModal(false);
+        setContactMessage('');
+      } else {
+        showError(data.message || data.alert || 'Failed to send message');
+      }
+    } catch (err) {
+      console.error('Error sending message:', err);
+      showError('Failed to send message. Please try again.');
+    }
   }
   
   // Report user functions
@@ -320,17 +346,17 @@ function EmployerDashboard() {
       // Use the new API method for invitations
       await apiService.inviteWorker(jobId, currentWorker._id);
       
-      success(`Invitation sent to ${currentWorker.firstName} ${currentWorker.lastName}!`);
+      success(t('employerDashboard.inviteSuccess'));
       setShowInviteModal(false);
     } catch (error) {
       console.error('Error sending invitation:', error);
       // Show more specific error message
       if (error.message.includes('not found')) {
-        showError('Job or worker not found. Please refresh and try again.');
+        showError(t('employerDashboard.inviteFailed'));
       } else if (error.message.includes('not authorized')) {
-        showError('You are not authorized to invite workers to this job.');
+        showError(t('employerDashboard.inviteFailed'));
       } else {
-        showError('Could not send invitation. Please try again later.');
+        showError(t('employerDashboard.inviteFailed'));
       }
     } finally {
       setLoading(false);
@@ -410,7 +436,7 @@ function EmployerDashboard() {
         jobId: jobToComplete._id
       });
 
-      success('Job completed and rating submitted successfully');
+      success(t('employerDashboard.completeSuccess'));
       setShowCompleteModal(false);
       setJobToComplete(null);
       setRating(0);
@@ -421,7 +447,7 @@ function EmployerDashboard() {
       await loadDashboardStats();
     } catch (error) {
       console.error('Error completing job:', error);
-      showError(error.message || 'Failed to complete job');
+      showError(error.message || t('employerDashboard.completeFailed'));
     }
   };
 
@@ -448,7 +474,7 @@ function EmployerDashboard() {
       setJobs(prevJobs => prevJobs.filter(job => job._id !== jobToDelete._id));
       setMyJobs(prevJobs => prevJobs.filter(job => job._id !== jobToDelete._id));
       
-      success(result.alert || 'Job deleted successfully');
+      success(result.alert || t('employerDashboard.deleteSuccess'));
       
       // Refresh the dashboard stats
       await loadDashboardStats();
@@ -458,7 +484,7 @@ function EmployerDashboard() {
       setJobToDelete(null);
     } catch (error) {
       console.error('Error deleting job:', error);
-      showError(error.message || 'Failed to delete job');
+      showError(error.message || t('employerDashboard.deleteFailed'));
     } finally {
       setLoading(false);
     }
@@ -491,14 +517,14 @@ function EmployerDashboard() {
       
       console.log(`Response for ${action}:`, result);
       
-      success(`Application ${action}ed successfully`);
+      success(action === 'accept' ? t('employerDashboard.acceptSuccess') : t('employerDashboard.rejectSuccess'));
       loadApplications();
       // Also reload the jobs to reflect changes
       loadMyJobs();
       loadDashboardStats();
     } catch (error) {
       console.error(`Error ${action}ing application:`, error);
-      showError(`Error ${action}ing application: ${error.message}`);
+      showError(action === 'accept' ? t('employerDashboard.acceptFailed') : t('employerDashboard.rejectFailed'));
     }
   }
   
@@ -583,7 +609,7 @@ function EmployerDashboard() {
         price: parseFloat(editFormData.price)
       });
       
-      success(result.alert || "Job updated successfully!");
+      success(result.alert || t('employerDashboard.editSuccess'));
       setShowEditModal(false);
       
       // Refresh the jobs list
@@ -591,7 +617,7 @@ function EmployerDashboard() {
       await loadDashboardStats();
     } catch (error) {
       console.error('Error updating job:', error);
-      showError(`Error updating job: ${error.message || 'Failed to update job'}`);
+      showError(error.message || t('employerDashboard.editFailed'));
     } finally {
       setLoading(false);
     }
@@ -602,7 +628,7 @@ function EmployerDashboard() {
       <div className="dashboard-container">
         <div className="loading-state">
           <div className="spinner large"></div>
-          <p>Loading dashboard...</p>
+          <p>{t('common.loading')}</p>
         </div>
       </div>
     )
@@ -611,7 +637,7 @@ function EmployerDashboard() {
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">
-        <h1>Employer Dashboard</h1>
+        <h1>{t('employerDashboard.title')}</h1>
         <p>Welcome back, {user?.firstName}!</p>
         <Link to="/landing" className="back-btn">Back to Landing</Link>
       </div>
@@ -622,7 +648,7 @@ function EmployerDashboard() {
           <div className="stat-icon">💼</div>
           <div className="stat-content">
             <h3>{stats.activeJobs}</h3>
-            <p>Active Jobs</p>
+            <p>{t('employerDashboard.activeJobs')}</p>
           </div>
         </div>
         
@@ -630,7 +656,7 @@ function EmployerDashboard() {
           <div className="stat-icon">📝</div>
           <div className="stat-content">
             <h3>{stats.totalApplications}</h3>
-            <p>Total Applications</p>
+            <p>{t('employerDashboard.totalApplications')}</p>
           </div>
         </div>
         
@@ -638,7 +664,7 @@ function EmployerDashboard() {
           <div className="stat-icon">✅</div>
           <div className="stat-content">
             <h3>{stats.completedJobs}</h3>
-            <p>Completed Jobs</p>
+            <p>{t('employerDashboard.completedJobs')}</p>
           </div>
         </div>
         
@@ -646,7 +672,7 @@ function EmployerDashboard() {
           <div className="stat-icon">⭐</div>
           <div className="stat-content">
             <h3>{stats.averageRating.toFixed(1)}</h3>
-            <p>Average Rating</p>
+            <p>{t('employerDashboard.averageRating')}</p>
           </div>
         </div>
       </div>
@@ -655,11 +681,11 @@ function EmployerDashboard() {
       <div className="quick-actions">
         <Link to="/post-job" className="action-btn primary">
           <span className="icon">➕</span>
-          Post New Job
+          {t('employerDashboard.postNewJob')}
         </Link>
         <Link to="/search-workers" className="action-btn secondary">
           <span className="icon">🔍</span>
-          Browse Workers
+          {t('employerDashboard.searchWorkers')}
         </Link>
       </div>
 
@@ -669,19 +695,19 @@ function EmployerDashboard() {
           className={`tab-btn ${currentTab === 'my-jobs' ? 'active' : ''}`}
           onClick={() => handleTabChange('my-jobs')}
         >
-          My Jobs
+          {t('employerDashboard.myJobs')}
         </button>
         <button 
           className={`tab-btn ${currentTab === 'applications' ? 'active' : ''}`}
           onClick={() => handleTabChange('applications')}
         >
-          Applications Received
+          {t('employerDashboard.applications')}
         </button>
         <button 
           className={`tab-btn ${currentTab === 'workers' ? 'active' : ''}`}
           onClick={() => handleTabChange('workers')}
         >
-          Available Workers
+          {t('employerDashboard.workers')}
         </button>
       </div>
 
@@ -690,7 +716,7 @@ function EmployerDashboard() {
         {tabLoading ? (
           <div className="loading-state">
             <div className="spinner"></div>
-            <p>Loading...</p>
+            <p>{t('common.loading')}</p>
           </div>
         ) : (
           <>
@@ -701,7 +727,7 @@ function EmployerDashboard() {
                   <>
                     {/* Active Jobs Section */}
                     <div className="jobs-section">
-                      <h2 className="section-title">Active Jobs</h2>
+                      <h2 className="section-title">{t('employerDashboard.activeJobs')}</h2>
                       <div className="jobs-grid">
                         {myJobs.filter(job => job.status !== 'completed' && !job.completed).length > 0 ? (
                           myJobs.filter(job => job.status !== 'completed' && !job.completed).map(job => (
@@ -718,17 +744,17 @@ function EmployerDashboard() {
                                 </div>
                                 <div className="meta-item">
                                   <span className="icon">👥</span>
-                                  {job.applicants ? job.applicants.length : 0} applicants
+                                  {job.applicants ? job.applicants.length : 0} {t('employerDashboard.applicants')}
                                 </div>
                                 <div className="meta-item">
                                   <span className={`status ${job.isOpen !== false ? 'active' : 'closed'}`}>
-                                    {job.isOpen !== false ? 'Active' : 'Closed'}
+                                    {job.isOpen !== false ? t('employerDashboard.open') : t('employerDashboard.closed')}
                                   </span>
                                 </div>
                                 {job.assignedTo && (
                                   <div className="meta-item">
                                     <span className="icon">👤</span>
-                                    Assigned to: {job.assignedTo.firstName} {job.assignedTo.lastName}
+                                    {t('employerDashboard.assignedTo')}: {job.assignedTo.firstName} {job.assignedTo.lastName}
                                   </div>
                                 )}
                               </div>
@@ -743,28 +769,28 @@ function EmployerDashboard() {
                                   className="btn secondary"
                                   onClick={() => editJob(job)}
                                 >
-                                  Edit
+                                  {t('employerDashboard.edit')}
                                 </button>
                                 {job.assignedTo && job.status !== 'completed' && !job.completed && (
                                   <button 
                                     className="btn success"
                                     onClick={() => openCompleteModal(job)}
                                   >
-                                    Mark Completed
+                                    {t('employerDashboard.complete')}
                                   </button>
                                 )}
                                 <button 
                                   className="btn danger"
                                   onClick={() => openDeleteModal(job)}
                                 >
-                                  Delete
+                                  {t('employerDashboard.delete')}
                                 </button>
                               </div>
                             </div>
                           ))
                         ) : (
                           <div className="no-data">
-                            <p>No active jobs</p>
+                            <p>{t('employerDashboard.noJobsYet')}</p>
                           </div>
                         )}
                       </div>
@@ -772,7 +798,7 @@ function EmployerDashboard() {
 
                     {/* Completed Jobs Section */}
                     <div className="jobs-section">
-                      <h2 className="section-title">Completed Jobs</h2>
+                      <h2 className="section-title">{t('employerDashboard.completedJobs')}</h2>
                       <div className="jobs-grid">
                         {myJobs.filter(job => job.status === 'completed' || job.completed).length > 0 ? (
                           myJobs.filter(job => job.status === 'completed' || job.completed).map(job => (
@@ -788,7 +814,7 @@ function EmployerDashboard() {
                                   {job.barangay}
                                 </div>
                                 <div className="meta-item">
-                                  <span className="status completed">Completed</span>
+                                  <span className="status completed">{t('employerDashboard.completed')}</span>
                                 </div>
                                 {job.assignedTo && (
                                   <div className="meta-item">
@@ -813,14 +839,14 @@ function EmployerDashboard() {
                                   className="btn danger"
                                   onClick={() => openDeleteModal(job)}
                                 >
-                                  Delete
+                                  {t('employerDashboard.delete')}
                                 </button>
                               </div>
                             </div>
                           ))
                         ) : (
                           <div className="no-data">
-                            <p>No completed jobs yet</p>
+                            <p>{t('employerDashboard.noJobsYet')}</p>
                           </div>
                         )}
                       </div>
@@ -828,8 +854,8 @@ function EmployerDashboard() {
                   </>
                 ) : (
                   <div className="no-data">
-                    <p>You haven't posted any jobs yet</p>
-                    <Link to="/post-job" className="btn primary">Post Your First Job</Link>
+                    <p>{t('employerDashboard.noJobsYet')}</p>
+                    <Link to="/post-job" className="btn primary">{t('employerDashboard.startPosting')}</Link>
                   </div>
                 )}
               </div>
@@ -849,7 +875,10 @@ function EmployerDashboard() {
                               <h4>{app.user?.firstName} {app.user?.lastName}</h4>
                               <p>{app.user?.email}</p>
                               <span className={`status ${app.status}`}>
-                                {app.status || 'pending'}
+                                {app.status === 'pending' ? t('employerDashboard.pending') : 
+                                 app.status === 'accepted' ? t('employerDashboard.accepted') : 
+                                 app.status === 'rejected' ? t('employerDashboard.rejected') : 
+                                 app.status || t('employerDashboard.pending')}
                               </span>
                             </div>
                             <div className="applicant-actions">
@@ -860,14 +889,14 @@ function EmployerDashboard() {
                                     onClick={() => handleApplication(app._id, 'accept', job._id, app.user?._id || app.userId)}
                                     disabled={!app.user?._id && !app.userId}
                                   >
-                                    Accept
+                                    {t('employerDashboard.accept')}
                                   </button>
                                   <button 
                                     className="btn danger"
                                     onClick={() => handleApplication(app._id, 'reject', job._id, app.user?._id || app.userId)}
                                     disabled={!app.user?._id && !app.userId}
                                   >
-                                    Reject
+                                    {t('employerDashboard.reject')}
                                   </button>
                                 </>
                               )}
@@ -879,7 +908,7 @@ function EmployerDashboard() {
                   ))
                 ) : (
                   <div className="no-data">
-                    <p>No applications received yet</p>
+                    <p>{t('employerDashboard.noApplications')}</p>
                   </div>
                 )}
               </div>
@@ -913,7 +942,7 @@ function EmployerDashboard() {
                       </div>
                       
                       <div className="worker-info">
-                        <p>{worker.bio || 'No bio available'}</p>
+                        <p>{worker.bio || t('employerDashboard.noDescription')}</p>
                         <div className="worker-skills">
                           {worker.skills?.map((skill, index) => (
                             <span key={index} className="skill-tag">{skill}</span>
@@ -927,35 +956,35 @@ function EmployerDashboard() {
                           onClick={() => contactWorker(worker)}
                           aria-label={`Contact ${worker.firstName}`}
                         >
-                          Contact
+                          {t('employerDashboard.message')}
                         </button>
                         <Link 
                           to={`/profile/${worker._id}`}
                           className="btn secondary" 
                           aria-label={`View ${worker.firstName}'s profile`}
                         >
-                          View Profile
+                          {t('employerDashboard.viewProfile')}
                         </Link>
                         <button 
                           className="btn accent" 
                           onClick={() => openInviteModal(worker)}
                           aria-label={`Invite ${worker.firstName} to job`}
                         >
-                          Invite to Job
+                          {t('employerDashboard.inviteWorker')}
                         </button>
                         <button 
                           className="btn danger" 
                           onClick={() => openReportModal(worker)}
                           aria-label={`Report ${worker.firstName}`}
                         >
-                          🚩 Report
+                          🚩 {t('employerDashboard.report')}
                         </button>
                       </div>
                     </div>
                   ))
                 ) : (
                   <div className="no-data">
-                    <p>No workers available at the moment</p>
+                    <p>{t('employerDashboard.noWorkersFound')}</p>
                   </div>
                 )}
               </div>
@@ -969,18 +998,12 @@ function EmployerDashboard() {
         <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>Edit Job</h2>
-              <button 
-                className="modal-close"
-                onClick={() => setShowEditModal(false)}
-              >
-                &times;
-              </button>
+              <h2>{t('employerDashboard.editJobTitle')}</h2>
             </div>
             
             <form onSubmit={handleSaveJob} className="edit-job-form">
               <div className="form-group">
-                <label htmlFor="title">Job Title *</label>
+                <label htmlFor="title">{t('employerDashboard.jobTitle')} *</label>
                 <input
                   type="text"
                   id="title"
@@ -993,7 +1016,7 @@ function EmployerDashboard() {
               </div>
 
               <div className="form-group">
-                <label htmlFor="description">Job Description *</label>
+                <label htmlFor="description">{t('employerDashboard.description')} *</label>
                 <textarea
                   id="description"
                   name="description"
@@ -1007,7 +1030,7 @@ function EmployerDashboard() {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label htmlFor="price">Price (₱) *</label>
+                  <label htmlFor="price">{t('employerDashboard.price')} (₱) *</label>
                   <input
                     type="number"
                     id="price"
@@ -1022,7 +1045,7 @@ function EmployerDashboard() {
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="barangay">Barangay *</label>
+                  <label htmlFor="barangay">{t('employerDashboard.barangay')} *</label>
                   <input
                     type="text"
                     id="barangay"
@@ -1036,7 +1059,7 @@ function EmployerDashboard() {
               </div>
 
               <div className="form-group">
-                <label>Skills Required</label>
+                <label>{t('employerDashboard.requiredSkills')}</label>
                 <div className="skills-input">
                   <div className="skills-input-container">
                     <input
@@ -1105,13 +1128,13 @@ function EmployerDashboard() {
                   className="btn secondary" 
                   onClick={() => setShowEditModal(false)}
                 >
-                  Cancel
+                  {t('employerDashboard.cancel')}
                 </button>
                 <button 
                   type="submit" 
                   className="btn primary" 
                 >
-                  Save Changes
+                  {t('employerDashboard.save')}
                 </button>
               </div>
             </form>
@@ -1351,56 +1374,107 @@ function EmployerDashboard() {
           display: flex;
           gap: 1rem;
           margin-bottom: 2rem;
+          flex-wrap: wrap;
         }
 
         .action-btn {
-          display: flex;
+          display: inline-flex;
           align-items: center;
-          gap: 0.5rem;
-          padding: 0.75rem 1.5rem;
-          border-radius: 8px;
+          justify-content: center;
+          gap: 0.6rem;
+          padding: 0.85rem 1.75rem;
+          border-radius: 10px;
           text-decoration: none;
-          font-weight: 500;
-          transition: background-color 0.2s;
+          font-weight: 600;
+          font-size: 0.95rem;
+          transition: all 0.3s ease;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          white-space: nowrap;
+          flex: 1;
+          min-width: 180px;
+          max-width: 300px;
+        }
+        
+        .action-btn .icon {
+          font-size: 1.2rem;
+          filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
         }
 
         .action-btn.primary {
-          background: #2b6cb0;
+          background: linear-gradient(135deg, #2b6cb0 0%, #2c5282 100%);
           color: white;
+          border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .action-btn.primary:hover {
-          background: #2c5282;
+          background: linear-gradient(135deg, #2c5282 0%, #1e3a5f 100%);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(43, 108, 176, 0.3);
         }
 
         .action-btn.secondary {
-          background: #e2e8f0;
+          background: linear-gradient(135deg, #f7fafc 0%, #e2e8f0 100%);
           color: #2d3748;
+          border: 1px solid #cbd5e0;
         }
 
         .action-btn.secondary:hover {
-          background: #cbd5e0;
+          background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        @media (max-width: 768px) {
+          .quick-actions {
+            flex-direction: column;
+          }
+          
+          .action-btn {
+            max-width: 100%;
+          }
         }
 
         .tab-navigation {
           background: white;
           border-radius: 12px 12px 0 0;
           display: flex;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+          border: 1px solid #e2e8f0;
+          border-bottom: none;
+          overflow: hidden;
+          width: 100%;
         }
 
         .tab-btn {
           flex: 1;
-          padding: 1rem 1.5rem;
+          padding: 1.1rem 1rem;
           border: none;
-          background: #f3f6fa;
-          color: #2b6cb0;
+          background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+          color: #475569;
           cursor: pointer;
-          font-size: 1rem;
-          transition: background-color 0.2s, color 0.2s;
-          border-radius: 12px 12px 0 0;
-          border-bottom: 3px solid #e2e8f0;
-          font-weight: 500;
+          font-size: 0.95rem;
+          transition: all 0.3s ease;
+          border-bottom: 3px solid transparent;
+          font-weight: 600;
+          position: relative;
+          white-space: normal;
+          word-wrap: break-word;
+          overflow: hidden;
+          text-align: center;
+          line-height: 1.3;
+          min-width: 0;
+        }
+        
+        .tab-btn::before {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: 3px;
+          background: linear-gradient(90deg, #2b6cb0 0%, #3b82f6 100%);
+          transform: scaleX(0);
+          transition: transform 0.3s ease;
         }
 
         .tab-btn:first-child {
@@ -1412,14 +1486,32 @@ function EmployerDashboard() {
         }
 
         .tab-btn.active {
-          background: #2b6cb0;
-          color: #fff;
-          font-weight: bold;
-          text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+          background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+          color: #2b6cb0;
+          font-weight: 700;
+        }
+        
+        .tab-btn.active::before {
+          transform: scaleX(1);
         }
 
         .tab-btn:not(.active):hover {
-          background: #f7fafc;
+          background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+          color: #2b6cb0;
+        }
+        
+        @media (max-width: 768px) {
+          .tab-btn {
+            padding: 1rem 0.5rem;
+            font-size: 0.85rem;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .tab-btn {
+            padding: 0.9rem 0.4rem;
+            font-size: 0.8rem;
+          }
         }
 
         .tab-content {
@@ -1482,17 +1574,24 @@ function EmployerDashboard() {
         }
 
         .job-card, .worker-card {
-          border: 2px solid #e2e8f0;
-          border-radius: 8px;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
           padding: 1.5rem;
-          transition: transform 0.2s, box-shadow 0.2s;
+          transition: all 0.3s ease;
           display: flex;
           flex-direction: column;
+          background: white;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
         .job-card:hover, .worker-card:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+          transform: translateY(-3px);
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+          border-color: rgba(59, 130, 246, 0.3);
+        }
+        
+        .worker-card {
+          min-height: 360px;
         }
 
         .job-header, .worker-header {
@@ -1548,6 +1647,16 @@ function EmployerDashboard() {
 
         .worker-header-info {
           flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+        
+        .worker-header-info h3 {
+          margin: 0;
+          color: #2b6cb0;
+          font-size: 1.15rem;
+          font-weight: 600;
         }
 
         .job-header h3, .worker-header h3 {
@@ -1567,20 +1676,24 @@ function EmployerDashboard() {
         }
 
         .worker-rating {
-          background: #ffc107;
-          color: white;
-          padding: 0.25rem 0.75rem;
-          border-radius: 15px;
-          font-weight: bold;
-          font-size: 0.9rem;
-          display: flex;
+          background: linear-gradient(135deg, #ffd700 0%, #ffb700 100%);
+          color: #1a1a1a;
+          padding: 0.4rem 0.9rem;
+          border-radius: 20px;
+          font-weight: 600;
+          font-size: 0.95rem;
+          display: inline-flex;
           align-items: center;
-          gap: 0.3rem;
+          gap: 0.4rem;
+          box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+          border: 1px solid rgba(255, 193, 7, 0.4);
+          width: fit-content;
         }
         
         .worker-rating .star-icon {
-          color: #ffffff;
-          font-size: 1rem;
+          color: #1a1a1a;
+          font-size: 1.1rem;
+          filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
         }
 
         .job-meta, .worker-info {
@@ -1770,29 +1883,78 @@ function EmployerDashboard() {
         .worker-info {
           flex: 1;
           margin-bottom: 1rem;
+          display: flex;
+          flex-direction: column;
+          gap: 0.8rem;
+        }
+        
+        .worker-info p {
+          color: #4a5568;
+          font-size: 0.9rem;
+          line-height: 1.5;
+          margin: 0;
+        }
+        
+        .worker-skills {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.5rem;
         }
         
         .worker-card .worker-actions {
           margin-top: auto;
-          display: flex;
-          flex-wrap: wrap;
-          gap: 0.8rem;
-          justify-content: center;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 0.6rem;
+          padding-top: 0.5rem;
         }
 
         .worker-card .worker-actions .btn {
-          flex: 1;
-          min-width: 90px;
-          max-width: 120px;
+          width: 100%;
+          padding: 0.6rem 0.8rem;
           font-weight: 500;
+          font-size: 0.85rem;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          min-height: 38px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        
+        .worker-card .worker-actions .btn.accent {
+          grid-column: 1 / -1;
+        }
+        
+        .worker-card .worker-actions .btn.danger {
+          grid-column: 1 / -1;
+        }
+        
+        @media (max-width: 768px) {
+          .worker-card .worker-actions {
+            grid-template-columns: 1fr;
+          }
+          
+          .worker-card .worker-actions .btn {
+            font-size: 0.9rem;
+          }
         }
 
         .skill-tag {
-          background: #e2e8f0;
+          background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%);
           color: #2d3748;
-          padding: 0.25rem 0.5rem;
-          border-radius: 12px;
+          padding: 0.35rem 0.75rem;
+          border-radius: 16px;
           font-size: 0.8rem;
+          font-weight: 500;
+          border: 1px solid rgba(0, 0, 0, 0.05);
+          transition: all 0.2s ease;
+        }
+        
+        .skill-tag:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
         }
 
         .loading-state {
@@ -2897,8 +3059,7 @@ function EmployerDashboard() {
         <div className="modal-overlay" onClick={() => setShowWorkerModal(false)}>
           <div className="modal-content worker-profile-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>Worker Profile</h2>
-              <button className="modal-close" onClick={() => setShowWorkerModal(false)} aria-label="Close worker profile modal">×</button>
+              <h2>{t('employerDashboard.workerProfile')}</h2>
             </div>
             
             <div className="modal-body">
@@ -2929,7 +3090,7 @@ function EmployerDashboard() {
                     <span className="rating-score">{(currentWorker.avgRating || 4.5).toFixed(1)}</span>
                   </div>
                   <p className="worker-location">
-                    <span className="location-icon">📍</span> {currentWorker.barangay || 'Location not specified'}
+                    <span className="location-icon">📍</span> {currentWorker.barangay || t('employerDashboard.noDescription')}
                   </p>
                 </div>
               </div>
@@ -2940,40 +3101,40 @@ function EmployerDashboard() {
                     className={`tab-btn ${activeProfileTab === 'profile' ? 'active' : ''}`}
                     onClick={() => setActiveProfileTab('profile')}
                   >
-                    Profile
+                    {t('employerDashboard.viewProfile')}
                   </button>
                   <button 
                     className={`tab-btn ${activeProfileTab === 'ratings' ? 'active' : ''}`}
                     onClick={() => setActiveProfileTab('ratings')}
                   >
-                    Ratings & Reviews
+                    {t('employerDashboard.rating')}
                   </button>
                 </div>
                 
                 <div className={`tab-content ${activeProfileTab === 'profile' ? 'active' : ''}`}>
                   <div className="worker-profile-section">
-                    <h4>About</h4>
-                    <p>{currentWorker.bio || 'No bio available'}</p>
+                    <h4>{t('employerDashboard.about')}</h4>
+                    <p>{currentWorker.bio || t('employerDashboard.noDescription')}</p>
                   </div>
                   
                   <div className="worker-profile-section">
-                    <h4>Skills</h4>
+                    <h4>{t('employerDashboard.skills')}</h4>
                     <div className="worker-skills">
                       {currentWorker.skills?.map((skill, index) => (
                         <span key={index} className="skill-tag">{skill}</span>
-                      )) || <p>No skills listed</p>}
+                      )) || <p>{t('employerDashboard.noSkills')}</p>}
                     </div>
                   </div>
                   
                   <div className="worker-profile-section">
-                    <h4>Experience</h4>
-                    <p>{currentWorker.experience || 'No experience information provided'}</p>
+                    <h4>{t('employerDashboard.experience')}</h4>
+                    <p>{currentWorker.experience || t('employerDashboard.noDescription')}</p>
                   </div>
                   
                   <div className="worker-profile-section">
-                    <h4>Contact Information</h4>
-                    <p><strong>Email:</strong> {currentWorker.email}</p>
-                    <p><strong>Phone:</strong> {currentWorker.mobileNo || 'Not provided'}</p>
+                    <h4>{t('employerDashboard.contactInformation')}</h4>
+                    <p><strong>{t('employerDashboard.email')}:</strong> {currentWorker.email}</p>
+                    <p><strong>{t('employerDashboard.phone')}:</strong> {currentWorker.mobileNo || t('employerDashboard.noDescription')}</p>
                   </div>
                 </div>
                 
@@ -3023,14 +3184,14 @@ function EmployerDashboard() {
                             )}
                             {rating.job && (
                               <div className="rating-job">
-                                <span className="job-label">Job: </span>
+                                <span className="job-label">{t('employerDashboard.jobTitle')}: </span>
                                 <span className="job-title">{rating.job.title}</span>
                               </div>
                             )}
                           </div>
                         ))
                       ) : (
-                        <div className="no-ratings">No reviews yet</div>
+                        <div className="no-ratings">{t('employerDashboard.noJobsYet')}</div>
                       )}
                     </div>
                   </div>
@@ -3044,7 +3205,7 @@ function EmployerDashboard() {
                 onClick={() => contactWorker(currentWorker)}
                 aria-label={`Contact ${currentWorker.firstName}`}
               >
-                Contact
+                {t('employerDashboard.message')}
               </button>
               <button 
                 className="btn accent"
@@ -3054,14 +3215,14 @@ function EmployerDashboard() {
                 }}
                 aria-label={`Invite ${currentWorker.firstName} to job`}
               >
-                Invite to Job
+                {t('employerDashboard.inviteWorker')}
               </button>
               <button 
                 className="btn secondary" 
                 onClick={() => setShowWorkerModal(false)}
                 aria-label="Close modal"
               >
-                Close
+                {t('employerDashboard.cancel')}
               </button>
             </div>
           </div>
@@ -3073,8 +3234,7 @@ function EmployerDashboard() {
         <div className="modal-overlay" onClick={() => setShowContactModal(false)}>
           <div className="modal-content contact-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>Contact {currentWorker.firstName}</h2>
-              <button className="modal-close" onClick={() => setShowContactModal(false)} aria-label="Close contact modal">×</button>
+              <h2>{t('employerDashboard.message')} {currentWorker.firstName}</h2>
             </div>
             
             <div className="modal-body">
@@ -3116,8 +3276,8 @@ function EmployerDashboard() {
               </div>
               
               <div className="message-section">
-                <h4>Send a Message</h4>
-                <p className="message-info">Send a direct message to {currentWorker.firstName} through the platform</p>
+                <h4>{t('employerDashboard.message')}</h4>
+                <p className="message-info">{t('employerDashboard.message')} {currentWorker.firstName}</p>
                 
                 <div className="direct-message-link">
                   <Link 
@@ -3126,12 +3286,12 @@ function EmployerDashboard() {
                     className="chat-link-btn"
                     onClick={() => setShowContactModal(false)}
                   >
-                    💬 Open Chat with {currentWorker.firstName}
+                    💬 {t('employerDashboard.message')} {currentWorker.firstName}
                   </Link>
                 </div>
                 
                 <div className="divider-text">
-                  <span>or send via form below</span>
+                  <span>{t('common.or')}</span>
                 </div>
                 
                 <div className="message-form">
@@ -3139,7 +3299,7 @@ function EmployerDashboard() {
                     id="message-input"
                     value={contactMessage}
                     onChange={(e) => setContactMessage(e.target.value)}
-                    placeholder={`Hello ${currentWorker.firstName}, I'm interested in discussing a job opportunity with you...`}
+                    placeholder={`${t('employerDashboard.message')} ${currentWorker.firstName}...`}
                     rows="5"
                     className="message-textarea"
                   ></textarea>
@@ -3154,7 +3314,7 @@ function EmployerDashboard() {
                       {loading ? (
                         <span className="spinner-inline"></span>
                       ) : (
-                        'Send Message'
+                        t('common.send')
                       )}
                     </button>
                   </div>
@@ -3168,7 +3328,7 @@ function EmployerDashboard() {
                 onClick={() => setShowContactModal(false)}
                 aria-label="Close contact modal"
               >
-                Close
+                {t('common.close')}
               </button>
             </div>
           </div>
@@ -3181,9 +3341,8 @@ function EmployerDashboard() {
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div className="modal-title-with-status">
-                <h2>Invite to Job</h2>
+                <h2>{t('employerDashboard.inviteWorker')}</h2>
               </div>
-              <button className="modal-close" onClick={() => setShowInviteModal(false)} aria-label="Close job invitation modal">×</button>
             </div>
             
             <div className="modal-body">
@@ -3204,13 +3363,13 @@ function EmployerDashboard() {
                   <p className="worker-skills-preview">
                     {currentWorker.skills && currentWorker.skills.length > 0 
                       ? currentWorker.skills.slice(0, 3).join(', ') + (currentWorker.skills.length > 3 ? '...' : '') 
-                      : 'No skills listed'}
+                      : t('employerDashboard.noSkills')}
                   </p>
                 </div>
               </div>
               
               <div className="invitation-instruction">
-                <p>Select a job to invite this worker to:</p>
+                <p>{t('employerDashboard.selectJobMessage')}</p>
               </div>
               
               {myJobs.length > 0 ? (
@@ -3227,7 +3386,7 @@ function EmployerDashboard() {
                           <div className="job-header-with-status">
                             <h4>{job.title}</h4>
                             <div className={`job-status-badge ${job.completed ? 'completed' : (job.isOpen !== false ? 'active' : 'closed')}`}>
-                              {job.completed ? 'Completed' : (job.isOpen !== false ? 'Active' : 'Closed')}
+                              {job.completed ? t('employerDashboard.completed') : (job.isOpen !== false ? t('employerDashboard.open') : t('employerDashboard.closed'))}
                             </div>
                           </div>
                           <p className="job-description-preview">
@@ -3261,8 +3420,8 @@ function EmployerDashboard() {
               ) : (
                 <div className="no-jobs-message">
                   <div className="icon">📭</div>
-                  <h3>No Open Jobs Available</h3>
-                  <p>You currently don't have any active job listings to invite workers to.</p>
+                  <h3>{t('employerDashboard.noJobsYet')}</h3>
+                  <p>{t('employerDashboard.startPosting')}</p>
                   <div className="no-jobs-info">
                     <div className="info-item">
                       <span className="info-icon">💡</span>
@@ -3278,13 +3437,7 @@ function EmployerDashboard() {
                     </div>
                   </div>
                   <div className="no-jobs-actions">
-                    <Link to="/post-job" className="btn accent">Post a New Job</Link>
-                    <button 
-                      className="btn secondary"
-                      onClick={() => setShowInviteModal(false)}
-                    >
-                      Cancel
-                    </button>
+                    <Link to="/post-job" className="btn accent">{t('employerDashboard.postNewJob')}</Link>
                   </div>
                 </div>
               )}
@@ -3303,7 +3456,7 @@ function EmployerDashboard() {
                 {loading ? (
                   <span className="spinner-inline"></span>
                 ) : (
-                  'Send Invitation'
+                  t('employerDashboard.invite')
                 )}
               </button>
               <button 
@@ -3311,7 +3464,7 @@ function EmployerDashboard() {
                 onClick={() => setShowInviteModal(false)}
                 aria-label="Cancel invitation"
               >
-                Cancel
+                {t('employerDashboard.cancel')}
               </button>
             </div>
           </div>
@@ -3323,8 +3476,7 @@ function EmployerDashboard() {
         <div className="modal-overlay" onClick={() => setShowCompleteModal(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>Complete Job & Rate Worker</h3>
-              <button className="modal-close" onClick={() => setShowCompleteModal(false)}>×</button>
+              <h3>{t('employerDashboard.completeJobTitle')}</h3>
             </div>
             
             <form onSubmit={handleCompleteJob}>
@@ -3334,11 +3486,11 @@ function EmployerDashboard() {
                   <p className="worker-info">
                     Worker: <strong>{jobToComplete.assignedTo?.firstName} {jobToComplete.assignedTo?.lastName}</strong>
                   </p>
-                  <p className="job-price-info">Payment: {formatPrice(jobToComplete.price)}</p>
+                  <p className="job-price-info">{t('employerDashboard.price')}: {formatPrice(jobToComplete.price)}</p>
                 </div>
 
                 <div className="rating-section">
-                  <label className="rating-label">Rate the Worker's Performance *</label>
+                  <label className="rating-label">{t('employerDashboard.rateWorker')} *</label>
                   <div className="star-rating">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
@@ -3362,7 +3514,7 @@ function EmployerDashboard() {
                 </div>
 
                 <div className="form-group">
-                  <label>Feedback for the Worker *</label>
+                  <label>{t('employerDashboard.comment')} *</label>
                   <textarea
                     value={ratingComment}
                     onChange={(e) => setRatingComment(e.target.value)}
@@ -3388,13 +3540,13 @@ function EmployerDashboard() {
                   className="btn secondary" 
                   onClick={() => setShowCompleteModal(false)}
                 >
-                  Cancel
+                  {t('employerDashboard.cancel')}
                 </button>
                 <button 
                   type="submit"
                   className="btn success"
                 >
-                  Complete Job & Submit Rating
+                  {t('employerDashboard.submit')}
                 </button>
               </div>
             </form>
@@ -3407,36 +3559,34 @@ function EmployerDashboard() {
         <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
           <div className="modal-content delete-modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>Confirm Deletion</h3>
-              <button className="modal-close" onClick={() => setShowDeleteModal(false)}>×</button>
+              <h3>{t('employerDashboard.deleteJobTitle')}</h3>
             </div>
             
             <div className="modal-body">
               <div className="delete-warning">
                 <div className="warning-icon">⚠️</div>
-                <h4>Are you sure you want to delete this job?</h4>
+                <h4>{t('employerDashboard.confirmDelete')}</h4>
                 <p>
-                  <strong>"{jobToDelete.title}"</strong> will be deleted. 
-                  This action is reversible - you can contact an administrator to restore the job if needed.
+                  <strong>"{jobToDelete.title}"</strong> {t('employerDashboard.confirmDeleteMessage')}
                 </p>
                 
                 <div className="delete-job-details">
                   <div className="detail-item">
-                    <span className="detail-label">Job Price:</span>
+                    <span className="detail-label">{t('employerDashboard.price')}:</span>
                     <span className="detail-value">{formatPrice(jobToDelete.price)}</span>
                   </div>
                   <div className="detail-item">
-                    <span className="detail-label">Location:</span>
-                    <span className="detail-value">{jobToDelete.barangay || 'Not specified'}</span>
+                    <span className="detail-label">{t('employerDashboard.location')}:</span>
+                    <span className="detail-value">{jobToDelete.barangay || t('employerDashboard.noDescription')}</span>
                   </div>
                   <div className="detail-item">
-                    <span className="detail-label">Status:</span>
+                    <span className="detail-label">{t('employerDashboard.status')}:</span>
                     <span className={`status-badge ${jobToDelete.isOpen ? 'active' : 'closed'}`}>
-                      {jobToDelete.isOpen ? 'Open' : 'Closed'}
+                      {jobToDelete.isOpen ? t('employerDashboard.open') : t('employerDashboard.closed')}
                     </span>
                   </div>
                   <div className="detail-item">
-                    <span className="detail-label">Applicants:</span>
+                    <span className="detail-label">{t('employerDashboard.applicants')}:</span>
                     <span className="detail-value">{jobToDelete.applicants?.length || 0}</span>
                   </div>
                 </div>
@@ -3455,7 +3605,7 @@ function EmployerDashboard() {
                 className="btn secondary" 
                 onClick={() => setShowDeleteModal(false)}
               >
-                Cancel
+                {t('employerDashboard.cancel')}
               </button>
               <button 
                 className="btn danger"
@@ -3465,7 +3615,7 @@ function EmployerDashboard() {
                 {loading ? (
                   <span className="spinner-inline"></span>
                 ) : (
-                  'Delete Job'
+                  t('employerDashboard.delete')
                 )}
               </button>
             </div>

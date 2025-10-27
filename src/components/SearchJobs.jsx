@@ -2,12 +2,14 @@ import { useState, useEffect, useContext } from 'react'
 import { Link } from 'react-router-dom'
 import { AuthContext } from '../context/AuthContext'
 import { AlertContext } from '../context/AlertContext'
+import { useTranslation } from '../hooks/useTranslation'
 import ReportModal from './ReportModal'
 
 // Use environment variable for API base URL
 const API_BASE = import.meta.env.VITE_API_URL || 'https://resi-backend-ihyu.vercel.app/api'
 
 function SearchJobs() {
+  const { t } = useTranslation()
   const [searchQuery, setSearchQuery] = useState({
     keyword: '',
     skill: '',
@@ -21,6 +23,7 @@ function SearchJobs() {
   const [hasSearched, setHasSearched] = useState(false)
   const [expandedJobs, setExpandedJobs] = useState({})
   const [reportModal, setReportModal] = useState({ isOpen: false, jobId: null, jobTitle: '' })
+  const [cancelModal, setCancelModal] = useState({ isOpen: false, jobId: null, jobTitle: '' })
   
   const { user, isLoggedIn } = useContext(AuthContext)
   const { success, error: showError } = useContext(AlertContext)
@@ -73,7 +76,14 @@ function SearchJobs() {
       console.log('📊 Response:', data);
       
       if (data.success && data.data) {
-        setJobs(data.data)
+        // Filter out completed and closed jobs on the frontend as additional safety
+        const openJobs = data.data.filter(job => 
+          job.isOpen !== false && 
+          job.completed !== true && 
+          job.isDeleted !== true &&
+          job.postedBy !== null  // Filter out jobs where employer doesn't exist
+        );
+        setJobs(openJobs)
       } else {
         setJobs([])
         if (data.message) {
@@ -82,12 +92,12 @@ function SearchJobs() {
       }
     } catch (err) {
       console.error('Search error:', err)
-      let errorMessage = 'Something went wrong while searching for jobs.'
+      let errorMessage = t('searchJobs.searchError')
       
       if (err.message.includes('network') || err.message.includes('fetch')) {
-        errorMessage = 'Unable to connect to server. Please check your internet connection.'
+        errorMessage = t('searchJobs.networkError')
       } else if (err.message.includes('timeout')) {
-        errorMessage = 'Request timed out. Please try again.'
+        errorMessage = t('searchJobs.timeoutError')
       }
       
       showError(errorMessage)
@@ -109,7 +119,16 @@ function SearchJobs() {
     e.stopPropagation()
     
     if (!isLoggedIn) {
-      showError('Please login to apply for jobs.')
+      showError(t('searchJobs.pleaseLogin'))
+      return
+    }
+
+    // Find the job to check if it's still open
+    const job = jobs.find(j => j._id === jobId)
+    if (job && (job.isOpen === false || job.completed === true)) {
+      showError(t('searchJobs.jobClosed'))
+      // Refresh the search to remove this job
+      await searchJobs(searchQuery)
       return
     }
 
@@ -127,26 +146,90 @@ function SearchJobs() {
       const data = await response.json()
       
       if (response.ok) {
-        success(data.alert || 'Successfully applied to the job!')
+        success(data.alert || t('searchJobs.appliedSuccess'))
         // Refresh the search results to update applicant count
         await searchJobs(searchQuery)
       } else {
-        showError(data.alert || data.message || 'Failed to apply to job')
+        showError(data.alert || data.message || t('searchJobs.applyFailed'))
       }
     } catch (err) {
       console.error('Apply error:', err)
-      let errorMessage = 'Error applying to job. Please try again.'
+      let errorMessage = t('searchJobs.genericError')
       
       if (err.message.includes('already applied')) {
-        errorMessage = 'You have already applied to this job.'
+        errorMessage = t('searchJobs.alreadyAppliedError')
       } else if (err.message.includes('network') || err.message.includes('fetch')) {
-        errorMessage = 'Unable to connect to server. Please check your internet connection.'
+        errorMessage = t('searchJobs.networkError')
       } else if (err.message.includes('unauthorized')) {
-        errorMessage = 'Please log in again to apply for jobs.'
+        errorMessage = t('searchJobs.unauthorizedError')
       }
       
       showError(errorMessage)
     }
+  }
+
+  const cancelApplication = async (jobId, e) => {
+    // Prevent the click from toggling the job expansion
+    e.stopPropagation()
+    
+    if (!isLoggedIn) {
+      showError(t('searchJobs.pleaseLogin'))
+      return
+    }
+
+    // Find the job to get its title
+    const job = jobs.find(j => j._id === jobId)
+    
+    // Open confirmation modal
+    setCancelModal({
+      isOpen: true,
+      jobId: jobId,
+      jobTitle: job?.title || 'this job'
+    })
+  }
+
+  const handleCancelConfirm = async () => {
+    const { jobId } = cancelModal
+    
+    // Close the modal first
+    setCancelModal({ isOpen: false, jobId: null, jobTitle: '' })
+
+    const token = localStorage.getItem('token')
+    
+    try {
+      const response = await fetch(`${API_BASE}/jobs/${jobId}/cancel-application`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      const data = await response.json()
+      
+      if (response.ok) {
+        success(data.alert || t('searchJobs.cancelSuccess'))
+        // Refresh the search results to update the button
+        await searchJobs(searchQuery)
+      } else {
+        showError(data.alert || data.message || t('searchJobs.cancelFailed'))
+      }
+    } catch (err) {
+      console.error('Cancel error:', err)
+      let errorMessage = t('searchJobs.genericError')
+      
+      if (err.message.includes('network') || err.message.includes('fetch')) {
+        errorMessage = t('searchJobs.networkError')
+      } else if (err.message.includes('unauthorized')) {
+        errorMessage = t('searchJobs.unauthorizedError')
+      }
+      
+      showError(errorMessage)
+    }
+  }
+
+  const closeCancelModal = () => {
+    setCancelModal({ isOpen: false, jobId: null, jobTitle: '' })
   }
 
   const openReportModal = (job, e) => {
@@ -169,11 +252,11 @@ function SearchJobs() {
         reportedJobId: reportModal.jobId,
         reason
       })
-      success('Report submitted successfully')
+      success(t('success.reportSubmitted'))
       closeReportModal()
     } catch (error) {
       console.error('Error submitting report:', error)
-      showError(error.message || 'Failed to submit report')
+      showError(error.message || t('errors.reportFailed'))
       throw error
     }
   }
@@ -186,8 +269,8 @@ function SearchJobs() {
   return (
     <div className="search-jobs-container">
       <div className="search-jobs-header">
-        <h1>Search Jobs</h1>
-  <Link to="/employee-dashboard" className="back-btn">Back to Dashboard</Link>
+        <h1>{t('searchJobs.title')}</h1>
+        <Link to="/employee-dashboard" className="back-btn">{t('searchJobs.backToDashboard')}</Link>
       </div>
 
       {/* Search Form */}
@@ -195,21 +278,21 @@ function SearchJobs() {
         <form onSubmit={handleSubmit} className="search-form">
           {/* Keyword Search Bar */}
           <div className="form-group full-width">
-            <label htmlFor="keyword">Search by Title or Keyword</label>
+            <label htmlFor="keyword">{t('searchJobs.searchByTitle')}</label>
             <input
               type="text"
               id="keyword"
               name="keyword"
               value={searchQuery.keyword}
               onChange={handleInputChange}
-              placeholder="Search by job title, description, or keyword..."
+              placeholder={t('searchJobs.searchPlaceholder')}
               className="search-input"
             />
           </div>
 
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="skill">Skill</label>
+              <label htmlFor="skill">{t('searchJobs.skill')}</label>
               <select
                 id="skill"
                 name="skill"
@@ -217,7 +300,7 @@ function SearchJobs() {
                 onChange={handleInputChange}
                 style={{ minHeight: '48px', fontSize: '1rem' }}
               >
-                <option value="">Select a skill</option>
+                <option value="">{t('searchJobs.selectSkill')}</option>
                 {['Plumbing','Carpentry','Cleaning','Electrical','Painting','Gardening','Cooking','Driving','Babysitting','Tutoring','IT Support','Customer Service'].map(skill => (
                   <option key={skill} value={skill}>{skill}</option>
                 ))}
@@ -230,7 +313,7 @@ function SearchJobs() {
                   name="otherSkill"
                   value={searchQuery.otherSkill || ''}
                   onChange={handleInputChange}
-                  placeholder="Add custom skill"
+                  placeholder={t('searchJobs.addCustomSkill')}
                   style={{ marginTop: '0.5em' }}
                   required
                 />
@@ -238,21 +321,21 @@ function SearchJobs() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="barangay">Location (Barangay)</label>
+              <label htmlFor="barangay">{t('searchJobs.locationBarangay')}</label>
               <input
                 type="text"
                 id="barangay"
                 name="barangay"
                 value={searchQuery.barangay}
                 onChange={handleInputChange}
-                placeholder="e.g., Barangay San Jose"
+                placeholder={t('searchJobs.locationPlaceholder')}
               />
             </div>
           </div>
 
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="minPrice">Min Price (₱)</label>
+              <label htmlFor="minPrice">{t('searchJobs.minPrice')}</label>
               <input
                 type="number"
                 id="minPrice"
@@ -265,7 +348,7 @@ function SearchJobs() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="maxPrice">Max Price (₱)</label>
+              <label htmlFor="maxPrice">{t('searchJobs.maxPrice')}</label>
               <input
                 type="number"
                 id="maxPrice"
@@ -283,10 +366,10 @@ function SearchJobs() {
               {loading ? (
                 <>
                   <div className="spinner"></div>
-                  Searching...
+                  {t('searchJobs.searching')}
                 </>
               ) : (
-                'Search Jobs'
+                t('searchJobs.searchButton')
               )}
             </button>
             <button 
@@ -295,7 +378,7 @@ function SearchJobs() {
               onClick={clearFilters}
               disabled={loading}
             >
-              Clear Filters
+              {t('searchJobs.clearFilters')}
             </button>
           </div>
         </form>
@@ -306,25 +389,34 @@ function SearchJobs() {
         {loading && (
           <div className="loading-state">
             <div className="spinner large"></div>
-            <p>Searching for jobs...</p>
+            <p>{t('searchJobs.searchingJobs')}</p>
           </div>
         )}
 
         {!loading && hasSearched && jobs.length === 0 && (
           <div className="no-results">
-            <h3>No jobs found</h3>
-            <p>Try adjusting your search criteria to find more opportunities.</p>
+            <h3>{t('searchJobs.noJobsTitle')}</h3>
+            <p>{t('searchJobs.noJobsMessage')}</p>
           </div>
         )}
 
         {!loading && jobs.length > 0 && (
           <div className="results-header">
-            <h2>Found {jobs.length} job{jobs.length !== 1 ? 's' : ''}</h2>
+            <h2>{t('searchJobs.foundJobs')} {jobs.length} {jobs.length !== 1 ? t('searchJobs.jobs') : t('searchJobs.job')}</h2>
           </div>
         )}
 
         <div className="jobs-grid">
-          {jobs.map((job) => (
+          {jobs.map((job) => {
+            // Check if current user has already applied to this job
+            const currentUserId = user?.userId || user?.id;
+            const hasApplied = currentUserId && job.applicants && job.applicants.some(a => {
+              if (!a.user) return false;
+              const applicantId = a.user._id || a.user;
+              return applicantId.toString() === currentUserId.toString();
+            });
+
+            return (
             <div 
               key={job._id} 
               className={`job-card ${expandedJobs[job._id] ? 'expanded' : ''}`}
@@ -343,35 +435,35 @@ function SearchJobs() {
                 {job.skillsRequired && job.skillsRequired.length > 0 && (
                   <div className="job-preview-detail">
                     <span className="preview-icon">🛠️</span> {job.skillsRequired.slice(0, 2).join(', ')}
-                    {job.skillsRequired.length > 2 && ` +${job.skillsRequired.length - 2} more`}
+                    {job.skillsRequired.length > 2 && ` +${job.skillsRequired.length - 2} ${t('searchJobs.more')}`}
                   </div>
                 )}
                 
                 <div className="job-preview-detail">
-                  <span className="preview-icon">👥</span> {job.applicants ? job.applicants.length : 0} applicant(s)
+                  <span className="preview-icon">👥</span> {job.applicants ? job.applicants.length : 0} {t('searchJobs.applicants')}
                 </div>
               </div>
               
               <div className="expansion-indicator">
                 {expandedJobs[job._id] ? '▲' : '▼'} 
-                <span className="indicator-text">{expandedJobs[job._id] ? 'Show less' : 'Show more'}</span>
+                <span className="indicator-text">{expandedJobs[job._id] ? t('searchJobs.showLess') : t('searchJobs.showMore')}</span>
               </div>
 
               {expandedJobs[job._id] && (
                 <div className="job-content">
                   <hr className="content-divider" />
                   <p className="job-description">
-                    <strong>Description:</strong> {job.description || 'No description available'}
+                    <strong>{t('searchJobs.description')}:</strong> {job.description || t('searchJobs.noDescription')}
                   </p>
 
                   <div className="job-details">
                     <div className="job-detail">
-                      <strong>Location:</strong> {job.barangay}
+                      <strong>{t('searchJobs.location')}:</strong> {job.barangay}
                     </div>
                     
                     {job.skillsRequired && job.skillsRequired.length > 0 && (
                       <div className="job-detail">
-                        <strong>Skills Required:</strong>
+                        <strong>{t('searchJobs.skillsRequired')}:</strong>
                         <div className="skills-list">
                           {job.skillsRequired.map((skill, index) => (
                             <span key={index} className="skill-badge">{skill}</span>
@@ -381,42 +473,48 @@ function SearchJobs() {
                     )}
 
                     <div className="job-detail">
-                      <strong>Posted by:</strong> {
+                      <strong>{t('searchJobs.postedBy')}:</strong> {
                         job.postedBy 
                           ? `${job.postedBy.firstName} ${job.postedBy.lastName}` 
-                          : 'Anonymous'
+                          : t('searchJobs.anonymous')
                       }
                     </div>
 
                     {job.postedBy?.email && (
                       <div className="job-detail employer-contact">
-                        <strong>✉️ Contact:</strong> {job.postedBy.email}
+                        <strong>{t('searchJobs.contact')}</strong> {job.postedBy.email}
                       </div>
                     )}
 
                     <div className="job-detail">
-                      <strong>Applicants:</strong> {job.applicants ? job.applicants.length : 0}
+                      <strong>{t('searchJobs.applicantsCount')}:</strong> {job.applicants ? job.applicants.length : 0}
                     </div>
                     
                     <div className="job-actions">
-                      <button 
-                        className="apply-btn"
-                        onClick={(e) => applyToJob(job._id, e)}
-                        disabled={!isLoggedIn || (user && job.applicants && job.applicants.some(a => (a.user && (a.user._id === user.id || a.user === user.id))))}
-                        title={
-                          !isLoggedIn
-                            ? "Please login to apply"
-                            : (user && job.applicants && job.applicants.some(a => (a.user && (a.user._id === user.id || a.user === user.id))))
-                              ? "You have already applied to this job"
-                              : "Apply for this job"
-                        }
-                      >
-                        {!isLoggedIn
-                          ? 'Login to Apply'
-                          : (user && job.applicants && job.applicants.some(a => (a.user && (a.user._id === user.id || a.user === user.id))))
-                            ? 'Already Applied'
-                            : 'Apply Now'}
-                      </button>
+                      {!hasApplied ? (
+                        <button 
+                          className="apply-btn"
+                          onClick={(e) => applyToJob(job._id, e)}
+                          disabled={!isLoggedIn}
+                          title={
+                            !isLoggedIn
+                              ? t('searchJobs.tooltipLoginApply')
+                              : t('searchJobs.tooltipApply')
+                          }
+                        >
+                          {!isLoggedIn
+                            ? t('searchJobs.loginToApply')
+                            : t('searchJobs.applyNow')}
+                        </button>
+                      ) : (
+                        <button 
+                          className="cancel-application-btn"
+                          onClick={(e) => cancelApplication(job._id, e)}
+                          title={t('searchJobs.tooltipCancelApplication')}
+                        >
+                          {t('searchJobs.cancelApplication')}
+                        </button>
+                      )}
                       {isLoggedIn && job.postedBy?.email && (
                         <Link
                           to="/chat"
@@ -424,22 +522,22 @@ function SearchJobs() {
                             recipientId: job.postedBy._id,
                             recipientEmail: job.postedBy.email,
                             recipientName: `${job.postedBy.firstName} ${job.postedBy.lastName}`,
-                            subject: `Regarding: ${job.title}`
+                            subject: `${t('searchJobs.regarding')}: ${job.title}`
                           }}
                           className="message-btn"
                           onClick={(e) => e.stopPropagation()}
-                          title="Message employer"
+                          title={t('searchJobs.tooltipMessage')}
                         >
-                          💬 Message
+                          {t('searchJobs.message')}
                         </Link>
                       )}
                       {isLoggedIn && (
                         <button 
                           className="report-btn"
                           onClick={(e) => openReportModal(job, e)}
-                          title="Report this job"
+                          title={t('searchJobs.tooltipReport')}
                         >
-                          🚩 Report
+                          {t('searchJobs.report')}
                         </button>
                       )}
                     </div>
@@ -447,7 +545,8 @@ function SearchJobs() {
                 </div>
               )}
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -459,6 +558,29 @@ function SearchJobs() {
         reportType="Job"
         targetName={reportModal.jobTitle}
       />
+
+      {/* Cancel Application Confirmation Modal */}
+      {cancelModal.isOpen && (
+        <div className="modal-overlay" onClick={closeCancelModal}>
+          <div className="modal-content cancel-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>{t('searchJobs.cancelApplicationTitle')}</h2>
+            </div>
+            <div className="modal-body">
+              <p>{t('searchJobs.confirmCancelMessage')}</p>
+              <p className="job-title-highlight">"{cancelModal.jobTitle}"</p>
+            </div>
+            <div className="modal-footer">
+              <button onClick={closeCancelModal} className="btn secondary">
+                {t('common.cancel')}
+              </button>
+              <button onClick={handleCancelConfirm} className="btn danger">
+                {t('searchJobs.confirmCancelButton')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
   <style>{`
         .search-jobs-container {
@@ -811,6 +933,25 @@ function SearchJobs() {
           cursor: not-allowed;
         }
 
+        .cancel-application-btn {
+          background: #f59e0b;
+          color: white;
+          border: none;
+          padding: 0.75rem 1.5rem;
+          border-radius: 8px;
+          font-size: 1rem;
+          cursor: pointer;
+          transition: all 0.2s;
+          position: relative;
+          z-index: 5;
+        }
+
+        .cancel-application-btn:hover {
+          background: #d97706;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
         .report-btn {
           background: #dc2626;
           color: white;
@@ -854,6 +995,118 @@ function SearchJobs() {
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
+        }
+
+        /* Cancel Modal Styles */
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: rgba(0, 0, 0, 0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+          animation: fadeIn 0.2s ease-in;
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        .modal-content {
+          background: white;
+          border-radius: 12px;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+          max-width: 500px;
+          width: 90%;
+          max-height: 90vh;
+          overflow-y: auto;
+          animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+          from {
+            transform: translateY(20px);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+
+        .cancel-modal .modal-header {
+          padding: 1.5rem;
+          border-bottom: 1px solid #e2e8f0;
+        }
+
+        .cancel-modal .modal-header h2 {
+          margin: 0;
+          color: #2d3748;
+          font-size: 1.5rem;
+        }
+
+        .cancel-modal .modal-body {
+          padding: 1.5rem;
+        }
+
+        .cancel-modal .modal-body p {
+          margin: 0 0 1rem 0;
+          color: #4a5568;
+          font-size: 1rem;
+          line-height: 1.6;
+        }
+
+        .job-title-highlight {
+          font-weight: 600;
+          color: #2b6cb0;
+          font-size: 1.1rem;
+          padding: 0.75rem;
+          background: #ebf8ff;
+          border-radius: 8px;
+          border-left: 4px solid #2b6cb0;
+        }
+
+        .cancel-modal .modal-footer {
+          padding: 1rem 1.5rem;
+          border-top: 1px solid #e2e8f0;
+          display: flex;
+          gap: 0.75rem;
+          justify-content: flex-end;
+        }
+
+        .btn {
+          padding: 0.75rem 1.5rem;
+          border-radius: 8px;
+          font-size: 1rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s;
+          border: none;
+        }
+
+        .btn.secondary {
+          background: #e2e8f0;
+          color: #2d3748;
+        }
+
+        .btn.secondary:hover {
+          background: #cbd5e0;
+        }
+
+        .btn.danger {
+          background: #dc2626;
+          color: white;
+        }
+
+        .btn.danger:hover {
+          background: #b91c1c;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
         }
 
         @media (max-width: 768px) {

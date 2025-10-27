@@ -4,10 +4,12 @@ import { AuthContext } from '../context/AuthContext';
 import { NotificationContext } from '../context/NotificationContext';
 import NotificationDropdown from './NotificationDropdown';
 import { getProfilePictureUrl } from '../utils/imageHelper';
+import { useTranslation } from '../hooks/useTranslation';
 
 function Navigation() {
   const { user, logout, hasAccessTo, isAuthenticated, loading } = useContext(AuthContext);
   const { unreadCount } = useContext(NotificationContext);
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -101,18 +103,18 @@ function Navigation() {
               <div className="nav-links">
                 <NavLink to="/search-jobs">
                   <span className="nav-icon">🔍</span>
-                  Find Jobs
+                  {t('nav.findJobs')}
                 </NavLink>
                 
                 <NavLink to="/chat">
                   <span className="nav-icon">💬</span>
-                  Chat
+                  {t('nav.messages')}
                 </NavLink>
                 
                 {(user?.userType === 'employee' || user?.userType === 'both') && (
                   <NavLink to="/employee-dashboard">
                     <span className="nav-icon">👤</span>
-                    <span style={{ fontWeight: 'bold', color: '#fff', letterSpacing: '0.5px' }}>Employee Dashboard</span>
+                    <span style={{ fontWeight: 'bold', color: '#fff', letterSpacing: '0.5px' }}>{t('nav.dashboard')} ({t('register.employee')})</span>
                   </NavLink>
                 )}
 
@@ -120,11 +122,11 @@ function Navigation() {
                   <>
                     <NavLink to="/employer-dashboard">
                       <span className="nav-icon">💼</span>
-                      <span style={{ fontWeight: 'bold', color: '#fff', letterSpacing: '0.5px' }}>Employer Dashboard</span>
+                      <span style={{ fontWeight: 'bold', color: '#fff', letterSpacing: '0.5px' }}>{t('nav.dashboard')} ({t('register.employer')})</span>
                     </NavLink>
                     <NavLink to="/post-job">
                       <span className="nav-icon">➕</span>
-                      Post Job
+                      {t('nav.postJob')}
                     </NavLink>
                   </>
                 )}
@@ -132,7 +134,7 @@ function Navigation() {
                 {user?.userType === 'admin' && (
                   <NavLink to="/admin-dashboard">
                     <span className="nav-icon">⚙️</span>
-                    Admin
+                    {t('nav.admin')}
                   </NavLink>
                 )}
               </div>
@@ -179,19 +181,19 @@ function Navigation() {
                     
                     <Link to="/profile" className="dropdown-item" onClick={() => setUserMenuOpen(false)}>
                       <span className="dropdown-icon">👤</span>
-                      Profile
+                      {t('nav.profile')}
                     </Link>
                     
                     <Link to="/settings" className="dropdown-item" onClick={() => setUserMenuOpen(false)}>
                       <span className="dropdown-icon">⚙️</span>
-                      Settings
+                      {t('nav.settings')}
                     </Link>
                     
                     <div className="dropdown-divider"></div>
                     
                     <button onClick={handleLogout} className="dropdown-item logout-item">
                       <span className="dropdown-icon">🚪</span>
-                      Logout
+                      {t('nav.logout')}
                     </button>
                   </div>
                 )}
@@ -202,12 +204,13 @@ function Navigation() {
             <button 
               className="mobile-menu-button"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label="Menu"
             >
-              <span className={`hamburger ${isMenuOpen ? 'open' : ''}`}>
+              <div className={`hamburger ${isMenuOpen ? 'open' : ''}`}>
                 <span></span>
                 <span></span>
                 <span></span>
-              </span>
+              </div>
             </button>
           </>
         ) : (
@@ -216,13 +219,13 @@ function Navigation() {
             <div className="nav-links">
               <NavLink to="/search-jobs">
                 <span className="nav-icon">🔍</span>
-                Find Jobs
+                {t('nav.findJobs')}
               </NavLink>
               <NavLink to="/login" className="btn-outline">
-                Login
+                {t('nav.login')}
               </NavLink>
               <NavLink to="/register" className="btn-primary">
-                Get Started
+                {t('landing.getStarted')}
               </NavLink>
             </div>
           </div>
@@ -230,96 +233,90 @@ function Navigation() {
       </nav>
 
       {/* Mobile Menu Overlay */}
-      {isMenuOpen && (
-        <div className="mobile-menu-overlay" ref={menuRef}>
-          <div className="mobile-menu">
-            <div className="mobile-menu-header">
-              <div className="user-info-mobile">
-                <div className="user-avatar-mobile">
+      {isMenuOpen && isAuthenticated && (
+        <div className="mobile-overlay" onClick={() => setIsMenuOpen(false)}>
+          <div className="mobile-menu" onClick={(e) => e.stopPropagation()}>
+            {/* Mobile User Header */}
+            <div className="mobile-header">
+              <div className="mobile-user-info">
+                <div className="mobile-avatar">
                   {getProfilePictureUrl(currentUser) ? (
                     <img 
                       src={getProfilePictureUrl(currentUser)} 
                       alt="Profile" 
                       className="avatar-img"
-                      key={currentUser?.profilePicture} // Force re-render on profile change
                     />
                   ) : (
                     currentUser?.firstName?.[0] || 'U'
                   )}
                 </div>
-                <div className="user-details-mobile">
-                  <span className="user-name-mobile">
+                <div className="mobile-user-details">
+                  <div className="mobile-user-name">
                     {user?.firstName} {user?.lastName}
-                  </span>
-                  <span className="user-role-mobile">{user?.userType}</span>
+                  </div>
+                  <div className="mobile-user-role">{user?.userType}</div>
                 </div>
               </div>
+              <button 
+                className="mobile-close"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                ✕
+              </button>
             </div>
 
-            <div className="mobile-nav-links">
-              <NavLink to="/search-jobs">
-                <span className="nav-icon">🔍</span>
-                Find Jobs
+            {/* Mobile Navigation Links */}
+            <div className="mobile-links">
+              <NavLink to="/search-jobs" className="mobile-link">
+                <span className="mobile-icon">🔍</span>
+                <span>{t('nav.findJobs')}</span>
               </NavLink>
               
-              <NavLink to="/chat">
-                <span className="nav-icon">💬</span>
-                Chat
+              <NavLink to="/chat" className="mobile-link">
+                <span className="mobile-icon">💬</span>
+                <span>{t('nav.messages')}</span>
               </NavLink>
-              
-              <NavLink to="/profile">
-                <span className="nav-icon">👤</span>
-                Profile
-              </NavLink>
-              
-              <div className="mobile-notification-container">
-                <span className="nav-icon">🔔</span>
-                Notifications
-                {unreadCount > 0 && (
-                  <span className="mobile-notification-badge">{unreadCount}</span>
-                )}
-                <div className="mobile-notification-dropdown">
-                  <NotificationDropdown isMobile={true} />
-                </div>
-              </div>
 
               {(user?.userType === 'employee' || user?.userType === 'both') && (
-                <>
-                  <NavLink to="/employee-dashboard">
-                    <span className="nav-icon">📊</span>
-                    Employee Dashboard
-                  </NavLink>
-                </>
+                <NavLink to="/employee-dashboard" className="mobile-link">
+                  <span className="mobile-icon">👤</span>
+                  <span>{t('nav.dashboard')} ({t('register.employee')})</span>
+                </NavLink>
               )}
 
               {(user?.userType === 'employer' || user?.userType === 'both') && (
                 <>
-                  <NavLink to="/employer-dashboard">
-                    <span className="nav-icon">💼</span>
-                    Employer Dashboard
+                  <NavLink to="/employer-dashboard" className="mobile-link">
+                    <span className="mobile-icon">💼</span>
+                    <span>{t('nav.dashboard')} ({t('register.employer')})</span>
                   </NavLink>
-                  <NavLink to="/post-job">
-                    <span className="nav-icon">➕</span>
-                    Post Job
+                  <NavLink to="/post-job" className="mobile-link">
+                    <span className="mobile-icon">➕</span>
+                    <span>{t('nav.postJob')}</span>
                   </NavLink>
                 </>
               )}
 
               {user?.userType === 'admin' && (
-                <NavLink to="/admin-dashboard">
-                  <span className="nav-icon">⚙️</span>
-                  Admin Dashboard
+                <NavLink to="/admin-dashboard" className="mobile-link">
+                  <span className="mobile-icon">⚙️</span>
+                  <span>{t('nav.admin')}</span>
                 </NavLink>
               )}
 
-              <NavLink to="/settings">
-                <span className="nav-icon">⚙️</span>
-                Settings
+              <NavLink to="/profile" className="mobile-link">
+                <span className="mobile-icon">👤</span>
+                <span>{t('nav.profile')}</span>
               </NavLink>
 
-              <button onClick={handleLogout} className="mobile-logout-btn">
-                <span className="nav-icon">🚪</span>
-                Logout
+              <NavLink to="/settings" className="mobile-link">
+                <span className="mobile-icon">⚙️</span>
+                <span>{t('nav.settings')}</span>
+              </NavLink>
+
+              <button onClick={handleLogout} className="mobile-link mobile-logout">
+                <span className="mobile-icon">🚪</span>
+                <span>{t('nav.logout')}</span>
               </button>
             </div>
           </div>
@@ -330,31 +327,36 @@ function Navigation() {
         .main-navigation {
           display: flex;
           align-items: center;
-          gap: var(--spacing-4);
+          gap: var(--spacing-2);
+          flex: 1;
+          justify-content: flex-end;
         }
 
         .nav-desktop {
           display: flex;
           align-items: center;
-          gap: var(--spacing-6);
+          gap: var(--spacing-3);
+          flex: 1;
         }
 
         .nav-links {
           display: flex;
           align-items: center;
-          gap: var(--spacing-4);
+          gap: 0.375rem;
+          flex-wrap: nowrap;
+          flex: 1;
         }
 
         .nav-link {
           display: flex;
           align-items: center;
-          gap: var(--spacing-2);
+          gap: 0.25rem;
           color: white;
           text-decoration: none;
-          padding: var(--spacing-3) var(--spacing-5);
+          padding: 0.5rem 0.625rem;
           border-radius: var(--radius-xl);
           font-weight: 500;
-          font-size: var(--font-size-sm);
+          font-size: 0.75rem;
           transition: all var(--transition-fast);
           white-space: nowrap;
           position: relative;
@@ -401,7 +403,7 @@ function Navigation() {
         }
 
         .nav-icon {
-          font-size: var(--font-size-base);
+          font-size: 0.875rem;
         }
 
         /* User Menu */
@@ -549,168 +551,291 @@ function Navigation() {
           font-size: var(--font-size-base);
         }
 
-        /* Mobile Menu */
+        /* Mobile Navigation */
         .mobile-menu-button {
           display: none;
-          background: none;
-          border: none;
+          background: rgba(255, 255, 255, 0.15);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          border-radius: 6px;
           cursor: pointer;
-          padding: var(--spacing-2);
+          padding right: 6px;
+          transition: all 0.3s ease;
+          -webkit-tap-highlight-color: transparent;
+          margin-left: auto;
+          flex-shrink: 0;
+          width: auto;
+          height: auto;
+        }
+
+        .mobile-menu-button:hover {
+          background: rgba(255, 255, 255, 0.25);
+          transform: scale(1.05);
+        }
+
+        .mobile-menu-button:active {
+          transform: scale(0.95);
         }
 
         .hamburger {
+          width: 18px;
+          height: 14px;
+          position: relative;
           display: flex;
           flex-direction: column;
-          gap: 4px;
+          justify-content: space-between;
         }
 
         .hamburger span {
-          width: 24px;
+          display: block;
+          width: 100%;
           height: 2px;
           background: white;
-          border-radius: 2px;
+          border-radius: 1px;
+          transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
 
         .hamburger.open span:nth-child(1) {
-          transform: rotate(45deg) translate(6px, 6px);
+          transform: rotate(45deg) translateY(6px);
         }
 
         .hamburger.open span:nth-child(2) {
           opacity: 0;
+          transform: translateX(-10px);
         }
 
         .hamburger.open span:nth-child(3) {
-          transform: rotate(-45deg) translate(6px, -6px);
+          transform: rotate(-45deg) translateY(-6px);
         }
 
-        .mobile-menu-overlay {
+        .mobile-overlay {
           position: fixed;
-          top: var(--header-height);
+          top: 0;
           left: 0;
           right: 0;
           bottom: 0;
-          background: rgba(0, 0, 0, 0.5);
-          z-index: 999;
-          backdrop-filter: blur(5px);
-        }
-
-        .mobile-menu {
-          background: linear-gradient(135deg, 
-            rgba(255, 255, 255, 0.95) 0%, 
-            rgba(168, 85, 247, 0.05) 100%);
-          border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
-          box-shadow: 0 20px 56px rgba(147, 51, 234, 0.2);
-          animation: fadeIn 0.2s ease;
-          backdrop-filter: blur(20px);
-          border: 1px solid var(--primary-200);
+          background: rgba(0, 0, 0, 0.6);
+          backdrop-filter: blur(4px);
+          z-index: 9998;
+          animation: fadeIn 0.25s ease;
         }
 
         @keyframes fadeIn {
+          from { 
+            opacity: 0; 
+          }
+          to { 
+            opacity: 1; 
+          }
+        }
+
+        .mobile-menu {
+          position: fixed;
+          top: 0;
+          right: 0;
+          width: 320px;
+          max-width: 85vw;
+          height: 100vh;
+          background: linear-gradient(180deg, 
+            #9333ea 0%, 
+            #7e22ce 50%,
+            #6b21a8 100%);
+          box-shadow: -8px 0 32px rgba(0, 0, 0, 0.4);
+          animation: slideIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+          z-index: 9999;
+          display: flex;
+          flex-direction: column;
+        }
+
+        @keyframes slideIn {
           from {
+            transform: translateX(100%);
             opacity: 0;
           }
           to {
+            transform: translateX(0);
             opacity: 1;
           }
         }
 
-        .mobile-menu-header {
-          padding: var(--spacing-6);
-          background: linear-gradient(135deg, var(--primary-100) 0%, var(--primary-50) 100%);
-          border-bottom: 1px solid var(--primary-200);
+        .mobile-header {
+          padding: 1.75rem 1.25rem;
+          background: linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.15) 0%, 
+            rgba(255, 255, 255, 0.05) 100%);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-shrink: 0;
         }
 
-        .user-info-mobile {
+        .mobile-user-info {
           display: flex;
           align-items: center;
-          gap: var(--spacing-3);
+          gap: 1rem;
+          flex: 1;
         }
 
-        .user-avatar-mobile {
+        .mobile-avatar {
           width: 48px;
           height: 48px;
           border-radius: 50%;
-          background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+          background: linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.25) 0%, 
+            rgba(255, 255, 255, 0.15) 100%);
+          border: 2px solid rgba(255, 255, 255, 0.4);
           display: flex;
           align-items: center;
           justify-content: center;
-          font-weight: 600;
+          font-weight: 700;
           color: white;
-          font-size: var(--font-size-lg);
-          box-shadow: 0 4px 16px rgba(147, 51, 234, 0.3);
-          border: 2px solid var(--primary-300);
+          font-size: 1.125rem;
           overflow: hidden;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
-        
-        .user-avatar-mobile .avatar-img {
+
+        .mobile-avatar .avatar-img {
           width: 100%;
           height: 100%;
           object-fit: cover;
         }
 
-        .user-details-mobile {
+        .mobile-user-details {
           display: flex;
           flex-direction: column;
-          gap: var(--spacing-1);
+          gap: 0.25rem;
+          flex: 1;
+          min-width: 0;
         }
 
-        .user-name-mobile {
-          font-weight: 600;
-          color: var(--gray-800);
-          font-size: var(--font-size-base);
+        .mobile-user-name {
+          color: white;
+          font-weight: 700;
+          font-size: 1rem;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
 
-        .user-role-mobile {
-          font-size: var(--font-size-sm);
-          color: var(--gray-500);
+        .mobile-user-role {
+          color: rgba(255, 255, 255, 0.85);
+          font-size: 0.8125rem;
           text-transform: capitalize;
+          font-weight: 500;
+          letter-spacing: 0.5px;
         }
 
-        .mobile-nav-links {
-          padding: var(--spacing-4);
-          display: flex;
-          flex-direction: column;
-          gap: var(--spacing-2);
-        }
-
-        .mobile-nav-links .nav-link {
-          color: var(--gray-700);
-          background: rgba(255, 255, 255, 0.8);
-          padding: var(--spacing-4);
-          border-radius: var(--radius-xl);
-          font-size: var(--font-size-base);
-          border: 1px solid var(--primary-200);
-          backdrop-filter: blur(10px);
-        }
-
-        .mobile-nav-links .nav-link:hover,
-        .mobile-nav-links .nav-link.active {
-          background: var(--primary-100);
-          color: var(--primary-700);
-          border-color: var(--primary-300);
-        }
-
-        .mobile-logout-btn {
+        .mobile-close {
+          background: rgba(255, 255, 255, 0.15);
+          border: 1px solid rgba(255, 255, 255, 0.25);
+          color: white;
+          width: 36px;
+          height: 36px;
+          border-radius: 10px;
           display: flex;
           align-items: center;
-          gap: var(--spacing-3);
-          padding: var(--spacing-4);
-          background: var(--error-50);
-          color: var(--error-600);
-          border: 1px solid var(--error-200);
-          border-radius: var(--radius-xl);
-          font-size: var(--font-size-base);
+          justify-content: center;
           cursor: pointer;
-          width: 100%;
-          transition: all var(--transition-fast);
-          backdrop-filter: blur(10px);
+          font-size: 1.375rem;
+          transition: all 0.3s ease;
+          flex-shrink: 0;
+          font-weight: 300;
         }
 
-        .mobile-logout-btn:hover {
-          background: var(--error-100);
-          color: var(--error-700);
-          border-color: var(--error-300);
-          transform: translateX(4px);
+        .mobile-close:hover {
+          background: rgba(255, 255, 255, 0.25);
+          transform: rotate(90deg) scale(1.1);
+          border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .mobile-close:active {
+          transform: rotate(90deg) scale(0.95);
+        }
+
+        .mobile-links {
+          padding: 1.25rem 0;
+          flex: 1;
+          overflow-y: auto;
+        }
+
+        .mobile-link {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          padding: 1rem 1.5rem;
+          color: white;
+          text-decoration: none;
+          border: none;
+          background: transparent;
+          width: 100%;
+          text-align: left;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          font-size: 0.9375rem;
+          font-weight: 500;
+          border-left: 3px solid transparent;
+          position: relative;
+          white-space: normal;
+          word-break: break-word;
+        }
+
+        .mobile-link > span:last-child {
+          flex: 1;
+          line-height: 1.4;
+        }
+
+        .mobile-link::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          width: 0;
+          background: rgba(255, 255, 255, 0.1);
+          transition: width 0.3s ease;
+        }
+
+        .mobile-link:hover::before,
+        .mobile-link.active::before {
+          width: 100%;
+        }
+
+        .mobile-link:hover,
+        .mobile-link.active {
+          background: rgba(255, 255, 255, 0.1);
+          border-left-color: white;
+          padding-left: 1.75rem;
+        }
+
+        .mobile-link:active {
+          background: rgba(255, 255, 255, 0.15);
+        }
+
+        .mobile-icon {
+          font-size: 1.375rem;
+          width: 28px;
+          text-align: center;
+          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+          flex-shrink: 0;
+        }
+
+        .mobile-logout {
+          margin-top: auto;
+          border-top: 1px solid rgba(255, 255, 255, 0.15);
+          padding-top: 1rem;
+          margin-bottom: 1rem;
+          color: rgba(255, 255, 255, 0.95);
+        }
+
+        .mobile-logout:hover {
+          background: rgba(239, 68, 68, 0.25);
+          border-left-color: #fca5a5;
+        }
+
+        .mobile-logout .mobile-icon {
+          filter: drop-shadow(0 2px 4px rgba(239, 68, 68, 0.3));
         }
 
         /* Notification Styles */
@@ -720,64 +845,40 @@ function Navigation() {
           align-items: center;
         }
         
-        .mobile-notification-container {
-          display: flex;
-          align-items: center;
-          gap: var(--spacing-3);
-          padding: var(--spacing-4);
-          background: rgba(255, 255, 255, 0.8);
-          color: var(--gray-700);
-          border-radius: var(--radius-xl);
-          font-size: var(--font-size-base);
-          border: 1px solid var(--primary-200);
-          backdrop-filter: blur(10px);
-          position: relative;
-          cursor: pointer;
-        }
-        
-        .mobile-notification-container:hover {
-          background: var(--primary-100);
-          color: var(--primary-700);
-          border-color: var(--primary-300);
-        }
-        
-        .mobile-notification-badge {
-          background-color: var(--error-600);
-          color: white;
-          border-radius: 50%;
-          min-width: 18px;
-          height: 18px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 0.7rem;
-          font-weight: bold;
-          margin-left: var(--spacing-2);
-          padding: 0 4px;
-        }
-        
-        .mobile-notification-dropdown {
-          position: absolute;
-          top: 100%;
-          left: 0;
-          right: 0;
-          z-index: 1001;
-          margin-top: var(--spacing-2);
-        }
-
         /* Responsive Design */
         @media (max-width: 1024px) {
           .nav-links {
-            gap: var(--spacing-2);
+            gap: 0.25rem;
           }
 
           .nav-link {
-            padding: var(--spacing-2) var(--spacing-3);
-            font-size: var(--font-size-xs);
+            padding: 0.5rem 0.5rem;
+            font-size: 0.7rem;
+            gap: 0.2rem;
           }
 
           .user-name {
             display: none;
+          }
+          
+          .nav-icon {
+            font-size: 0.8rem;
+          }
+        }
+        
+        @media (max-width: 900px) {
+          .nav-desktop {
+            display: none;
+          }
+
+          .mobile-menu-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+
+          .main-navigation {
+            justify-content: flex-end;
           }
         }
 
@@ -787,7 +888,19 @@ function Navigation() {
           }
 
           .mobile-menu-button {
-            display: block;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+
+          .main-navigation {
+            justify-content: flex-end;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .mobile-menu {
+            width: 100%;
           }
         }
       `}</style>

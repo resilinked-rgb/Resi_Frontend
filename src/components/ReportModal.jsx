@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import './ReportModal.css';
+import { useTranslation } from '../hooks/useTranslation';
 
 const ReportModal = ({ isOpen, onClose, onSubmit, reportType, targetName }) => {
   const [reason, setReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { t } = useTranslation();
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (reason.trim().length < 10) {
-      alert('Please provide a reason with at least 10 characters');
+    if (!reason.trim()) {
+      alert(t('errors.requiredField'));
       return;
     }
 
@@ -38,39 +40,28 @@ const ReportModal = ({ isOpen, onClose, onSubmit, reportType, targetName }) => {
     <div className="report-modal-overlay" onClick={handleClose}>
       <div className="report-modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="report-modal-header">
-          <h2>Report {reportType}</h2>
-          <button 
-            className="report-modal-close" 
-            onClick={handleClose}
-            disabled={isSubmitting}
-          >
-            ×
-          </button>
+          <h2>{t('profile.report')} {reportType}</h2>
         </div>
         
         <div className="report-modal-body">
           <p className="report-target-info">
-            You are reporting: <strong>{targetName}</strong>
+            {t('common.view')}: <strong>{targetName}</strong>
           </p>
           
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label htmlFor="reason">
-                Reason for Report <span className="required">*</span>
+                {t('errors.validationError')} <span className="required">*</span>
               </label>
               <textarea
                 id="reason"
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder="Please describe why you are reporting this..."
+                placeholder={t('errors.validationError')}
                 rows="5"
                 required
-                minLength={10}
                 disabled={isSubmitting}
               />
-              <span className="char-count">
-                {reason.length} / 10 minimum characters
-              </span>
             </div>
 
             <div className="report-modal-actions">
@@ -80,14 +71,14 @@ const ReportModal = ({ isOpen, onClose, onSubmit, reportType, targetName }) => {
                 onClick={handleClose}
                 disabled={isSubmitting}
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 type="submit"
                 className="btn-report"
-                disabled={isSubmitting || reason.trim().length < 10}
+                disabled={isSubmitting || !reason.trim()}
               >
-                {isSubmitting ? 'Submitting...' : 'Submit Report'}
+                {isSubmitting ? t('common.loading') : t('common.submit')}
               </button>
             </div>
           </form>

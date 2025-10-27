@@ -1,8 +1,10 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 import apiService from '../api';
 
 function Chatbot() {
+  const { isAuthenticated } = useContext(AuthContext);
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
@@ -218,6 +220,11 @@ function Chatbot() {
       handleSendMessage(action);
     }
   };
+
+  // Don't render chatbot if user is not authenticated
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <>

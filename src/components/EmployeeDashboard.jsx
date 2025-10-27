@@ -4,6 +4,7 @@ import { AuthContext } from '../context/AuthContext';
 import { AlertContext } from '../context/AlertContext';
 import apiService from '../api';
 import ReportModal from './ReportModal';
+import { useTranslation } from '../hooks/useTranslation';
 
 function EmployeeDashboard() {
   const [stats, setStats] = useState({
@@ -32,6 +33,7 @@ function EmployeeDashboard() {
   const [reportModal, setReportModal] = useState({ isOpen: false, jobId: null, jobTitle: '' });
   const { user, isAuthenticated, loading: authLoading } = useContext(AuthContext);
   const { error: showError, success } = useContext(AlertContext);
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -395,9 +397,9 @@ function EmployeeDashboard() {
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">
-        <h1>Employee Dashboard</h1>
-        <p>Welcome back, {user?.firstName}!</p>
-        <Link to="/landing" className="back-btn">Back to Landing</Link>
+        <h1>{t('nav.dashboard')} - {t('register.employee')}</h1>
+        <p>{t('landing.welcomeBack')}, {user?.firstName}!</p>
+        <Link to="/landing" className="back-btn">{t('settings.backToDashboard')}</Link>
       </div>
 
       {/* Statistics Cards */}
@@ -406,28 +408,28 @@ function EmployeeDashboard() {
           <div className="stat-icon">📄</div>
           <div className="stat-content">
             <h3>{stats.applicationsCount}</h3>
-            <p>Applications</p>
+            <p>{t('jobs.applications')}</p>
           </div>
         </div>
         <div className="stat-card">
           <div className="stat-icon">💼</div>
           <div className="stat-content">
             <h3>{stats.offersCount}</h3>
-            <p>Job Offers</p>
+            <p>{t('jobs.jobTitle')}</p>
           </div>
         </div>
         <div className="stat-card">
           <div className="stat-icon">👁️</div>
           <div className="stat-content">
             <h3>{stats.viewsCount}</h3>
-            <p>Profile Views</p>
+            <p>{t('profile.portfolio')} {t('common.view')}</p>
           </div>
         </div>
         <div className="stat-card">
           <div className="stat-icon">⭐</div>
           <div className="stat-content">
             <h3>{stats.rating.toFixed(1)}</h3>
-            <p>Average Rating</p>
+            <p>{t('profile.ratings')}</p>
           </div>
         </div>
       </div>
@@ -436,18 +438,18 @@ function EmployeeDashboard() {
       <div className="quick-actions">
         <Link to="/search-jobs" className="action-btn primary">
           <span className="icon">🔍</span>
-          Search Jobs
+          {t('nav.findJobs')}
         </Link>
         <Link to="/profile" className="action-btn secondary">
           <span className="icon">👤</span>
-          Update Profile
+          {t('profile.editProfile')}
         </Link>
       </div>
 
       {/* Job Invitations Section */}
       <section className="dashboard-section invitations-section">
         <div className="section-header">
-          <h2>📨 Job Invitations ({jobInvitations.length})</h2>
+          <h2>📨 {t('nav.notifications')} ({jobInvitations.length})</h2>
         </div>
         {jobInvitations.length > 0 ? (
           <div className="invitations-grid">
@@ -475,13 +477,13 @@ function EmployeeDashboard() {
                     onClick={() => handleAcceptInvitation(invitation.relatedJob._id)}
                     className="btn success"
                   >
-                    ✓ Accept & Apply
+                    ✓ {t('common.accept')} & {t('common.apply')}
                   </button>
                   <button
                     onClick={() => handleDeclineInvitation(invitation.relatedJob._id)}
                     className="btn secondary"
                   >
-                    ✕ Decline
+                    ✕ {t('jobs.rejectApplication')}
                   </button>
                 </div>
               </div>
@@ -489,8 +491,8 @@ function EmployeeDashboard() {
           </div>
         ) : (
           <div className="no-invitations">
-            <p>No job invitations at the moment</p>
-            <small>Employers can invite you to jobs that match your skills</small>
+            <p>{t('common.noResults')}</p>
+            <small>{t('searchWorkers.invite')} {t('searchWorkers.skills')}</small>
           </div>
         )}
       </section>
@@ -500,19 +502,19 @@ function EmployeeDashboard() {
         {/* My Applications Section */}
         <section className="dashboard-section">
           <div className="section-header">
-            <h2>My Applications</h2>
+            <h2>{t('jobs.myApplications')}</h2>
             <div className="tab-navigation">
               <button 
                 className={`tab-button ${activeTab === 'active' ? 'active' : ''}`}
                 onClick={() => setActiveTab('active')}
               >
-                Active Applications
+                {t('common.active')} {t('jobs.applications')}
               </button>
               <button 
                 className={`tab-button ${activeTab === 'history' ? 'active' : ''}`}
                 onClick={() => setActiveTab('history')}
               >
-                Application History
+                {t('profile.workHistory')}
               </button>
             </div>
           </div>
@@ -536,7 +538,7 @@ function EmployeeDashboard() {
                         {new Date(job.datePosted).toLocaleDateString()}
                       </div>
                       <div className="meta-item">
-                        <span className="status pending">Pending</span>
+                        <span className="status pending">{t('jobs.pending')}</span>
                       </div>
                     </div>
                     <div className="job-actions">
@@ -545,14 +547,14 @@ function EmployeeDashboard() {
                         className="btn danger"
                         data-job-id={job._id}
                       >
-                        Cancel Application
+                        {t('common.cancel')} {t('jobs.apply')}
                       </button>
                       {job.postedBy && (
                         <Link
                           to={`/profile/${job.postedBy._id || job.postedBy}`}
                           className="btn secondary"
                         >
-                          View Employer
+                          {t('common.view')} {t('register.employer')}
                         </Link>
                       )}
                     </div>
@@ -560,8 +562,8 @@ function EmployeeDashboard() {
                 ))
               ) : (
                 <div className="no-data">
-                  <p>No active applications</p>
-                  <Link to="/search-jobs" className="btn primary">Browse Available Jobs</Link>
+                  <p>{t('jobs.noApplications')}</p>
+                  <Link to="/search-jobs" className="btn primary">{t('landing.exploreJobs')}</Link>
                 </div>
               )}
             </div>
@@ -587,21 +589,21 @@ function EmployeeDashboard() {
                       </div>
                       <div className="meta-item">
                         <span className={`status ${job.applicationInfo?.status.toLowerCase() || 'unknown'}`}>
-                          {job.applicationInfo?.status === 'accepted' ? 'Accepted' : 
-                           job.applicationInfo?.status === 'rejected' ? 'Rejected' : 'Closed'}
+                          {job.applicationInfo?.status === 'accepted' ? t('jobs.accepted') : 
+                           job.applicationInfo?.status === 'rejected' ? t('jobs.rejected') : t('jobs.closeJob')}
                         </span>
                       </div>
                     </div>
                     <div className="job-actions">
                       {job.applicationInfo?.assignedToMe && (
-                        <span className="assigned-badge">✓ Assigned to you</span>
+                        <span className="assigned-badge">✓ {t('jobs.accepted')}</span>
                       )}
                       {job.postedBy && (
                         <Link
                           to={`/profile/${job.postedBy._id || job.postedBy}`}
                           className="btn secondary"
                         >
-                          View Employer
+                          {t('common.view')} {t('register.employer')}
                         </Link>
                       )}
                     </div>
@@ -609,7 +611,7 @@ function EmployeeDashboard() {
                 ))
               ) : (
                 <div className="no-data">
-                  <p>No application history yet</p>
+                  <p>{t('profile.workHistory')}</p>
                 </div>
               )}
             </div>
@@ -618,7 +620,7 @@ function EmployeeDashboard() {
 
         {/* Job Matches Section */}
         <section className="dashboard-section">
-          <h2>Recommended Jobs</h2>
+          <h2>{t('employeeDashboard.recommendedJobs')}</h2>
           <div className="jobs-grid">
             {jobMatches.length > 0 ? (
               jobMatches.map(job => (
@@ -645,7 +647,7 @@ function EmployeeDashboard() {
                       <span className="icon">📍</span>
                       {job.barangay}
                       {job.barangay === user?.barangay && (
-                        <span className="location-match">Your area</span>
+                        <span className="location-match">{t('common.select')} Area</span>
                       )}
                     </div>
                     <div className="meta-item">
@@ -654,14 +656,14 @@ function EmployeeDashboard() {
                     </div>
                     <div className="meta-item">
                       <span className="icon">�👥</span>
-                      Posted by: {job.postedBy?.firstName} {job.postedBy?.lastName}
+                      {t('searchJobs.postedBy')}: {job.postedBy?.firstName} {job.postedBy?.lastName}
                     </div>
                     
                     {/* Matching Skills Section */}
                     {job.matchingSkills && job.matchingSkills.length > 0 && (
                       <div className="matching-skills-container">
                         <div className="matching-skills-label">
-                          <span className="icon">✓</span> Your matching skills ({job.matchingSkills.length}):
+                          <span className="icon">✓</span> {t('profile.skills')} ({job.matchingSkills.length}):
                         </div>
                         <div className="matching-skills-list">
                           {job.matchingSkills.map((skill, index) => (
@@ -674,7 +676,7 @@ function EmployeeDashboard() {
                     {/* All Required Skills Section */}
                     {job.skillsRequired && job.skillsRequired.length > 0 && (
                       <div className="skills-container">
-                        <div className="skills-label">All required skills ({job.skillsRequired.length}):</div>
+                        <div className="skills-label">{t('jobs.requiredSkills')} ({job.skillsRequired.length}):</div>
                         <div className="skills-list">
                           {job.skillsRequired.map((skill, index) => {
                             const isMatching = job.matchingSkills && job.matchingSkills.includes(skill);
@@ -707,34 +709,34 @@ function EmployeeDashboard() {
                         onClick={() => handleApplyToJob(job._id)}
                         className="btn primary"
                       >
-                        Apply Now
+                        {t('common.applyNow')}
                       </button>
                     ) : (
                       myApplications.some(app => app._id === job._id) && (
-                        <span className="applied-badge">Already Applied</span>
+                        <span className="applied-badge">{t('common.applied')}</span>
                       )
                     )}
                     <button 
                       onClick={() => openJobDetailsModal(job)} 
                       className="btn secondary"
                     >
-                      View Details
+                      {t('common.viewDetails')}
                     </button>
                     <button 
                       onClick={(e) => openReportModal(job, e)} 
                       className="btn danger"
-                      title="Report this job"
+                      title={t('profile.report')}
                     >
-                      🚩 Report
+                      🚩 {t('profile.report')}
                     </button>
                   </div>
                 </div>
               ))
             ) : (
               <div className="no-data">
-                <p>No job matches found for your skills</p>
-                <Link to="/profile" className="btn secondary">Update Your Skills</Link>
-                <Link to="/search-jobs" className="btn primary">Browse All Jobs</Link>
+                <p>{t('searchJobs.noJobsFound')}</p>
+                <Link to="/profile" className="btn secondary">{t('profile.editProfile')}</Link>
+                <Link to="/search-jobs" className="btn primary">{t('landing.exploreJobs')}</Link>
               </div>
             )}
           </div>
@@ -747,18 +749,17 @@ function EmployeeDashboard() {
           <div className="modal-content job-details-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>{selectedJob.title}</h2>
-              <button className="modal-close" onClick={closeJobDetailsModal}>×</button>
             </div>
             
             <div className="modal-body">
               <div className="job-detail-price">
-                <span className="price-label">Price:</span>
+                <span className="price-label">{t('searchJobs.salary')}:</span>
                 <span className="price-value">₱{selectedJob.price?.toLocaleString()}</span>
               </div>
 
               {selectedJob.matchScore && (
                 <div className="job-detail-match">
-                  <span className="match-label">Your Match Score:</span>
+                  <span className="match-label">Match %:</span>
                   <span className="match-percentage-large">
                     {Math.min(100, Math.round(selectedJob.matchScore / 10 * 20))}%
                   </span>
@@ -766,20 +767,20 @@ function EmployeeDashboard() {
               )}
 
               <div className="job-detail-section">
-                <h3>Description</h3>
-                <p>{selectedJob.description || 'No description provided'}</p>
+                <h3>{t('searchJobs.description')}</h3>
+                <p>{selectedJob.description || t('searchJobs.noJobsFound')}</p>
               </div>
 
               <div className="job-detail-section">
-                <h3>Location</h3>
+                <h3>{t('searchJobs.location')}</h3>
                 <p>📍 {selectedJob.barangay}</p>
                 {selectedJob.barangay === user?.barangay && (
-                  <span className="location-match-badge">This job is in your area!</span>
+                  <span className="location-match-badge">{t('searchJobs.location')}!</span>
                 )}
               </div>
 
               <div className="job-detail-section">
-                <h3>Posted By</h3>
+                <h3>{t('searchJobs.postedBy')}</h3>
                 <Link 
                   to={`/profile/${selectedJob.postedBy?._id}`}
                   className="employer-profile-link"
@@ -790,7 +791,7 @@ function EmployeeDashboard() {
                 {selectedJob.postedBy?.email && (
                   <p className="employer-email">✉️ {selectedJob.postedBy.email}</p>
                 )}
-                <p className="date-posted">📅 Posted on {new Date(selectedJob.datePosted).toLocaleDateString()}</p>
+                <p className="date-posted">📅 {t('searchJobs.postedOn')} {new Date(selectedJob.datePosted).toLocaleDateString()}</p>
                 <Link 
                   to="/chat" 
                   state={{ 
@@ -801,13 +802,13 @@ function EmployeeDashboard() {
                   }}
                   className="btn-message-employer"
                 >
-                  💬 Message Employer
+                  💬 {t('profile.message')} {t('register.employer')}
                 </Link>
               </div>
 
               {selectedJob.matchingSkills && selectedJob.matchingSkills.length > 0 && (
                 <div className="job-detail-section">
-                  <h3>✓ Your Matching Skills ({selectedJob.matchingSkills.length})</h3>
+                  <h3>✓ Matching {t('profile.skills')} ({selectedJob.matchingSkills.length})</h3>
                   <div className="skills-list">
                     {selectedJob.matchingSkills.map((skill, index) => (
                       <span key={index} className="skill-tag matching">{skill}</span>
@@ -818,7 +819,7 @@ function EmployeeDashboard() {
 
               {selectedJob.skillsRequired && selectedJob.skillsRequired.length > 0 && (
                 <div className="job-detail-section">
-                  <h3>All Required Skills ({selectedJob.skillsRequired.length})</h3>
+                  <h3>{t('jobs.requiredSkills')} ({selectedJob.skillsRequired.length})</h3>
                   <div className="skills-list">
                     {selectedJob.skillsRequired.map((skill, index) => {
                       const isMatching = selectedJob.matchingSkills && selectedJob.matchingSkills.includes(skill);
@@ -841,9 +842,9 @@ function EmployeeDashboard() {
                 <button 
                   onClick={(e) => openReportModal(selectedJob, e)} 
                   className="btn danger"
-                  title="Report this job"
+                  title={t('profile.report')}
                 >
-                  🚩 Report Job
+                  🚩 {t('profile.report')}
                 </button>
               </div>
               <div className="modal-footer-right">
@@ -852,14 +853,13 @@ function EmployeeDashboard() {
                     onClick={() => handleApplyToJob(selectedJob._id)}
                     className="btn primary btn-large"
                   >
-                    Apply Now
+                    {t('common.applyNow')}
                   </button>
                 ) : (
                   myApplications.some(app => app._id === selectedJob._id) && (
-                    <span className="applied-badge-large">Already Applied</span>
+                    <span className="applied-badge-large">{t('common.applied')}</span>
                   )
                 )}
-                <button onClick={closeJobDetailsModal} className="btn secondary">Close</button>
               </div>
             </div>
           </div>
@@ -880,15 +880,14 @@ function EmployeeDashboard() {
         <div className="modal-overlay" onClick={() => setShowEmployerModal(false)}>
           <div className="modal-content employer-profile-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>Employer Profile</h2>
-              <button className="modal-close" onClick={() => setShowEmployerModal(false)}>×</button>
+              <h2>{t('register.employer')} {t('nav.profile')}</h2>
             </div>
             
             <div className="modal-body">
               {loadingEmployer ? (
                 <div className="loading-state">
                   <div className="spinner"></div>
-                  <p>Loading employer profile...</p>
+                  <p>{t('common.loading')}</p>
                 </div>
               ) : (
                 <>
@@ -906,16 +905,16 @@ function EmployeeDashboard() {
                       </div>
                       <div className="employer-details">
                         <h3>{selectedEmployer.firstName} {selectedEmployer.lastName}</h3>
-                        <p className="employer-location">📍 {selectedEmployer.barangay || 'Location not specified'}</p>
+                        <p className="employer-location">📍 {selectedEmployer.barangay || t('common.noResults')}</p>
                         {selectedEmployer.averageRating > 0 && (
-                          <p className="employer-rating">⭐ {selectedEmployer.averageRating.toFixed(1)} Rating</p>
+                          <p className="employer-rating">⭐ {selectedEmployer.averageRating.toFixed(1)} {t('profile.rating')}</p>
                         )}
                       </div>
                     </div>
                     
                     {selectedEmployer.bio && (
                       <div className="employer-bio">
-                        <h4>About</h4>
+                        <h4>{t('profile.about')}</h4>
                         <p>{selectedEmployer.bio}</p>
                       </div>
                     )}
@@ -923,7 +922,7 @@ function EmployeeDashboard() {
 
                   {/* Completed Jobs */}
                   <div className="employer-jobs-section">
-                    <h4>Completed Jobs ({employerJobs.length})</h4>
+                    <h4>{t('jobs.completedJobs')} ({employerJobs.length})</h4>
                     {employerJobs.length > 0 ? (
                       <div className="completed-jobs-list">
                         {employerJobs.map(job => (
@@ -940,7 +939,7 @@ function EmployeeDashboard() {
 
                             {job.assignedWorker && (
                               <div className="worker-info-small">
-                                <p><strong>Worker:</strong> {job.assignedWorker.firstName} {job.assignedWorker.lastName}</p>
+                                <p><strong>{t('register.employee')}:</strong> {job.assignedWorker.firstName} {job.assignedWorker.lastName}</p>
                                 {job.rating && (
                                   <div className="job-rating">
                                     <span>⭐ {job.rating.rating}/5</span>
@@ -959,7 +958,7 @@ function EmployeeDashboard() {
                         ))}
                       </div>
                     ) : (
-                      <p className="no-jobs-message">No completed jobs yet</p>
+                      <p className="no-jobs-message">{t('jobs.noJobsPosted')}</p>
                     )}
                   </div>
 
@@ -976,15 +975,11 @@ function EmployeeDashboard() {
                       className="btn primary"
                       onClick={() => setShowEmployerModal(false)}
                     >
-                      💬 Message Employer
+                      💬 {t('profile.message')} {t('register.employer')}
                     </Link>
                   </div>
                 </>
               )}
-            </div>
-
-            <div className="modal-footer">
-              <button onClick={() => setShowEmployerModal(false)} className="btn secondary">Close</button>
             </div>
           </div>
         </div>
@@ -1157,149 +1152,208 @@ function EmployeeDashboard() {
         .applications-grid,
         .jobs-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-          gap: 1.5rem;
+          grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+          gap: 2rem;
+          margin-top: 1.5rem;
         }
 
         .job-card {
+          background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
           border: 2px solid #e2e8f0;
-          border-radius: 8px;
-          padding: 1.5rem;
-          transition: transform 0.2s, box-shadow 0.2s;
+          border-radius: 16px;
+          padding: 1.75rem;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           display: flex;
           flex-direction: column;
-          gap: 0.75rem;
+          gap: 1rem;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+          position: relative;
+          overflow: hidden;
+        }
+
+        .job-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 4px;
+          background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
+          transform: scaleX(0);
+          transform-origin: left;
+          transition: transform 0.3s ease;
         }
 
         .job-card:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+          transform: translateY(-4px);
+          box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+          border-color: #cbd5e1;
+        }
+
+        .job-card:hover::before {
+          transform: scaleX(1);
         }
 
         .job-header {
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
-          margin-bottom: 1rem;
+          gap: 1rem;
+          margin-bottom: 0.5rem;
         }
 
         .job-header h3 {
           margin: 0;
-          color: #2b6cb0;
-          font-size: 1.1rem;
+          color: #1e293b;
+          font-size: 1.25rem;
+          font-weight: 700;
           flex: 1;
+          line-height: 1.4;
+          letter-spacing: -0.02em;
         }
 
         .job-price {
-          background: #38a169;
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
           color: white;
-          padding: 0.25rem 0.75rem;
-          border-radius: 15px;
-          font-weight: bold;
-          font-size: 0.9rem;
+          padding: 0.5rem 1rem;
+          border-radius: 20px;
+          font-weight: 700;
+          font-size: 1rem;
+          box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+          white-space: nowrap;
+          flex-shrink: 0;
         }
 
         .job-meta {
-          margin-bottom: 1rem;
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+          margin: 0.5rem 0 1rem 0;
+          padding: 1rem;
+          background: #f8fafc;
+          border-radius: 12px;
+          border: 1px solid #e2e8f0;
         }
 
         .meta-item {
           display: flex;
           align-items: center;
-          gap: 0.5rem;
-          color: #666;
-          font-size: 0.9rem;
-          margin-bottom: 0.5rem;
+          gap: 0.75rem;
+          color: #475569;
+          font-size: 0.925rem;
+          font-weight: 500;
+        }
+
+        .meta-item .icon {
+          font-size: 1.1rem;
+          flex-shrink: 0;
         }
 
         .skills-container, .matching-skills-container {
-          margin: 0.75rem 0;
+          margin: 1rem 0;
         }
         
         .skills-label, .matching-skills-label {
-          font-weight: 600;
-          font-size: 0.85rem;
-          margin-bottom: 0.5rem;
-          color: #2d3748;
-          display: block;
+          font-weight: 700;
+          font-size: 0.875rem;
+          margin-bottom: 0.75rem;
+          color: #334155;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
         }
         
         .matching-skills-label {
-          color: #38a169;
+          color: #059669;
         }
         
         .skills-list, .matching-skills-list {
           display: flex;
           flex-wrap: wrap;
-          gap: 0.4rem;
+          gap: 0.5rem;
         }
 
         .skill-tag {
-          background: #e2e8f0;
-          color: #2d3748;
-          padding: 0.3rem 0.6rem;
-          border-radius: 12px;
-          font-size: 0.75rem;
-          font-weight: 500;
+          background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+          color: #475569;
+          padding: 0.5rem 0.875rem;
+          border-radius: 20px;
+          font-size: 0.8125rem;
+          font-weight: 600;
           white-space: nowrap;
+          border: 1.5px solid #cbd5e1;
+          transition: all 0.2s ease;
+        }
+
+        .skill-tag:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
         }
         
         .skill-tag.matching {
-          background: #c6f6d5;
-          color: #2f855a;
-          border: 1px solid #9ae6b4;
-          font-weight: 600;
+          background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+          color: #065f46;
+          border: 1.5px solid #6ee7b7;
+          font-weight: 700;
+          box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
         }
         
         .skill-tag.non-matching {
-          background: #edf2f7;
-          color: #718096;
+          background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+          color: #94a3b8;
+          border: 1.5px solid #e2e8f0;
         }
         
         .match-score-container {
           display: flex;
           justify-content: flex-end;
-          margin-bottom: 0.5rem;
+          margin-bottom: 0.75rem;
         }
         
         .match-score {
           display: flex;
           align-items: center;
-          background: #ebf8ff;
-          border-radius: 15px;
-          padding: 0.3rem 0.8rem;
-          border: 1px solid #90cdf4;
+          gap: 0.5rem;
+          background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+          border-radius: 20px;
+          padding: 0.5rem 1rem;
+          border: 2px solid #93c5fd;
+          box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
         }
         
         .match-label {
-          color: #2b6cb0;
-          font-size: 0.8rem;
-          font-weight: 500;
-          margin-right: 0.3rem;
+          color: #1e40af;
+          font-size: 0.875rem;
+          font-weight: 600;
         }
         
         .match-percentage {
-          color: #2b6cb0;
-          font-size: 0.9rem;
-          font-weight: 700;
+          color: #1e40af;
+          font-size: 1rem;
+          font-weight: 800;
         }
         
         .location-match {
-          background: #e6fffa;
-          color: #2c7a7b;
-          border-radius: 10px;
-          padding: 0.1rem 0.4rem;
+          background: linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%);
+          color: #0f766e;
+          border-radius: 15px;
+          padding: 0.25rem 0.625rem;
           margin-left: 0.5rem;
-          font-size: 0.7rem;
-          font-weight: 500;
-          border: 1px solid #81e6d9;
+          font-size: 0.75rem;
+          font-weight: 700;
+          border: 1.5px solid #5eead4;
+          box-shadow: 0 1px 4px rgba(20, 184, 166, 0.2);
         }
         
         .job-description {
-          margin: 0.75rem 0;
-          color: #4a5568;
-          font-size: 0.875rem;
-          line-height: 1.5;
+          margin: 1rem 0;
+          color: #64748b;
+          font-size: 0.9375rem;
+          line-height: 1.7;
+          padding: 1rem;
+          background: #f8fafc;
+          border-radius: 10px;
+          border-left: 3px solid #3b82f6;
         }
 
         .job-description p {
@@ -1307,26 +1361,42 @@ function EmployeeDashboard() {
         }
         
         .applied-badge {
-          display: inline-block;
-          background: #fed7aa;
-          color: #c05621;
-          padding: 0.6rem 1.25rem;
-          border-radius: 6px;
-          font-size: 0.875rem;
-          font-weight: 500;
-          border: 1px solid #ed8936;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+          color: #92400e;
+          padding: 0.75rem 1.25rem;
+          border-radius: 12px;
+          font-size: 0.9375rem;
+          font-weight: 700;
+          border: 1.5px solid #fbbf24;
+          box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
           text-align: center;
         }
 
+        .applied-badge::before {
+          content: '✓';
+          font-size: 1.1rem;
+        }
+
         .applied-badge-large {
-          display: inline-block;
-          background: #fed7aa;
-          color: #c05621;
-          padding: 0.75rem 1.5rem;
-          border-radius: 8px;
-          font-size: 1rem;
-          font-weight: 600;
-          border: 2px solid #ed8936;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+          color: #92400e;
+          padding: 1rem 1.75rem;
+          border-radius: 16px;
+          font-size: 1.125rem;
+          font-weight: 700;
+          border: 2px solid #fbbf24;
+          box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4);
+        }
+
+        .applied-badge-large::before {
+          content: '✓';
+          font-size: 1.3rem;
         }
 
         /* Invitations Section */
@@ -1688,81 +1758,115 @@ function EmployeeDashboard() {
         }
 
         .status {
-          padding: 0.25rem 0.5rem;
-          border-radius: 12px;
-          font-size: 0.8rem;
-          font-weight: 500;
+          padding: 0.5rem 1rem;
+          border-radius: 20px;
+          font-size: 0.8125rem;
+          font-weight: 700;
+          letter-spacing: 0.02em;
+          text-transform: uppercase;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
         }
 
         .status.pending {
-          background: #fef7e5;
-          color: #b7791f;
+          background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+          color: #92400e;
+          border: 1.5px solid #fbbf24;
         }
 
         .status.accepted {
-          background: #e6fffa;
-          color: #00695c;
+          background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+          color: #065f46;
+          border: 1.5px solid #6ee7b7;
         }
 
         .status.rejected {
-          background: #fed7d7;
-          color: #c53030;
+          background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+          color: #991b1b;
+          border: 1.5px solid #f87171;
         }
 
         .job-actions {
-          margin-top: 1rem;
+          margin-top: 1.25rem;
           display: flex;
-          gap: 0.75rem;
+          gap: 0.875rem;
           flex-wrap: wrap;
           align-items: center;
+          padding-top: 1rem;
+          border-top: 1px solid #e2e8f0;
         }
 
         .btn {
-          padding: 0.6rem 1.25rem;
+          padding: 0.75rem 1.5rem;
           border: none;
-          border-radius: 6px;
-          font-size: 0.875rem;
+          border-radius: 12px;
+          font-size: 0.9375rem;
           cursor: pointer;
-          transition: all 0.2s;
+          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
           text-decoration: none;
-          display: inline-block;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
           text-align: center;
-          font-weight: 500;
+          font-weight: 600;
           flex: 0 1 auto;
           white-space: nowrap;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+          position: relative;
+          overflow: hidden;
+        }
+
+        .btn::before {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 0;
+          height: 0;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.5);
+          transform: translate(-50%, -50%);
+          transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+          width: 300px;
+          height: 300px;
         }
 
         .btn.primary {
-          background: #9333ea;
+          background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
           color: white;
         }
 
         .btn.primary:hover {
-          background: #7c3aed;
-          transform: translateY(-1px);
-          box-shadow: 0 2px 8px rgba(147, 51, 234, 0.3);
+          background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
         }
 
         .btn.secondary {
-          background: #e2e8f0;
-          color: #2d3748;
+          background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+          color: #334155;
+          border: 1.5px solid #cbd5e1;
         }
 
         .btn.secondary:hover {
-          background: #cbd5e0;
-          transform: translateY(-1px);
+          background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         .btn.danger {
-          background: #dc2626;
+          background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
           color: white;
           border: none;
         }
 
         .btn.danger:hover {
-          background: #b91c1c;
-          transform: translateY(-1px);
-          box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+          background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
         }
 
         .loading-state {

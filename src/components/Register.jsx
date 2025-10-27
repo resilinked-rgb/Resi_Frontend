@@ -4,11 +4,13 @@ import { useAuth } from '../context/AuthContext'
 import { useAlert } from '../context/AlertContext'
 import apiService from '../api'
 import TermsOfServiceModal from './TermsOfServiceModal'
+import {useTranslation} from '../hooks/useTranslation'
 
 function Register() {
   // Multi-step form state
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 5;
+  const { t } = useTranslation();
 
   // TOS Modal state
   const [showTOSModal, setShowTOSModal] = useState(false);
@@ -538,10 +540,10 @@ function Register() {
           {/* Step 1: Personal Information */}
           {currentStep === 1 && (
             <div className="form-step fade-in">
-              <h2 className="step-title">Personal Information</h2>
+              <h2 className="step-title">{t('register.step1')}</h2>
               <div className="form-row">
                 <div className="form-group">
-                  <label htmlFor="firstName">First Name</label>
+                  <label htmlFor="firstName">{t('register.firstName')}</label>
                   <input
                     type="text"
                     id="firstName"
@@ -549,11 +551,11 @@ function Register() {
                     value={formData.firstName}
                     onChange={handleInputChange}
                     required
-                    placeholder="First name"
+                    placeholder={t('register.firstName')}
                   />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="lastName">Last Name</label>
+                  <label htmlFor="lastName">{t('register.lastName')}</label>
                   <input
                     type="text"
                     id="lastName"
@@ -561,13 +563,13 @@ function Register() {
                     value={formData.lastName}
                     onChange={handleInputChange}
                     required
-                    placeholder="Last name"
+                    placeholder={t('register.lastName')}
                   />
                 </div>
               </div>
 
               <div className="form-group">
-                <label htmlFor="gender">Gender</label>
+                <label htmlFor="gender">{t('register.sex')}</label>
                 <select
                   id="gender"
                   name="gender"
@@ -575,10 +577,10 @@ function Register() {
                   onChange={handleInputChange}
                   required
                 >
-                  <option value="">Select gender</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
+                  <option value="">{t('common.select')} {t('register.sex')}</option>
+                  <option value="male">{t('register.male')}</option>
+                  <option value="female">{t('register.female')}</option>
+                  <option value="other">{t('common.or')}</option>
                 </select>
               </div>
             </div>
@@ -587,9 +589,9 @@ function Register() {
           {/* Step 2: Account Details */}
           {currentStep === 2 && (
             <div className="form-step fade-in">
-              <h2 className="step-title">Account Details</h2>
+              <h2 className="step-title">{t('register.step2')}</h2>
               <div className="form-group">
-                <label htmlFor="email">Email Address</label>
+                <label htmlFor="email">{t('register.email')}</label>
                 <input
                   type="email"
                   id="email"
@@ -603,7 +605,7 @@ function Register() {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label htmlFor="password">Password</label>
+                  <label htmlFor="password">{t('register.password')}</label>
                   <div className="input-wrapper" style={{ position: 'relative' }}>
                     <input
                       type={showPassword ? "text" : "password"}
@@ -614,14 +616,14 @@ function Register() {
                       onBlur={handleBlur}
                       onFocus={handleFocus}
                       required
-                      placeholder="Create a password"
+                      placeholder={t('register.password')}
                       autoComplete="new-password"
                       style={{ paddingRight: '2.5rem' }}
                     />
                     <div 
                       className="password-toggle-icon" 
                       onClick={() => setShowPassword(!showPassword)}
-                      title={showPassword ? "Hide password" : "Show password"}
+                      title={showPassword ? t('common.show') : t('common.show')}
                       style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', zIndex: 2 }}
                     >
                       {showPassword ? (

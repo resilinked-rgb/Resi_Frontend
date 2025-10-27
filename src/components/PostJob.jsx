@@ -2,9 +2,11 @@ import { useState, useEffect, useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { AuthContext } from '../context/AuthContext'
 import { AlertContext } from '../context/AlertContext'
+import { useTranslation } from '../hooks/useTranslation'
 import apiService from '../api'
 
 function PostJob() {
+  const { t } = useTranslation()
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -26,14 +28,14 @@ function PostJob() {
 
   useEffect(() => {
     if (!isLoggedIn) {
-      showError('Please log in to post a job')
+      showError(t('postJob.loginRequired'))
       navigate('/login')
       return
     }
 
     // Check if user is employer, both, or admin
     if (user && user.userType !== 'employer' && user.userType !== 'both' && user.userType !== 'admin') {
-      showError('Only employers can post jobs. Please update your profile to become an employer.')
+      showError(t('postJob.employerOnly'))
       navigate('/profile')
       return
     }
@@ -96,7 +98,7 @@ function PostJob() {
       setSkills(prev => [...prev, skill])
       setSkillError('')
     } else {
-      setSkillError('Skill already added')
+      setSkillError(t('postJob.skillAlreadyAdded'))
     }
   }
 
@@ -110,7 +112,7 @@ function PostJob() {
       skillsRequired: skills
     }
     localStorage.setItem('draftJob', JSON.stringify(draftData))
-    success('Job saved as draft.')
+    success(t('postJob.draftSaved'))
   }
 
   const handleSubmit = async (e) => {
@@ -118,15 +120,15 @@ function PostJob() {
     setFormError('')
     
     if (skills.length === 0) {
-      setFormError('Please add at least one required skill')
+      setFormError(t('postJob.atLeastOneSkill'))
       return
     }
     if (!formData.postTiming || (formData.postTiming === 'schedule' && !formData.scheduledTime)) {
-      setFormError('Please select a post timing and date/time if scheduling')
+      setFormError(t('postJob.selectPostTiming'))
       return
     }
     if (formData.barangay === 'other' && !formData.otherBarangay) {
-      setFormError('Please specify your barangay')
+      setFormError(t('postJob.specifyBarangay'))
       return
     }
 
@@ -146,7 +148,7 @@ function PostJob() {
       
       const result = await apiService.createJob(jobData);
 
-      success("Job posted successfully!");
+      success(t('postJob.jobPostedSuccess'));
       setFormData({
         title: '',
         description: '',
@@ -164,7 +166,7 @@ function PostJob() {
       }, 1500);
     } catch (err) {
       console.error('Error posting job:', err);
-      const errorMessage = err?.message || 'Failed to post job. Please try again.';
+      const errorMessage = err?.message || t('postJob.jobPostFailed');
       setFormError(errorMessage);
       showError(errorMessage);
     } finally {
@@ -176,8 +178,8 @@ function PostJob() {
     <div className="post-job-container">
       <div className="post-job-card">
         <div className="post-job-header">
-          <h1>Post a Job</h1>
-          <Link to="/employer-dashboard" className="back-btn">Back to Dashboard</Link>
+          <h1>{t('postJob.title')}</h1>
+          <Link to="/employer-dashboard" className="back-btn">{t('postJob.backToDashboard')}</Link>
         </div>
 
         <form onSubmit={handleSubmit} className="post-job-form">
@@ -188,7 +190,7 @@ function PostJob() {
           )}
 
           <div className="form-group">
-            <label htmlFor="title">Job Title *</label>
+            <label htmlFor="title">{t('postJob.jobTitle')} *</label>
             <input
               type="text"
               id="title"
@@ -196,12 +198,12 @@ function PostJob() {
               value={formData.title}
               onChange={handleInputChange}
               required
-              placeholder="e.g., House Cleaning, Plumbing Repair"
+              placeholder={t('postJob.jobTitlePlaceholder')}
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="description">Job Description *</label>
+            <label htmlFor="description">{t('postJob.jobDescription')} *</label>
             <textarea
               id="description"
               name="description"
@@ -209,12 +211,12 @@ function PostJob() {
               onChange={handleInputChange}
               required
               rows="4"
-              placeholder="Describe the job requirements, what needs to be done, and any specific instructions"
+              placeholder={t('postJob.jobDescriptionPlaceholder')}
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="price">Price (₱) *</label>
+            <label htmlFor="price">{t('postJob.price')} *</label>
             <input
               type="number"
               id="price"
@@ -224,12 +226,12 @@ function PostJob() {
               required
               min="0"
               step="0.01"
-              placeholder="e.g., 500.00"
+              placeholder={t('postJob.pricePlaceholder')}
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="barangay">Location (Barangay) *</label>
+            <label htmlFor="barangay">{t('postJob.location')} *</label>
             <select
               id="barangay"
               name="barangay"
@@ -237,11 +239,11 @@ function PostJob() {
               onChange={handleInputChange}
               required
             >
-              <option value="">Select Barangay</option>
+              <option value="">{t('postJob.selectBarangay')}</option>
               <option value="Sto. Rosario">Sto. Rosario</option>
               <option value="Sta. Lucia">Sta. Lucia</option>
               <option value="Sta. Teresita">Sta. Teresita</option>
-              <option value="other">Other</option>
+              <option value="other">{t('postJob.other')}</option>
             </select>
             {formData.barangay === 'other' && (
               <input
@@ -250,7 +252,7 @@ function PostJob() {
                 name="otherBarangay"
                 value={formData.otherBarangay}
                 onChange={handleInputChange}
-                placeholder="Specify your barangay"
+                placeholder={t('postJob.specifyBarangayPlaceholder')}
                 style={{ marginTop: '0.5em' }}
                 required={formData.barangay === 'other'}
               />
@@ -258,21 +260,40 @@ function PostJob() {
           </div>
 
           <div className="form-group">
-            <label>Required Skills <span style={{color:'red'}}>*</span></label>
+            <label>{t('postJob.requiredSkills')} <span style={{color:'red'}}>*</span></label>
             <div className="skills-table">
-              {['Plumbing','Carpentry','Cleaning','Electrical','Painting','Gardening','Cooking','Driving','Babysitting','Tutoring','IT Support','Customer Service'].map(skill => (
-                <div key={skill} className="skills-table-row">
-                  <span className="skills-table-name">{skill}</span>
+              {[
+                { key: 'houseCleaning', label: t('postJob.skills.houseCleaning') },
+                { key: 'laundry', label: t('postJob.skills.laundry') },
+                { key: 'cooking', label: t('postJob.skills.cooking') },
+                { key: 'babysitting', label: t('postJob.skills.babysitting') },
+                { key: 'elderCare', label: t('postJob.skills.elderCare') },
+                { key: 'gardening', label: t('postJob.skills.gardening') },
+                { key: 'petCare', label: t('postJob.skills.petCare') },
+                { key: 'carWashing', label: t('postJob.skills.carWashing') },
+                { key: 'driving', label: t('postJob.skills.driving') },
+                { key: 'delivery', label: t('postJob.skills.delivery') },
+                { key: 'moving', label: t('postJob.skills.moving') },
+                { key: 'painting', label: t('postJob.skills.painting') },
+                { key: 'plumbing', label: t('postJob.skills.plumbing') },
+                { key: 'electrical', label: t('postJob.skills.electrical') },
+                { key: 'carpentry', label: t('postJob.skills.carpentry') },
+                { key: 'masonry', label: t('postJob.skills.masonry') },
+                { key: 'roofing', label: t('postJob.skills.roofing') },
+                { key: 'airconCleaning', label: t('postJob.skills.airconCleaning') }
+              ].map(skill => (
+                <div key={skill.key} className="skills-table-row">
+                  <span className="skills-table-name">{skill.label}</span>
                   <input
                     type="checkbox"
                     name="skillsRequired"
-                    value={skill}
-                    checked={skills.includes(skill)}
+                    value={skill.label}
+                    checked={skills.includes(skill.label)}
                     onChange={e => {
                       const checked = e.target.checked;
                       setSkills(checked
-                        ? [...skills, skill]
-                        : skills.filter(s => s !== skill)
+                        ? [...skills, skill.label]
+                        : skills.filter(s => s !== skill.label)
                       );
                     }}
                     className="skills-table-checkbox"
@@ -281,14 +302,14 @@ function PostJob() {
               ))}
             </div>
             <div className="form-group">
-              <label htmlFor="otherSkill">Other:</label>
+              <label htmlFor="otherSkill">{t('postJob.other')}:</label>
               <input
                 type="text"
                 id="otherSkill"
                 name="otherSkill"
                 value={formData.otherSkill || ''}
                 onChange={e => setFormData(prev => ({...prev, otherSkill: e.target.value}))}
-                placeholder="Add custom skill"
+                placeholder={t('postJob.addCustomSkill')}
               />
               <div className="custom-skill-actions">
                 <button type="button" className="btn btn-secondary add-btn"
@@ -298,18 +319,18 @@ function PostJob() {
                       setFormData(prev => ({...prev, otherSkill: ''}));
                     }
                   }}
-                >Add</button>
+                >{t('postJob.add')}</button>
                 <button type="button" className="btn btn-secondary clear-btn"
                   onClick={() => {
                     setFormData(prev => ({...prev, otherSkill: ''}));
                     setSkills([]);
                   }}
-                >Clear</button>
+                >{t('postJob.clear')}</button>
               </div>
             </div>
-            <small>Select all that apply. Add custom skills if needed.</small>
+            <small>{t('postJob.selectAllApply')}</small>
             {skills.length === 0 && (
-              <div className="field-error">Please select at least one required skill</div>
+              <div className="field-error">{t('postJob.atLeastOneSkill')}</div>
             )}
             {skills.length > 0 && (
                 <div className="skill-tags">
@@ -323,7 +344,7 @@ function PostJob() {
           </div>
 
           <div className="form-group">
-            <label>Post Timing *</label>
+            <label>{t('postJob.postTiming')} *</label>
             <div className="radio-group">
               <label className="radio-label">
                 <input
@@ -335,7 +356,7 @@ function PostJob() {
                   style={{ marginRight: "5px" }}
                   required
                 />
-                <span className="radio-text">Post Now</span>
+                <span className="radio-text">{t('postJob.postNow')}</span>
               </label>
               <label className="radio-label">
                 <input
@@ -347,12 +368,12 @@ function PostJob() {
                   style={{ marginRight: "5px" }}
                   required
                 />
-                <span className="radio-text">Schedule Post</span>
+                <span className="radio-text">{t('postJob.schedulePost')}</span>
               </label>
             </div>
             {formData.postTiming === 'schedule' && (
               <div style={{marginTop: '0.7em'}}>
-                <label htmlFor="scheduledTime">Select Date & Time:</label>
+                <label htmlFor="scheduledTime">{t('postJob.selectDateTime')}:</label>
                 <input
                   type="datetime-local"
                   id="scheduledTime"
@@ -372,7 +393,7 @@ function PostJob() {
               className="save-draft-btn"
               onClick={handleSaveDraft}
             >
-              Save as Draft
+              {t('postJob.saveAsDraft')}
             </button>
             
             <button 
@@ -383,10 +404,10 @@ function PostJob() {
               {loading ? (
                 <>
                   <div className="spinner"></div>
-                  Posting Job...
+                  {t('postJob.postingJob')}
                 </>
               ) : (
-                'Post Job'
+                t('postJob.postJob')
               )}
             </button>
           </div>

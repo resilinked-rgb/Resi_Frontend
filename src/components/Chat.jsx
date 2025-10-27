@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useAlert } from '../context/AlertContext';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from '../hooks/useTranslation';
 import apiService from '../api';
 import { getProfilePictureUrl } from '../utils/imageHelper';
 import io from 'socket.io-client';
@@ -33,6 +34,7 @@ function Chat() {
   
   const { user } = useAuth();
   const { success, error: showError } = useAlert();
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -137,12 +139,12 @@ function Chat() {
                 }
               } else {
                 console.log('❌ User not found by ID');
-                showError('Could not find the recipient. Please try searching manually.');
+                showError(t('chat.errors.recipientNotFound'));
               }
             })
             .catch(err => {
               console.error('❌ Failed to fetch user by ID:', err);
-              showError('Could not find the recipient. Please try searching manually.');
+              showError(t('chat.errors.recipientNotFound'));
             })
             .finally(() => {
               setPendingRecipient(null);
@@ -177,12 +179,12 @@ function Chat() {
                 }
               } else {
                 console.log('❌ No users found');
-                showError('Could not find the recipient. Please try searching manually.');
+                showError(t('chat.errors.recipientNotFound'));
               }
             })
             .catch(err => {
               console.error('❌ Failed to find recipient:', err);
-              showError('Could not find the recipient. Please try searching manually.');
+              showError(t('chat.errors.recipientNotFound'));
             })
             .finally(() => {
               setPendingRecipient(null);
@@ -209,7 +211,7 @@ function Chat() {
         })
         .catch((err) => {
           console.error('Search error:', err);
-          const errorMessage = err.message || 'Failed to search users. Please try again.';
+          const errorMessage = err.message || t('chat.errors.searchFailed');
           showError(errorMessage);
           setSearchResults([]);
         })
@@ -233,7 +235,7 @@ function Chat() {
         })
         .catch((err) => {
           console.error('Modal search error:', err);
-          const errorMessage = err.message || 'Failed to search users. Please try again.';
+          const errorMessage = err.message || t('chat.errors.searchFailed');
           showError(errorMessage);
           setModalSearchResults([]);
         })
@@ -482,7 +484,7 @@ function Chat() {
       setConversations(uniqueConversationsArray);
     } catch (error) {
       console.error('Failed to load conversations:', error);
-      const errorMessage = error.message || 'Failed to load conversations';
+      const errorMessage = error.message || t('chat.errors.loadConversationsFailed');
       showError(errorMessage);
     } finally {
       setLoading(false);
@@ -617,7 +619,7 @@ function Chat() {
     } catch (error) {
       console.error('Failed to load messages:', error);
       if (!silent) {
-        const errorMessage = error.message || 'Failed to load messages';
+        const errorMessage = error.message || t('chat.errors.loadMessagesFailed');
         showError(errorMessage);
       }
     } finally {
@@ -679,7 +681,7 @@ function Chat() {
       });
     } catch (error) {
       console.error('Failed to send message:', error);
-      const errorMessage = error.message || 'Failed to send message. Please try again.';
+      const errorMessage = error.message || t('chat.errors.sendMessageFailed');
       showError(errorMessage);
     } finally {
       setSending(false);
@@ -762,7 +764,7 @@ function Chat() {
       <div className="chat-container">
         <div className="loading-state">
           <div className="spinner"></div>
-          <p>Loading conversations...</p>
+          <p>{t('chat.loadingConversations')}</p>
         </div>
         <style>{chatStyles}</style>
       </div>
@@ -775,13 +777,13 @@ function Chat() {
         {/* Conversations Sidebar */}
         <div className={`conversations-sidebar ${selectedConversation ? 'mobile-hide' : ''}`}>
           <div className="sidebar-header">
-            <h2>Messages</h2>
+            <h2>{t('chat.messages')}</h2>
             <div className="search-wrapper">
               <span className="search-icon-inline">🔍</span>
               <input
                 type="text"
                 className="search-input"
-                placeholder="Search users or conversations..."
+                placeholder={t('chat.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => setSearchFocused(true)}
@@ -795,13 +797,13 @@ function Chat() {
             <div className="search-results-list">
               {searchQuery.trim().length > 0 && (
                 <div className="search-results-header">
-                  {searching ? 'Searching...' : `Search Results ${searchResults.length > 0 ? `(${searchResults.length})` : ''}`}
+                  {searching ? t('chat.searching') : `${t('chat.searchResults')} ${searchResults.length > 0 ? `(${searchResults.length})` : ''}`}
                 </div>
               )}
               {searching ? (
                 <div className="search-loading">
                   <div className="spinner-sm"></div>
-                  <span>Searching users...</span>
+                  <span>{t('chat.searchingUsers')}</span>
                 </div>
               ) : (
                 <>
@@ -810,7 +812,7 @@ function Chat() {
                     <>
                       {searchResults.length > 0 ? (
                         <>
-                          <div className="results-section-label">Users Found</div>
+                          <div className="results-section-label">{t('chat.usersFound')}</div>
                           {searchResults.map(userObj => (
                             <div
                               key={userObj._id}
@@ -848,7 +850,7 @@ function Chat() {
                         </>
                       ) : (
                         <div className="search-no-results">
-                          <span>No users found matching "{searchQuery}"</span>
+                          <span>{t('chat.noUsersFound')} "{searchQuery}"</span>
                         </div>
                       )}
                     </>
@@ -858,17 +860,17 @@ function Chat() {
                   {loadingRecommended ? (
                     <>
                       <div className="results-section-label">
-                        💡 Recommended People
+                        💡 {t('chat.recommendedPeople')}
                       </div>
                       <div className="search-loading">
                         <div className="spinner-sm"></div>
-                        <span>Loading recommendations...</span>
+                        <span>{t('chat.loadingRecommendations')}</span>
                       </div>
                     </>
                   ) : recommendedUsers.length > 0 ? (
                     <>
                       <div className="results-section-label">
-                        💡 Recommended People
+                        💡 {t('chat.recommendedPeople')}
                       </div>
                       <div className="recommended-horizontal-list">
                         {recommendedUsers.map(userObj => (
@@ -876,7 +878,7 @@ function Chat() {
                             key={userObj._id}
                             className="recommended-user-card"
                             onClick={() => handleStartConversation(userObj)}
-                            title={`Start chat with ${userObj.firstName} ${userObj.lastName}`}
+                            title={`${t('chat.startChatWith')} ${userObj.firstName} ${userObj.lastName}`}
                           >
                             <div className="recommended-user-avatar">
                               {userObj.profilePicture ? (
@@ -907,10 +909,10 @@ function Chat() {
                   ) : searchFocused && !searchQuery.trim() ? (
                     <>
                       <div className="results-section-label">
-                        💡 Recommended People
+                        💡 {t('chat.recommendedPeople')}
                       </div>
                       <div className="search-no-results">
-                        <span>No recommendations available</span>
+                        <span>{t('chat.noRecommendations')}</span>
                       </div>
                     </>
                   ) : null}
@@ -922,8 +924,8 @@ function Chat() {
           <div className="conversations-list">
             {filteredConversations.length === 0 && !searchQuery.trim() && !searchFocused ? (
               <div className="empty-state">
-                <p>No conversations yet</p>
-                <span>Start chatting with employees or employers!</span>
+                <p>{t('chat.noConversations')}</p>
+                <span>{t('chat.startChattingPrompt')}</span>
               </div>
             ) : (
               filteredConversations.map((conv) => (
@@ -974,9 +976,9 @@ function Chat() {
             <button 
               className="new-chat-btn"
               onClick={() => setShowNewChatModal(true)}
-              title="Start New Chat"
+              title={t('chat.startNewChat')}
             >
-              ➕ New Chat
+              ➕ {t('chat.newChat')}
             </button>
           </div>
         </div>
@@ -987,12 +989,12 @@ function Chat() {
             <>
               <div className="chat-header">
                 <button className="back-button" onClick={() => setSelectedConversation(null)}>
-                  ← Back
+                  ← {t('chat.back')}
                 </button>
                 <div 
                   className="chat-user-info clickable" 
                   onClick={() => handleViewProfile(selectedConversation.user._id)}
-                  title="View profile"
+                  title={t('chat.viewProfile')}
                 >
                   <div className="chat-avatar">
                     {selectedConversation.user.profilePicture ? (
@@ -1042,7 +1044,7 @@ function Chat() {
                           </div>
                           <div className="message-meta">
                             <span className="message-time">{formatTime(msg.createdAt)}</span>
-                            {isSeen && <span className="message-seen">Seen</span>}
+                            {isSeen && <span className="message-seen">{t('chat.seen')}</span>}
                           </div>
                         </div>
                       </div>
@@ -1054,7 +1056,7 @@ function Chat() {
 
               <form className="message-input-container" onSubmit={handleSendMessage}>
                 <textarea
-                  placeholder="Type your message..."
+                  placeholder={t('chat.typePlaceholder')}
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
@@ -1070,8 +1072,8 @@ function Chat() {
             <div className="no-conversation-selected">
               <div className="empty-chat-state">
                 <span className="empty-icon">💬</span>
-                <h3>Select a conversation</h3>
-                <p>Choose a conversation from the sidebar to start chatting</p>
+                <h3>{t('chat.selectConversation')}</h3>
+                <p>{t('chat.selectConversationPrompt')}</p>
               </div>
             </div>
           )}
@@ -1086,7 +1088,7 @@ function Chat() {
         }}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>Start New Chat</h3>
+              <h3>{t('chat.startNewChat')}</h3>
               <button className="close-btn" onClick={() => {
                 setShowNewChatModal(false);
                 setModalSearchQuery('');
@@ -1096,7 +1098,7 @@ function Chat() {
               <div className="search-box">
                 <input
                   type="text"
-                  placeholder="Search users by name or email..."
+                  placeholder={t('chat.searchUsersPlaceholder')}
                   value={modalSearchQuery}
                   onChange={(e) => setModalSearchQuery(e.target.value)}
                   autoFocus
@@ -1108,7 +1110,7 @@ function Chat() {
                 {modalSearching ? (
                   <div className="search-loading">
                     <div className="spinner-sm"></div>
-                    <span>Searching users...</span>
+                    <span>{t('chat.searchingUsers')}</span>
                   </div>
                 ) : modalSearchResults.length > 0 ? (
                   <div className="users-list">
@@ -1151,11 +1153,11 @@ function Chat() {
                   </div>
                 ) : modalSearchQuery.trim().length > 0 ? (
                   <div className="search-no-results">
-                    <span>No users found matching "{modalSearchQuery}"</span>
+                    <span>{t('chat.noUsersFound')} "{modalSearchQuery}"</span>
                   </div>
                 ) : recommendedUsers.length > 0 ? (
                   <div className="recommended-section">
-                    <h4 className="recommended-title">👥 Recommended Users</h4>
+                    <h4 className="recommended-title">👥 {t('chat.recommendedUsers')}</h4>
                     <div className="users-list">
                       {recommendedUsers.map(userObj => (
                         <div
@@ -1197,7 +1199,7 @@ function Chat() {
                   </div>
                 ) : (
                   <div className="search-hint">
-                    <p>💡 Type a name or email to search for users</p>
+                    <p>💡 {t('chat.searchHint')}</p>
                   </div>
                 )}
               </div>
