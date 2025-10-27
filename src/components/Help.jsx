@@ -261,6 +261,12 @@ function Help() {
   }
 
   const openSupportChat = async () => {
+    // Check if user is logged in
+    if (!user || !token) {
+      showError('You need to be logged in to use live chat support. Please login or use Email Support instead.')
+      return
+    }
+
     try {
       // Get support contact (admin)
       const response = await apiService.getSupportContact()

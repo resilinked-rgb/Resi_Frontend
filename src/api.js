@@ -171,6 +171,13 @@ class ApiService {
     }
   }
 
+  async checkEmail(email) {
+    return this.request("/auth/check-email", {
+      method: "POST",
+      body: { email },
+    });
+  }
+
   async verifyEmail(token) {
     return this.request("/auth/verify", {
       method: "POST",

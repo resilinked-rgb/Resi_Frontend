@@ -344,11 +344,41 @@ function Register() {
   };
 
   // Navigate to next step
-  const nextStep = () => {
-    if (validateStep(currentStep)) {
-      setCurrentStep(prev => Math.min(prev + 1, totalSteps));
+  const nextStep = async () => {
+    if (!validateStep(currentStep)) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
     }
+
+    // Check email availability on step 2 before proceeding
+    if (currentStep === 2 && formData.email) {
+      try {
+        setLoading(true);
+        const response = await apiService.checkEmail(formData.email);
+        
+        if (response.exists) {
+          const errorMsg = response.alert || 'This email is already registered. Please use a different email or login instead.';
+          setError(errorMsg);
+          setLoading(false);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
+      } catch (error) {
+        console.error('Error checking email:', error);
+        const errorMessage = error.response?.data?.alert || 
+                           error.response?.data?.message || 
+                           error.message ||
+                           'Failed to verify email availability. Please try again.';
+        setError(errorMessage);
+        setLoading(false);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;ing(false);
+      }
+    }
+
+    setCurrentStep(prev => Math.min(prev + 1, totalSteps));
+    setError('');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Navigate to previous step
@@ -449,15 +479,19 @@ function Register() {
       } else {
         // Handle the case where success is false but data is returned
         const errorMessage = data.alert || data.message || "Registration failed. Please try again."
-        showError(errorMessage)
+        setError(errorMessage)
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     } catch (err) {
-      // Sanitize error messages to not expose backend details
-      let errorMessage = "Connection error. Please try again."
-      if (err.message && !err.message.toLowerCase().includes('backend') && !err.message.toLowerCase().includes('server')) {
-        errorMessage = err.message || err.alert
-      }
-      showError(errorMessage)
+      console.error('Registration error:', err);
+      // Display the actual error message from the API
+      const errorMessage = err.response?.data?.alert || 
+                          err.response?.data?.message || 
+                          err.alert || 
+                          err.message || 
+                          "Connection error. Please try again."
+      setError(errorMessage)
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
       setLoading(false)
     }
@@ -492,6 +526,13 @@ function Register() {
             <span className={currentStep === 5 ? 'active' : ''}>Documents</span>
           </div>
         </div>
+
+        {/* Error Display - Positioned at top */}
+        {error && (
+          <div className="error-message">
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="register-form">
           {/* Step 1: Personal Information */}
@@ -574,6 +615,7 @@ function Register() {
                       onFocus={handleFocus}
                       required
                       placeholder="Create a password"
+                      autoComplete="new-password"
                       style={{ paddingRight: '2.5rem' }}
                     />
                     <div 
@@ -629,6 +671,7 @@ function Register() {
                       onChange={handleInputChange}
                       required
                       placeholder="Repeat the password"
+                      autoComplete="new-password"
                       style={{
                         borderColor: passwordError === "Passwords match!" ? 'green' : 
                                    passwordError === "Passwords do not match!" ? 'red' : '',

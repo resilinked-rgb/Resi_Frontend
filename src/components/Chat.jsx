@@ -209,7 +209,8 @@ function Chat() {
         })
         .catch((err) => {
           console.error('Search error:', err);
-          showError('Failed to search users. Please try again.');
+          const errorMessage = err.message || 'Failed to search users. Please try again.';
+          showError(errorMessage);
           setSearchResults([]);
         })
         .finally(() => setSearching(false));
@@ -232,7 +233,8 @@ function Chat() {
         })
         .catch((err) => {
           console.error('Modal search error:', err);
-          showError('Failed to search users. Please try again.');
+          const errorMessage = err.message || 'Failed to search users. Please try again.';
+          showError(errorMessage);
           setModalSearchResults([]);
         })
         .finally(() => setModalSearching(false));
@@ -480,7 +482,8 @@ function Chat() {
       setConversations(uniqueConversationsArray);
     } catch (error) {
       console.error('Failed to load conversations:', error);
-      showError('Failed to load conversations');
+      const errorMessage = error.message || 'Failed to load conversations';
+      showError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -613,7 +616,10 @@ function Chat() {
       }
     } catch (error) {
       console.error('Failed to load messages:', error);
-      if (!silent) showError('Failed to load messages');
+      if (!silent) {
+        const errorMessage = error.message || 'Failed to load messages';
+        showError(errorMessage);
+      }
     } finally {
       if (!silent) setLoading(false);
     }
@@ -673,7 +679,8 @@ function Chat() {
       });
     } catch (error) {
       console.error('Failed to send message:', error);
-      showError('Failed to send message');
+      const errorMessage = error.message || 'Failed to send message. Please try again.';
+      showError(errorMessage);
     } finally {
       setSending(false);
     }
