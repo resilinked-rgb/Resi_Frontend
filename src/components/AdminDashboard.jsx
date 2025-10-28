@@ -64,8 +64,11 @@ function UserModal({ user, type, onClose, onSave }) {
     email: '',
     userType: 'employee',
     barangay: '',
-    isVerified: false
+    isVerified: false,
+    isEmailVerified: false
   })
+  
+  const [viewingDocument, setViewingDocument] = useState(null) // For document lightbox
 
   useEffect(() => {
     if (user) {
@@ -75,7 +78,8 @@ function UserModal({ user, type, onClose, onSave }) {
         email: user.email || '',
         userType: user.userType || 'employee',
         barangay: user.barangay || '',
-        isVerified: user.isVerified || false
+        isVerified: user.isVerified || false,
+        isEmailVerified: user.isEmailVerified || false
       })
     }
   }, [user])
@@ -144,9 +148,15 @@ function UserModal({ user, type, onClose, onSave }) {
                     <span className="value">{user?.barangay || 'Not specified'}</span>
                   </div>
                   <div className="detail-item">
-                    <span className="label">Status:</span>
+                    <span className="label">Email Verified:</span>
+                    <span className={`value status-badge ${user?.isEmailVerified ? 'verified' : 'unverified'}`}>
+                      {user?.isEmailVerified ? '✓ Verified' : '✗ Not Verified'}
+                    </span>
+                  </div>
+                  <div className="detail-item">
+                    <span className="label">Admin Approved:</span>
                     <span className={`value status-badge ${user?.isVerified ? 'verified' : 'unverified'}`}>
-                      {user?.isVerified ? '? Verified' : '? Unverified'}
+                      {user?.isVerified ? '✓ Approved' : '✗ Pending'}
                     </span>
                   </div>
                   <div className="detail-item">
@@ -161,6 +171,48 @@ function UserModal({ user, type, onClose, onSave }) {
                   </div>
                 </div>
               </div>
+              
+              {/* Document Verification Section */}
+              {(user?.idFrontImage || user?.idBackImage || user?.barangayClearanceImage) && (
+                <div className="detail-section">
+                  <h4>Uploaded Documents</h4>
+                  <div className="documents-grid">
+                    {user?.idFrontImage && (
+                      <div className="document-item">
+                        <span className="document-label">ID Front:</span>
+                        <img 
+                          src={user.idFrontImage} 
+                          alt="ID Front" 
+                          className="document-thumbnail"
+                          onClick={() => setViewingDocument({ url: user.idFrontImage, title: 'ID Front' })}
+                        />
+                      </div>
+                    )}
+                    {user?.idBackImage && (
+                      <div className="document-item">
+                        <span className="document-label">ID Back:</span>
+                        <img 
+                          src={user.idBackImage} 
+                          alt="ID Back" 
+                          className="document-thumbnail"
+                          onClick={() => setViewingDocument({ url: user.idBackImage, title: 'ID Back' })}
+                        />
+                      </div>
+                    )}
+                    {user?.barangayClearanceImage && (
+                      <div className="document-item">
+                        <span className="document-label">Barangay Clearance:</span>
+                        <img 
+                          src={user.barangayClearanceImage} 
+                          alt="Barangay Clearance" 
+                          className="document-thumbnail"
+                          onClick={() => setViewingDocument({ url: user.barangayClearanceImage, title: 'Barangay Clearance' })}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
               
               {user?.skills && user.skills.length > 0 && (
                 <div className="detail-section">
@@ -238,6 +290,16 @@ function UserModal({ user, type, onClose, onSave }) {
                   />
                 </div>
                 
+                <div className="form-group">
+                  <label className="info-label">Email Verified:</label>
+                  <span className={`status-badge ${formData.isEmailVerified ? 'verified' : 'unverified'}`}>
+                    {formData.isEmailVerified ? '✓ Verified' : '✗ Not Verified'}
+                  </span>
+                  <small style={{ display: 'block', color: '#666', marginTop: '0.25rem' }}>
+                    (Email verification is automated when user clicks link)
+                  </small>
+                </div>
+                
                 <div className="form-group checkbox-group">
                   <label htmlFor="isVerified" className="checkbox-label">
                     <input
@@ -247,8 +309,11 @@ function UserModal({ user, type, onClose, onSave }) {
                       checked={formData.isVerified}
                       onChange={handleChange}
                     />
-                    Verified Account
+                    Admin Approved
                   </label>
+                  <small style={{ display: 'block', color: '#666', marginLeft: '1.5rem', marginTop: '0.25rem' }}>
+                    (Toggle to approve/revoke user account)
+                  </small>
                 </div>
               </div>
               
@@ -263,6 +328,19 @@ function UserModal({ user, type, onClose, onSave }) {
             </form>
           )}
         </div>
+        
+        {/* Document Lightbox */}
+        {viewingDocument && (
+          <div className="document-lightbox" onClick={() => setViewingDocument(null)}>
+            <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
+              <div className="lightbox-header">
+                <h4>{viewingDocument.title}</h4>
+                <button className="lightbox-close" onClick={() => setViewingDocument(null)}>×</button>
+              </div>
+              <img src={viewingDocument.url} alt={viewingDocument.title} className="lightbox-image" />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -4610,6 +4688,121 @@ function AdminDashboard() {
           color: #2b6cb0;
           border-bottom: 1px solid #dee2e6;
           padding-bottom: 0.5rem;
+        }
+        
+        /* Document Viewing Styles */
+        .documents-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 1rem;
+          margin-top: 1rem;
+        }
+        
+        .document-item {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+        
+        .document-label {
+          font-weight: 500;
+          color: #4a5568;
+          font-size: 0.9rem;
+        }
+        
+        .document-thumbnail {
+          width: 100%;
+          max-width: 250px;
+          height: auto;
+          max-height: 180px;
+          object-fit: contain;
+          border: 2px solid #e2e8f0;
+          border-radius: 8px;
+          cursor: pointer;
+          transition: all 0.2s;
+          background: white;
+          padding: 0.5rem;
+        }
+        
+        .document-thumbnail:hover {
+          border-color: #2b6cb0;
+          box-shadow: 0 4px 12px rgba(43, 108, 176, 0.2);
+          transform: scale(1.02);
+        }
+        
+        /* Document Lightbox */
+        .document-lightbox {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.85);
+          z-index: 10000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 2rem;
+        }
+        
+        .lightbox-content {
+          background: white;
+          border-radius: 12px;
+          max-width: 90vw;
+          max-height: 90vh;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+        }
+        
+        .lightbox-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 1rem 1.5rem;
+          border-bottom: 1px solid #e2e8f0;
+          background: #f7fafc;
+        }
+        
+        .lightbox-header h4 {
+          margin: 0;
+          color: #2b6cb0;
+        }
+        
+        .lightbox-close {
+          background: none;
+          border: none;
+          font-size: 2rem;
+          color: #4a5568;
+          cursor: pointer;
+          padding: 0;
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          transition: all 0.2s;
+        }
+        
+        .lightbox-close:hover {
+          background: #e2e8f0;
+          color: #2b6cb0;
+        }
+        
+        .lightbox-image {
+          width: 100%;
+          height: auto;
+          max-height: calc(90vh - 80px);
+          object-fit: contain;
+          padding: 1rem;
+        }
+        
+        .info-label {
+          display: block;
+          margin-bottom: 0.5rem;
+          color: #4a5568;
+          font-weight: 500;
         }
 
         .detail-item {
