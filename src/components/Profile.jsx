@@ -1594,7 +1594,7 @@ function Profile() {
                     </div>
                     
                     <div className="common-skills">
-                      <label>{t('postJob.commonSkills') || 'Common Skills'}:</label>
+                      <label>Common Skills:</label>
                       <div className="common-skills-options">
                         {(t('postJob.commonSkills') || []).map((translatedSkill, idx) => {
                           // Get English skill for toggle logic
