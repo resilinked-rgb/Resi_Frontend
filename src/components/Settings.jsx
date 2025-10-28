@@ -20,7 +20,6 @@ function Settings() {
   
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
-  const [saving, setSaving] = useState(false)
   const [showPasswordModal, setShowPasswordModal] = useState(false)
   const [showEmailModal, setShowEmailModal] = useState(false)
   const [showSupportModal, setShowSupportModal] = useState(false)
@@ -94,26 +93,6 @@ function Settings() {
       showError('Failed to load settings')
     } finally {
       setLoading(false)
-    }
-  }
-
-  const saveSettings = async () => {
-    try {
-      setSaving(true)
-      const userData = JSON.parse(localStorage.getItem('userData') || '{}')
-      
-      const response = await apiService.updateProfile(userData.userId, settings)
-      
-      if (response.success) {
-        success('Settings saved successfully')
-      } else {
-        showError(response.message || 'Error saving settings')
-      }
-    } catch (error) {
-      console.error('Error saving settings:', error)
-      showError(error.message || 'Failed to save settings')
-    } finally {
-      setSaving(false)
     }
   }
 
@@ -443,24 +422,6 @@ function Settings() {
           >
             <span className="icon">💬</span>
             {t('settings.contactSupport')}
-          </button>
-        </div>
-
-        {/* Save Button */}
-        <div className="settings-actions">
-          <button 
-            className="save-btn"
-            onClick={saveSettings}
-            disabled={saving}
-          >
-            {saving ? (
-              <>
-                <div className="spinner"></div>
-                {t('common.saving')}
-              </>
-            ) : (
-              t('goals.saveSettings')
-            )}
           </button>
         </div>
       </div>

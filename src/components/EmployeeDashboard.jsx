@@ -558,8 +558,8 @@ function EmployeeDashboard() {
           </div>
         ) : (
           <div className="no-invitations">
-            <p>{t('common.noResults')}</p>
-            <small>{t('searchWorkers.invite')} {t('searchWorkers.skills')}</small>
+            <p>{t('employeeDashboard.noInvitations')}</p>
+            <small>{t('employeeDashboard.checkBackLater')}</small>
           </div>
         )}
       </section>
