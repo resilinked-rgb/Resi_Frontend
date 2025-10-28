@@ -52,6 +52,8 @@ function EmployerDashboard() {
   const [jobToComplete, setJobToComplete] = useState(null)
   const [rating, setRating] = useState(0)
   const [ratingComment, setRatingComment] = useState('')
+  const [paymentProof, setPaymentProof] = useState(null)
+  const [paymentProofPreview, setPaymentProofPreview] = useState(null)
 
   const { user, hasAccessTo } = useContext(AuthContext)
   const { success, error: showError } = useContext(AlertContext)
@@ -398,7 +400,41 @@ function EmployerDashboard() {
     setJobToComplete(job);
     setRating(0);
     setRatingComment('');
+    setPaymentProof(null);
+    setPaymentProofPreview(null);
     setShowCompleteModal(true);
+  };
+
+  // Handle payment proof file selection
+  const handlePaymentProofChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
+      if (!validTypes.includes(file.type)) {
+        showError('Please upload a valid image (JPEG, PNG, WebP) or PDF file');
+        return;
+      }
+
+      // Validate file size (5MB max)
+      if (file.size > 5 * 1024 * 1024) {
+        showError('File size must be less than 5MB');
+        return;
+      }
+
+      setPaymentProof(file);
+      
+      // Create preview for images only
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setPaymentProofPreview(reader.result);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        setPaymentProofPreview(null);
+      }
+    }
   };
 
   const handleCompleteJob = async (e) => {
@@ -414,6 +450,11 @@ function EmployerDashboard() {
       return;
     }
 
+    if (!paymentProof) {
+      showError('Please upload proof of payment (image or receipt)');
+      return;
+    }
+
     // Check if job is already completed
     if (jobToComplete.status === 'completed' || jobToComplete.completed) {
       showError('This job has already been completed');
@@ -421,12 +462,18 @@ function EmployerDashboard() {
       setJobToComplete(null);
       setRating(0);
       setRatingComment('');
+      setPaymentProof(null);
+      setPaymentProofPreview(null);
       return;
     }
 
     try {
-      // First complete the job
-      const result = await apiService.completeJob(jobToComplete._id);
+      // Create FormData to send file
+      const formData = new FormData();
+      formData.append('paymentProof', paymentProof);
+
+      // First complete the job with payment proof
+      const result = await apiService.completeJobWithPayment(jobToComplete._id, formData);
       
       // Then submit the rating (using rateeId to match backend expectation)
       await apiService.rateUser({
@@ -441,6 +488,8 @@ function EmployerDashboard() {
       setJobToComplete(null);
       setRating(0);
       setRatingComment('');
+      setPaymentProof(null);
+      setPaymentProofPreview(null);
       
       // Refresh the jobs list and dashboard stats
       await loadMyJobs();
@@ -3052,6 +3101,52 @@ function EmployerDashboard() {
           font-size: 0.85rem;
           margin-top: 0.25rem;
         }
+
+        .field-description {
+          font-size: 0.875rem;
+          color: #64748b;
+          margin: 0.25rem 0 0.5rem 0;
+        }
+
+        .file-input {
+          display: block;
+          width: 100%;
+          padding: 0.75rem;
+          border: 2px dashed #cbd5e0;
+          border-radius: 8px;
+          background: #f7fafc;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .file-input:hover {
+          border-color: #7c3aed;
+          background: #faf5ff;
+        }
+
+        .payment-proof-preview {
+          margin-top: 1rem;
+          border-radius: 8px;
+          overflow: hidden;
+          border: 1px solid #e2e8f0;
+        }
+
+        .payment-proof-preview img {
+          width: 100%;
+          max-height: 300px;
+          object-fit: contain;
+          background: #f7fafc;
+        }
+
+        .file-selected {
+          margin-top: 0.5rem;
+          padding: 0.75rem;
+          background: #ecfdf5;
+          border: 1px solid #a7f3d0;
+          border-radius: 8px;
+          color: #065f46;
+          font-size: 0.875rem;
+        }
       `}</style>
 
       {/* Worker Profile Modal */}
@@ -3524,6 +3619,28 @@ function EmployerDashboard() {
                     minLength="10"
                   />
                   <small className="char-count">{ratingComment.length} characters</small>
+                </div>
+
+                <div className="form-group">
+                  <label>{t('employerDashboard.paymentProof')} *</label>
+                  <p className="field-description">{t('employerDashboard.paymentProofDesc')}</p>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/webp,application/pdf"
+                    onChange={handlePaymentProofChange}
+                    required
+                    className="file-input"
+                  />
+                  {paymentProofPreview && (
+                    <div className="payment-proof-preview">
+                      <img src={paymentProofPreview} alt="Payment proof preview" />
+                    </div>
+                  )}
+                  {paymentProof && !paymentProofPreview && (
+                    <div className="file-selected">
+                      📄 {paymentProof.name}
+                    </div>
+                  )}
                 </div>
 
                 <div className="complete-note">

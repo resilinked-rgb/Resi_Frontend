@@ -417,6 +417,26 @@ class ApiService {
     });
   }
 
+  async completeJobWithPayment(jobId, formData) {
+    const token = localStorage.getItem("token");
+    const apiUrl = import.meta.env.VITE_API_URL || "https://resilinked-api.onrender.com/api";
+    
+    const response = await fetch(`${apiUrl}/jobs/${jobId}/complete`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData, // FormData with paymentProof file
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.alert || errorData.message || "Failed to complete job");
+    }
+
+    return response.json();
+  }
+
   async deleteJob(jobId) {
     return this.request(`/jobs/${jobId}`, {
       method: "DELETE",

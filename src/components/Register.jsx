@@ -140,6 +140,7 @@ function Register() {
     idFrontImage: null,
     idBackImage: null,
     profilePicture: null,
+    barangayClearanceImage: null,
     otherBarangay: '',
     otherSkill: '',
     acceptedTOS: false
@@ -152,12 +153,14 @@ function Register() {
   const idFrontInputRef = useRef(null)
   const idBackInputRef = useRef(null)
   const profilePicInputRef = useRef(null)
+  const barangayClearanceInputRef = useRef(null)
   
   // Store file names for display
   const [fileNames, setFileNames] = useState({
     idFrontImage: '',
     idBackImage: '',
-    profilePicture: ''
+    profilePicture: '',
+    barangayClearanceImage: ''
   })
   
   const [loading, setLoading] = useState(false)
@@ -329,7 +332,7 @@ function Register() {
         }
         break;
       case 5: // ID & Documents
-        if (!formData.idType || !formData.idNumber || !formData.idFrontImage || !formData.idBackImage) {
+        if (!formData.idType || !formData.idNumber || !formData.idFrontImage || !formData.idBackImage || !formData.barangayClearanceImage) {
           setError("Please fill in all ID and document fields");
           return false;
         }
@@ -454,7 +457,7 @@ function Register() {
         // Use the otherBarangay value if barangay is set to 'other'
         submitFormData.append('barangay', formData.otherBarangay);
       } else if (key !== 'confirmPassword' && key !== 'idFrontImage' && key !== 'idBackImage' && 
-                key !== 'profilePicture' && key !== 'skills' && key !== 'otherBarangay' &&
+                key !== 'profilePicture' && key !== 'barangayClearanceImage' && key !== 'skills' && key !== 'otherBarangay' &&
                 key !== 'otherSkill') {
         submitFormData.append(key, formData[key])
       }
@@ -469,6 +472,9 @@ function Register() {
     }
     if (formData.profilePicture) {
       submitFormData.append("profilePicture", formData.profilePicture)
+    }
+    if (formData.barangayClearanceImage) {
+      submitFormData.append("barangayClearanceImage", formData.barangayClearanceImage)
     }
 
     try {
@@ -1104,6 +1110,54 @@ function Register() {
                         setFormData(prev => ({ ...prev, profilePicture: null }));
                         setFileNames(prev => ({ ...prev, profilePicture: '' }));
                         if (profilePicInputRef.current) profilePicInputRef.current.value = '';
+                      }}
+                    >
+                      {t('register.changeFile')}
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="barangayClearanceImage">{t('register.barangayClearanceImage')}</label>
+                {!fileNames.barangayClearanceImage ? (
+                  <input
+                    type="file"
+                    id="barangayClearanceImage"
+                    name="barangayClearanceImage"
+                    ref={barangayClearanceInputRef}
+                    onChange={handleInputChange}
+                    accept="image/*"
+                    required
+                  />
+                ) : (
+                  <div className="file-display-wrapper">
+                    <div className="file-selected-display">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                        <polyline points="13 2 13 9 20 9"></polyline>
+                      </svg>
+                      <span className="file-name">{fileNames.barangayClearanceImage}</span>
+                      <button 
+                        type="button"
+                        className="file-remove-btn"
+                        onClick={() => {
+                          setFormData(prev => ({ ...prev, barangayClearanceImage: null }));
+                          setFileNames(prev => ({ ...prev, barangayClearanceImage: '' }));
+                          if (barangayClearanceInputRef.current) barangayClearanceInputRef.current.value = '';
+                        }}
+                        title={t('register.removeFile')}
+                      >
+                        ×
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      className="file-change-btn"
+                      onClick={() => {
+                        setFormData(prev => ({ ...prev, barangayClearanceImage: null }));
+                        setFileNames(prev => ({ ...prev, barangayClearanceImage: '' }));
+                        if (barangayClearanceInputRef.current) barangayClearanceInputRef.current.value = '';
                       }}
                     >
                       {t('register.changeFile')}

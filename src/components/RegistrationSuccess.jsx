@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { CheckCircle, Mail, Shield, LogIn } from 'lucide-react'
+import { useTranslation } from '../hooks/useTranslation'
 
 const RegistrationSuccess = () => {
+  const { t } = useTranslation()
   const [currentProgress, setCurrentProgress] = useState(1) // Start at step 1 for animation
   const [isAnimating, setIsAnimating] = useState(true)
+  const [showResendForm, setShowResendForm] = useState(false)
+  const [resendEmail, setResendEmail] = useState('')
+  const [resendLoading, setResendLoading] = useState(false)
+  const [resendSuccess, setResendSuccess] = useState(false)
+  const [resendError, setResendError] = useState('')
   const location = useLocation()
 
   // Animate progress bar on mount
@@ -35,27 +42,27 @@ const RegistrationSuccess = () => {
   const progressSteps = [
     { 
       id: 1, 
-      label: 'Sign Up', 
+      label: t('registrationSuccess.signUp'), 
       icon: CheckCircle, 
-      description: 'Account Created'
+      description: t('registrationSuccess.accountCreated')
     },
     { 
       id: 2, 
-      label: 'Email Sent', 
+      label: t('registrationSuccess.emailSent'), 
       icon: CheckCircle, 
-      description: 'Verification Email Sent'
+      description: t('registrationSuccess.verificationEmailSent')
     },
     { 
       id: 3, 
-      label: 'Email Verification', 
+      label: t('registrationSuccess.emailVerification'), 
       icon: Mail, 
-      description: 'Check Your Inbox'
+      description: t('registrationSuccess.checkYourInbox')
     },
     { 
       id: 4, 
-      label: 'Ready to Login', 
+      label: t('registrationSuccess.readyToLogin'), 
       icon: LogIn, 
-      description: 'Almost There!'
+      description: t('registrationSuccess.almostThere')
     }
   ]
 
@@ -69,6 +76,48 @@ const RegistrationSuccess = () => {
     return ((currentProgress - 1) / 3) * 100 // 3 gaps between 4 steps
   }
 
+  const handleResendVerification = async (e) => {
+    e.preventDefault()
+    
+    if (!resendEmail) {
+      setResendError('Please enter your email address')
+      return
+    }
+    
+    try {
+      setResendLoading(true)
+      setResendError('')
+      setResendSuccess(false)
+      
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://resilinked-api.onrender.com/api'
+      const response = await fetch(`${apiUrl}/auth/verify/resend`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email: resendEmail })
+      })
+      
+      const data = await response.json()
+      
+      if (response.ok) {
+        setResendSuccess(true)
+        setResendError('')
+        setTimeout(() => {
+          setShowResendForm(false)
+          setResendEmail('')
+          setResendSuccess(false)
+        }, 3000)
+      } else {
+        setResendError(data.alert || 'Failed to resend verification email. Please try again.')
+      }
+    } catch (err) {
+      setResendError('Network error. Please check your connection and try again.')
+    } finally {
+      setResendLoading(false)
+    }
+  }
+
   return (
     <div className="registration-success-container">
       <div className="success-card">
@@ -78,12 +127,12 @@ const RegistrationSuccess = () => {
         </div>
 
         <h1 className="success-title">
-          Registration Successful!
+          {t('registrationSuccess.title')}
         </h1>
 
         <div className="email-badge">
           <Mail className="badge-icon" size={20} />
-          <span>{currentProgress === 4 ? 'Account Verified!' : 'Check Your Email'}</span>
+          <span>{currentProgress === 4 ? t('registrationSuccess.accountVerified') : t('registrationSuccess.checkEmail')}</span>
         </div>
 
         {/* Horizontal Progress Bar */}
@@ -138,17 +187,81 @@ const RegistrationSuccess = () => {
         <div className="message-box">
           <p className="message-text">
             {currentProgress === 4 
-              ? 'Your email has been verified! You can now log in to your account.'
-              : 'A verification email has been sent to your inbox. Please check your email and click the verification link to activate your account.'}
+              ? t('registrationSuccess.verifiedMessage')
+              : t('registrationSuccess.emailSentMessage')}
           </p>
+          
+          {/* Resend Email Toggle - Inside message box */}
+          {currentProgress < 4 && !showResendForm && (
+            <p className="resend-toggle-text">
+              {t('registrationSuccess.didntReceive')}{' '}
+              <span 
+                className="resend-toggle-link"
+                onClick={() => setShowResendForm(true)}
+              >
+                {t('registrationSuccess.clickToResend')}
+              </span>
+            </p>
+          )}
         </div>
+
+        {/* Resend Email Section */}
+        {showResendForm && currentProgress < 4 && (
+          <div className="resend-form-container">
+            {!resendSuccess ? (
+              <form onSubmit={handleResendVerification} className="resend-form">
+                <p className="resend-instructions">{t('registrationSuccess.enterEmailToResend')}</p>
+                
+                {resendError && <div className="resend-error-alert">{resendError}</div>}
+                
+                <div className="resend-input-group">
+                  <input
+                    type="email"
+                    value={resendEmail}
+                    onChange={(e) => setResendEmail(e.target.value)}
+                    placeholder={t('registrationSuccess.emailPlaceholder')}
+                    className="resend-email-input"
+                    disabled={resendLoading}
+                    required
+                  />
+                  <div className="resend-button-group">
+                    <button
+                      type="submit"
+                      className="resend-submit-button"
+                      disabled={resendLoading || !resendEmail}
+                    >
+                      {resendLoading ? t('registrationSuccess.sending') : t('registrationSuccess.resendButton')}
+                    </button>
+                    <button
+                      type="button"
+                      className="resend-cancel-button"
+                      onClick={() => {
+                        setShowResendForm(false)
+                        setResendEmail('')
+                        setResendError('')
+                      }}
+                      disabled={resendLoading}
+                    >
+                      {t('common.cancel')}
+                    </button>
+                  </div>
+                </div>
+              </form>
+            ) : (
+              <div className="resend-success-alert">
+                <CheckCircle className="success-check-icon" size={24} />
+                <p>{t('registrationSuccess.emailSentSuccess')}</p>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Action Button */}
         <Link 
           to="/login"
           className="login-button"
         >
-          {currentProgress === 4 ? 'Go to Login' : 'Go to Login'}
+          {currentProgress === 4 ? t('registrationSuccess.goToLogin') : t('registrationSuccess.goToLogin')}
         </Link>
       </div>
 
@@ -332,7 +445,28 @@ const RegistrationSuccess = () => {
           font-size: 16px;
           color: #581c87;
           line-height: 1.6;
-          margin: 0;
+          margin: 0 0 12px 0;
+        }
+
+        .resend-toggle-text {
+          font-size: 14px;
+          color: #6b7280;
+          margin: 12px 0 0 0;
+          line-height: 1.5;
+        }
+
+        .resend-toggle-link {
+          color: #7c3aed;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          text-decoration: underline;
+          transition: color 0.2s ease;
+          display: inline;
+        }
+
+        .resend-toggle-link:hover {
+          color: #6b21a8;
         }
 
         .login-button {
@@ -351,6 +485,145 @@ const RegistrationSuccess = () => {
         .login-button:hover {
           transform: translateY(-2px);
           box-shadow: 0 12px 28px rgba(147, 51, 234, 0.5);
+        }
+
+        .resend-form-container {
+          width: 100%;
+          max-width: 500px;
+          margin: 20px auto 30px;
+          padding: 24px;
+          background: rgba(147, 51, 234, 0.05);
+          border-radius: 16px;
+          border: 2px solid rgba(147, 51, 234, 0.15);
+        }
+
+        .resend-form {
+          text-align: left;
+        }
+
+        .resend-instructions {
+          margin-bottom: 16px;
+          color: #4b5563;
+          font-size: 14px;
+          font-weight: 500;
+          text-align: center;
+        }
+
+        .resend-error-alert {
+          padding: 12px 16px;
+          background-color: #fef2f2;
+          border-left: 4px solid #ef4444;
+          color: #b91c1c;
+          margin-bottom: 16px;
+          border-radius: 8px;
+          font-size: 14px;
+          text-align: left;
+        }
+
+        .resend-input-group {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .resend-email-input {
+          width: 100%;
+          padding: 12px 16px;
+          border: 2px solid #e5e7eb;
+          border-radius: 12px;
+          background: #ffffff;
+          font-size: 15px;
+          transition: all 0.2s;
+        }
+
+        .resend-email-input:focus {
+          outline: none;
+          border-color: #7c3aed;
+          box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        }
+
+        .resend-email-input:disabled {
+          background: #f3f4f6;
+          cursor: not-allowed;
+        }
+
+        .resend-button-group {
+          display: flex;
+          gap: 12px;
+        }
+
+        .resend-submit-button {
+          flex: 1;
+          background: linear-gradient(135deg, #9333ea, #7c3aed);
+          color: white;
+          border: none;
+          padding: 12px 24px;
+          border-radius: 12px;
+          font-size: 15px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s;
+          box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+        }
+
+        .resend-submit-button:hover:not(:disabled) {
+          background: linear-gradient(135deg, #8b31da, #6c2edd);
+          transform: translateY(-1px);
+          box-shadow: 0 6px 16px rgba(124, 58, 237, 0.3);
+        }
+
+        .resend-submit-button:disabled {
+          background: #9ca3af;
+          cursor: not-allowed;
+          transform: none;
+          box-shadow: none;
+          opacity: 0.6;
+        }
+
+        .resend-cancel-button {
+          flex: 0 0 auto;
+          background: #f3f4f6;
+          color: #6b7280;
+          border: none;
+          padding: 12px 24px;
+          border-radius: 12px;
+          font-size: 15px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .resend-cancel-button:hover:not(:disabled) {
+          background: #e5e7eb;
+          color: #4b5563;
+        }
+
+        .resend-cancel-button:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        .resend-success-alert {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 16px;
+          background: #ecfdf5;
+          border-radius: 12px;
+          border: 2px solid #10b981;
+        }
+
+        .success-check-icon {
+          color: #059669;
+          min-width: 24px;
+        }
+
+        .resend-success-alert p {
+          margin: 0;
+          color: #065f46;
+          font-size: 14px;
+          font-weight: 500;
+          text-align: left;
         }
 
         .pulse-animation {
@@ -446,6 +719,10 @@ const RegistrationSuccess = () => {
           .login-button {
             padding: 14px 40px;
             font-size: 16px;
+          }
+
+          .resend-form-container {
+            padding: 20px;
           }
         }
 
@@ -543,6 +820,21 @@ const RegistrationSuccess = () => {
             font-size: 15px;
             width: 100%;
             max-width: 280px;
+          }
+
+          .resend-form-container {
+            padding: 16px;
+            margin: 15px auto 25px;
+          }
+
+          .resend-button-group {
+            flex-direction: column;
+          }
+
+          .resend-submit-button,
+          .resend-cancel-button {
+            width: 100%;
+            font-size: 14px;
           }
         }
 

@@ -280,6 +280,7 @@ export const translations = {
       idFrontImage: 'ID Front Image',
       idBackImage: 'ID Back Image',
       profilePicture: 'Profile Picture',
+      barangayClearanceImage: 'Barangay Clearance',
       uploadHint: 'Click to upload or drag and drop',
       uploadedFile: 'Uploaded',
       changeFile: 'Change File',
@@ -342,6 +343,50 @@ export const translations = {
       checkingEmail: 'Checking email availability...',
       uploadingFiles: 'Uploading files...',
       processingRegistration: 'Processing registration...'
+    },
+
+    // Registration Success
+    registrationSuccess: {
+      title: 'Registration Successful!',
+      signUp: 'Sign Up',
+      accountCreated: 'Account Created',
+      emailSent: 'Email Sent',
+      verificationEmailSent: 'Verification Email Sent',
+      emailVerification: 'Email Verification',
+      checkYourInbox: 'Check Your Inbox',
+      readyToLogin: 'Ready to Login',
+      almostThere: 'Almost There!',
+      accountVerified: 'Account Verified!',
+      checkEmail: 'Check Your Email',
+      verifiedMessage: 'Your email has been verified! You can now log in to your account.',
+      emailSentMessage: 'A verification email has been sent to your inbox. Please check your email and click the verification link to activate your account.',
+      didntReceive: "Didn't receive the email?",
+      clickToResend: 'Click here to resend',
+      enterEmailToResend: 'Enter your email address to resend the verification email:',
+      emailPlaceholder: 'Enter your email address',
+      sending: 'Sending...',
+      resendButton: 'Resend Email',
+      emailSentSuccess: 'Verification email sent successfully! Please check your inbox and spam folder.',
+      goToLogin: 'Go to Login'
+    },
+
+    // Email Verification Page
+    verifyEmail: {
+      verifying: 'Verifying your email address...',
+      pleaseWait: 'Please wait while we verify your email.',
+      successTitle: 'Email Verified Successfully!',
+      successMessage: 'Your email has been verified. Redirecting you to complete the process...',
+      errorTitle: 'Verification Failed',
+      didntReceive: "Didn't receive the email?",
+      clickToResend: 'Click here to resend',
+      resendTitle: 'Resend Verification Email',
+      resendInstructions: 'Enter your email address to resend the verification email:',
+      emailPlaceholder: 'Enter your email address',
+      sending: 'Sending...',
+      resendButton: 'Resend Email',
+      emailSentTitle: 'Email Sent!',
+      emailSentMessage: 'Verification email sent successfully! Please check your inbox and spam folder.',
+      registerNew: 'Register a new account'
     },
 
     // Login
@@ -927,6 +972,8 @@ export const translations = {
       rateWorker: 'Rate the Worker',
       rating: 'Rating',
       comment: 'Comment',
+      paymentProof: 'Proof of Payment',
+      paymentProofDesc: 'Upload a screenshot or receipt showing payment to the worker (Required)',
       optional: 'Optional',
       cancel: 'Cancel',
       save: 'Save Changes',
@@ -1782,6 +1829,7 @@ export const translations = {
       idFrontImage: 'Harap ng ID',
       idBackImage: 'Likod ng ID',
       profilePicture: 'Larawan ng Profile',
+      barangayClearanceImage: 'Barangay Clearance',
       uploadHint: 'I-click para mag-upload o i-drag at i-drop',
       uploadedFile: 'Na-upload na',
       changeFile: 'Palitan ang File',
@@ -1844,6 +1892,50 @@ export const translations = {
       checkingEmail: 'Sinusuri ang email...',
       uploadingFiles: 'Nag-a-upload ng mga file...',
       processingRegistration: 'Pinoproseso ang pagpaparehistro...'
+    },
+
+    // Registration Success
+    registrationSuccess: {
+      title: 'Matagumpay ang Pagpaparehistro!',
+      signUp: 'Magparehistro',
+      accountCreated: 'Nagawa ang Account',
+      emailSent: 'Naipadala ang Email',
+      verificationEmailSent: 'Naipadala ang Verification Email',
+      emailVerification: 'Pag-verify ng Email',
+      checkYourInbox: 'Suriin ang Iyong Inbox',
+      readyToLogin: 'Handa nang Mag-login',
+      almostThere: 'Malapit na!',
+      accountVerified: 'Na-verify ang Account!',
+      checkEmail: 'Suriin ang Iyong Email',
+      verifiedMessage: 'Na-verify na ang iyong email! Maaari ka nang mag-login sa iyong account.',
+      emailSentMessage: 'Naipadala na ang verification email sa iyong inbox. Pakisuri ang iyong email at i-click ang verification link upang i-activate ang iyong account.',
+      didntReceive: 'Hindi mo natanggap ang email?',
+      clickToResend: 'I-click dito para ipadala muli',
+      enterEmailToResend: 'Ilagay ang iyong email address para ipadala muli ang verification email:',
+      emailPlaceholder: 'Ilagay ang iyong email address',
+      sending: 'Nagpapadala...',
+      resendButton: 'Ipadala Muli ang Email',
+      emailSentSuccess: 'Matagumpay na naipadala ang verification email! Pakisuri ang iyong inbox at spam folder.',
+      goToLogin: 'Pumunta sa Login'
+    },
+
+    // Email Verification Page
+    verifyEmail: {
+      verifying: 'Bini-verify ang iyong email address...',
+      pleaseWait: 'Mangyaring maghintay habang bini-verify namin ang iyong email.',
+      successTitle: 'Matagumpay na Na-verify ang Email!',
+      successMessage: 'Na-verify na ang iyong email. Dinadala ka namin sa susunod na hakbang...',
+      errorTitle: 'Nabigo ang Pag-verify',
+      didntReceive: 'Hindi mo natanggap ang email?',
+      clickToResend: 'I-click dito para ipadala muli',
+      resendTitle: 'Ipadala Muli ang Verification Email',
+      resendInstructions: 'Ilagay ang iyong email address para ipadala muli ang verification email:',
+      emailPlaceholder: 'Ilagay ang iyong email address',
+      sending: 'Nagpapadala...',
+      resendButton: 'Ipadala Muli ang Email',
+      emailSentTitle: 'Naipadala ang Email!',
+      emailSentMessage: 'Matagumpay na naipadala ang verification email! Pakisuri ang iyong inbox at spam folder.',
+      registerNew: 'Magrehistro ng bagong account'
     },
 
     // Login
@@ -2430,6 +2522,8 @@ export const translations = {
       rateWorker: 'I-rate ang Manggagawa',
       rating: 'Rating',
       comment: 'Komento',
+      paymentProof: 'Patunay ng Bayad',
+      paymentProofDesc: 'Mag-upload ng screenshot o resibo na nagpapakita ng bayad sa manggagawa (Kinakailangan)',
       optional: 'Opsyonal',
       cancel: 'Kanselahin',
       save: 'I-save ang mga Pagbabago',
