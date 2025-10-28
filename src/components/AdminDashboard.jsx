@@ -2055,16 +2055,103 @@ function AdminDashboard() {
                         </div>
                         <div className="job-stat-item">
                           <div className="job-stat-number">
-                            ?{analyticsData?.jobStats?.totalValue?.toLocaleString() ?? 0}
+                            ₱{analyticsData?.jobStats?.totalValue?.toLocaleString() ?? 0}
                           </div>
                           <div className="job-stat-label">Total Value</div>
                         </div>
                         <div className="job-stat-item">
                           <div className="job-stat-number">
-                            ?{analyticsData?.jobStats?.averagePrice?.toLocaleString() ?? 0}
+                            ₱{analyticsData?.jobStats?.averagePrice?.toLocaleString() ?? 0}
                           </div>
                           <div className="job-stat-label">Average Price</div>
                         </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="analytics-row">
+                    <div className="analytics-card">
+                      <h4>Gender Distribution</h4>
+                      <div className="user-stats">
+                        <div className="user-stat-item">
+                          <div className="stat-label">♂ Male</div>
+                          <div className="stat-details">
+                            <span className="stat-value">{analyticsData?.genderDistribution?.male ?? 0}</span>
+                            <span className="stat-percentage">
+                              {analyticsData?.totalUsers > 0 ? ((analyticsData?.genderDistribution?.male / analyticsData?.totalUsers) * 100).toFixed(1) : 0}%
+                            </span>
+                          </div>
+                        </div>
+                        <div className="user-stat-item">
+                          <div className="stat-label">♀ Female</div>
+                          <div className="stat-details">
+                            <span className="stat-value">{analyticsData?.genderDistribution?.female ?? 0}</span>
+                            <span className="stat-percentage">
+                              {analyticsData?.totalUsers > 0 ? ((analyticsData?.genderDistribution?.female / analyticsData?.totalUsers) * 100).toFixed(1) : 0}%
+                            </span>
+                          </div>
+                        </div>
+                        <div className="user-stat-item">
+                          <div className="stat-label">⚧ Others</div>
+                          <div className="stat-details">
+                            <span className="stat-value">{analyticsData?.genderDistribution?.others ?? 0}</span>
+                            <span className="stat-percentage">
+                              {analyticsData?.totalUsers > 0 ? ((analyticsData?.genderDistribution?.others / analyticsData?.totalUsers) * 100).toFixed(1) : 0}%
+                            </span>
+                          </div>
+                        </div>
+                        <div className="user-stat-item">
+                          <div className="stat-label">❓ Not Specified</div>
+                          <div className="stat-details">
+                            <span className="stat-value">{analyticsData?.genderDistribution?.notSpecified ?? 0}</span>
+                            <span className="stat-percentage">
+                              {analyticsData?.totalUsers > 0 ? ((analyticsData?.genderDistribution?.notSpecified / analyticsData?.totalUsers) * 100).toFixed(1) : 0}%
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="analytics-card">
+                      <h4>Popular Skills</h4>
+                      <div className="location-stats">
+                        {analyticsData?.popularSkills?.slice(0, 10).map((skill, index) => (
+                          <div key={skill.skill} className="location-stat-row">
+                            <span className="location-name">{index + 1}. {skill.skill}</span>
+                            <span className="location-count">{skill.count} users</span>
+                          </div>
+                        ))}
+                        {(!analyticsData?.popularSkills || analyticsData.popularSkills.length === 0) && (
+                          <div style={{ textAlign: 'center', color: '#999', padding: '1rem' }}>
+                            No skills data available
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="analytics-row">
+                    <div className="analytics-card full-width">
+                      <h4>Popular Jobs (By Applicants)</h4>
+                      <div className="job-list-analytics">
+                        {analyticsData?.popularJobs?.map((job, index) => (
+                          <div key={job._id} className="job-item-analytics">
+                            <div className="job-rank">{index + 1}</div>
+                            <div className="job-details-analytics">
+                              <div className="job-title-analytics">{job.title}</div>
+                              <div className="job-meta-analytics">
+                                <span>📍 {job.barangay}</span>
+                                <span>💰 ₱{job.price?.toLocaleString()}</span>
+                                <span>👥 {job.applicantCount} applicants</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                        {(!analyticsData?.popularJobs || analyticsData.popularJobs.length === 0) && (
+                          <div style={{ textAlign: 'center', color: '#999', padding: '1rem' }}>
+                            No popular jobs data available
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -4270,6 +4357,91 @@ function AdminDashboard() {
 
         .metric-value.good {
           color: #2b6cb0;
+        }
+
+        .analytics-card.full-width {
+          grid-column: 1 / -1;
+        }
+
+        .job-list-analytics {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .job-item-analytics {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          padding: 1rem;
+          background: #f8f9fa;
+          border-radius: 8px;
+          border-left: 4px solid #2b6cb0;
+        }
+
+        .job-rank {
+          font-size: 1.5rem;
+          font-weight: bold;
+          color: #2b6cb0;
+          min-width: 40px;
+          text-align: center;
+        }
+
+        .job-details-analytics {
+          flex: 1;
+        }
+
+        .job-title-analytics {
+          font-weight: 600;
+          color: #2d3748;
+          margin-bottom: 0.5rem;
+          font-size: 1rem;
+        }
+
+        .job-meta-analytics {
+          display: flex;
+          gap: 1rem;
+          font-size: 0.875rem;
+          color: #666;
+          flex-wrap: wrap;
+        }
+
+        .job-meta-analytics span {
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+        }
+
+        .user-stats {
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+        }
+
+        .user-stat-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 0.75rem;
+          background: #f8f9fa;
+          border-radius: 6px;
+        }
+
+        .user-stat-item .stat-label {
+          font-weight: 500;
+          color: #4a5568;
+        }
+
+        .stat-details {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+        }
+
+        .stat-percentage {
+          color: #2b6cb0;
+          font-size: 0.875rem;
+          font-weight: 600;
         }
 
         .analytics-actions {
