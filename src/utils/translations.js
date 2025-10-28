@@ -1588,6 +1588,14 @@ export const translations = {
       loadingAnalytics: 'Loading analytics...'
     },
 
+    // Report Modal
+    reportModal: {
+      disclaimerTitle: 'Important Notice',
+      disclaimerText: 'By submitting this report, you acknowledge that you may be called to the barangay office to settle the dispute. False or malicious reports may result in legal consequences.',
+      reasonLabel: 'Reason for Report',
+      reasonPlaceholder: 'Please describe why you are reporting this user/job...'
+    },
+
     // Error Messages
     errors: {
       generic: 'Something went wrong. Please try again.',
@@ -3244,6 +3252,14 @@ export const translations = {
       loadingJobs: 'Naglo-load ng mga trabaho...',
       loadingStats: 'Naglo-load ng mga istatistika...',
       loadingAnalytics: 'Naglo-load ng analytics...'
+    },
+
+    // Report Modal
+    reportModal: {
+      disclaimerTitle: 'Mahalagang Paalala',
+      disclaimerText: 'Sa pagsusumite ng ulat na ito, kinikilala mo na maaaring tawagin ka sa tanggapan ng barangay upang ayusin ang alitan. Ang mga maling o mapaminsalang ulat ay maaaring magresulta sa legal na kahihinatnan.',
+      reasonLabel: 'Dahilan ng Pag-uulat',
+      reasonPlaceholder: 'Pakipaliwanag kung bakit mo iniuulat ang user/trabaho na ito...'
     },
 
     // Error Messages

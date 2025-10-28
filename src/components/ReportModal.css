@@ -102,6 +102,46 @@
   color: #78350f;
 }
 
+.report-disclaimer {
+  display: flex;
+  gap: 12px;
+  background: linear-gradient(135deg, #fef5e7 0%, #fff8e1 100%);
+  border: 2px solid #ff9800;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.1);
+}
+
+.disclaimer-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.disclaimer-content h4 {
+  margin: 0 0 8px 0;
+  color: #e65100;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.disclaimer-content p {
+  margin: 0;
+  color: #bf360c;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
 .form-group {
   margin-bottom: 24px;
 }

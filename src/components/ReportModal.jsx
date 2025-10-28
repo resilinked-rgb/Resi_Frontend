@@ -48,16 +48,26 @@ const ReportModal = ({ isOpen, onClose, onSubmit, reportType, targetName }) => {
             {t('common.view')}: <strong>{targetName}</strong>
           </p>
           
+          <div className="report-disclaimer">
+            <div className="disclaimer-icon">⚠️</div>
+            <div className="disclaimer-content">
+              <h4>{t('reportModal.disclaimerTitle')}</h4>
+              <p>
+                {t('reportModal.disclaimerText')}
+              </p>
+            </div>
+          </div>
+          
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label htmlFor="reason">
-                {t('errors.validationError')} <span className="required">*</span>
+                {t('reportModal.reasonLabel')} <span className="required">*</span>
               </label>
               <textarea
                 id="reason"
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder={t('errors.validationError')}
+                placeholder={t('reportModal.reasonPlaceholder')}
                 rows="5"
                 required
                 disabled={isSubmitting}
