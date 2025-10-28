@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { translations } from '../utils/translations';
 
 const LanguageContext = createContext();
 
@@ -25,11 +26,28 @@ export const LanguageProvider = ({ children }) => {
     setLanguage(newLanguage);
   };
 
+  // Translation function
+  const t = (key) => {
+    const keys = key.split('.');
+    let value = translations[language];
+    
+    for (const k of keys) {
+      if (value && typeof value === 'object') {
+        value = value[k];
+      } else {
+        return key; // Return key if translation not found
+      }
+    }
+    
+    return value || key;
+  };
+
   const value = {
     language,
     changeLanguage,
     isEnglish: language === 'en',
-    isTagalog: language === 'tl'
+    isTagalog: language === 'tl',
+    t
   };
 
   return (

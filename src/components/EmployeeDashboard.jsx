@@ -634,7 +634,7 @@ function EmployeeDashboard() {
                   {job.matchScore && (
                     <div className="match-score-container">
                       <div className="match-score">
-                        <span className="match-label">Match</span>
+                        <span className="match-label">{t('employeeDashboard.match')}</span>
                         <span className="match-percentage">
                           {Math.min(100, Math.round(job.matchScore / 10 * 20))}%
                         </span>
@@ -651,12 +651,14 @@ function EmployeeDashboard() {
                       )}
                     </div>
                     <div className="meta-item">
-                      <span className="icon">�</span>
+                      <span className="icon">📅</span>
                       {new Date(job.datePosted).toLocaleDateString()}
                     </div>
                     <div className="meta-item">
-                      <span className="icon">�👥</span>
-                      {t('searchJobs.postedBy')}: {job.postedBy?.firstName} {job.postedBy?.lastName}
+                      <span className="icon">👥</span>
+                      {t('searchJobs.postedBy')}: {job.postedBy ? 
+                        `${job.postedBy.firstName} ${job.postedBy.lastName}` : 
+                        t('searchJobs.anonymous')}
                     </div>
                     
                     {/* Matching Skills Section */}
@@ -749,17 +751,24 @@ function EmployeeDashboard() {
           <div className="modal-content job-details-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>{selectedJob.title}</h2>
+              <button 
+                className="modal-close"
+                onClick={closeJobDetailsModal}
+                aria-label="Close modal"
+              >
+                ×
+              </button>
             </div>
             
             <div className="modal-body">
               <div className="job-detail-price">
-                <span className="price-label">{t('searchJobs.salary')}:</span>
+                <span className="price-label">{t('jobs.price')}:</span>
                 <span className="price-value">₱{selectedJob.price?.toLocaleString()}</span>
               </div>
 
               {selectedJob.matchScore && (
                 <div className="job-detail-match">
-                  <span className="match-label">Match %:</span>
+                  <span className="match-label">{t('employeeDashboard.matchScore')}:</span>
                   <span className="match-percentage-large">
                     {Math.min(100, Math.round(selectedJob.matchScore / 10 * 20))}%
                   </span>
@@ -781,29 +790,39 @@ function EmployeeDashboard() {
 
               <div className="job-detail-section">
                 <h3>{t('searchJobs.postedBy')}</h3>
-                <Link 
-                  to={`/profile/${selectedJob.postedBy?._id}`}
-                  className="employer-profile-link"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <p className="employer-name">👤 {selectedJob.postedBy?.firstName} {selectedJob.postedBy?.lastName}</p>
-                </Link>
-                {selectedJob.postedBy?.email && (
-                  <p className="employer-email">✉️ {selectedJob.postedBy.email}</p>
+                {selectedJob.postedBy ? (
+                  <>
+                    <Link 
+                      to={`/profile/${selectedJob.postedBy._id}`}
+                      className="employer-profile-link"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <p className="employer-name">👤 {selectedJob.postedBy.firstName} {selectedJob.postedBy.lastName}</p>
+                    </Link>
+                    {selectedJob.postedBy.email && (
+                      <p className="employer-email">✉️ {selectedJob.postedBy.email}</p>
+                    )}
+                    <p className="date-posted">📅 {t('searchJobs.postedOn')} {new Date(selectedJob.datePosted).toLocaleDateString()}</p>
+                    <Link 
+                      to="/chat" 
+                      state={{ 
+                        recipientId: selectedJob.postedBy._id,
+                        recipientEmail: selectedJob.postedBy.email,
+                        recipientName: `${selectedJob.postedBy.firstName} ${selectedJob.postedBy.lastName}`,
+                        subject: `Regarding: ${selectedJob.title}`
+                      }}
+                      className="btn-message-employer"
+                    >
+                      💬 {t('profile.message')} {t('register.employer')}
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <p className="employer-name">👤 {t('searchJobs.anonymous')}</p>
+                    <p className="date-posted">📅 {t('searchJobs.postedOn')} {new Date(selectedJob.datePosted).toLocaleDateString()}</p>
+                    <p className="employer-unavailable">{t('searchJobs.employerNotFound')}</p>
+                  </>
                 )}
-                <p className="date-posted">📅 {t('searchJobs.postedOn')} {new Date(selectedJob.datePosted).toLocaleDateString()}</p>
-                <Link 
-                  to="/chat" 
-                  state={{ 
-                    recipientId: selectedJob.postedBy?._id,
-                    recipientEmail: selectedJob.postedBy?.email,
-                    recipientName: `${selectedJob.postedBy?.firstName} ${selectedJob.postedBy?.lastName}`,
-                    subject: `Regarding: ${selectedJob.title}`
-                  }}
-                  className="btn-message-employer"
-                >
-                  💬 {t('profile.message')} {t('register.employer')}
-                </Link>
               </div>
 
               {selectedJob.matchingSkills && selectedJob.matchingSkills.length > 0 && (
@@ -848,6 +867,12 @@ function EmployeeDashboard() {
                 </button>
               </div>
               <div className="modal-footer-right">
+                <button 
+                  onClick={closeJobDetailsModal}
+                  className="btn secondary"
+                >
+                  {t('common.close')}
+                </button>
                 {selectedJob.isOpen && !myApplications.some(app => app._id === selectedJob._id) ? (
                   <button 
                     onClick={() => handleApplyToJob(selectedJob._id)}
@@ -1703,6 +1728,17 @@ function EmployeeDashboard() {
           color: #2b6cb0;
           font-size: 0.9rem;
           font-weight: 500;
+        }
+
+        .employer-unavailable {
+          color: #e53e3e;
+          font-size: 0.9rem;
+          font-style: italic;
+          margin-top: 0.5rem;
+          padding: 0.5rem;
+          background: #fff5f5;
+          border-left: 3px solid #e53e3e;
+          border-radius: 4px;
         }
 
         .btn-message-employer {

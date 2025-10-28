@@ -1,221 +1,183 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useLanguage } from '../context/LanguageContext'
 
 function TermsOfService() {
+  const { t } = useLanguage()
+  const navigate = useNavigate()
+
+  const handleGoBack = () => {
+    // Go back to previous page, or home if no history
+    if (window.history.length > 1) {
+      navigate(-1)
+    } else {
+      navigate('/')
+    }
+  }
+
   return (
     <div className="tos-page">
       <div className="tos-container">
         <div className="tos-header">
-          <h1>Terms of Service</h1>
-          <p className="effective-date">Effective Date: October 23, 2025</p>
+          <h1>{t('terms.title')}</h1>
+          <p className="effective-date">{t('terms.effectiveDate')}</p>
         </div>
 
         <div className="tos-content">
           <section>
-            <h2>1. Acceptance of Terms</h2>
-            <p>
-              By accessing or using ResiLinked ("the Platform"), you agree to be bound by these Terms of Service. 
-              If you do not agree to these terms, please do not use our services.
-            </p>
+            <h2>{t('terms.section1Title')}</h2>
+            <p>{t('terms.section1Para')}</p>
           </section>
 
           <section>
-            <h2>2. Platform Purpose</h2>
-            <p>
-              ResiLinked is a community-based platform designed to connect workers (employees) with employers 
-              within local communities. The Platform serves as a facilitator and does not employ any users or 
-              guarantee any employment relationships.
-            </p>
+            <h2>{t('terms.section2Title')}</h2>
+            <p>{t('terms.section2Para')}</p>
           </section>
 
           <section>
-            <h2>3. User Responsibilities</h2>
-            <h3>3.1 Account Creation</h3>
-            <p>Users must:</p>
+            <h2>{t('terms.section3Title')}</h2>
+            <h3>{t('terms.section3_1Title')}</h3>
+            <p>{t('terms.section3_1Intro')}</p>
             <ul>
-              <li>Provide accurate and truthful information during registration</li>
-              <li>Maintain the confidentiality of their account credentials</li>
-              <li>Be at least 18 years of age or have parental/guardian consent</li>
-              <li>Submit valid government-issued identification for verification</li>
+              <li>{t('terms.section3_1_1')}</li>
+              <li>{t('terms.section3_1_2')}</li>
+              <li>{t('terms.section3_1_3')}</li>
+              <li>{t('terms.section3_1_4')}</li>
             </ul>
 
-            <h3>3.2 User Conduct</h3>
-            <p>Users agree to:</p>
+            <h3>{t('terms.section3_2Title')}</h3>
+            <p>{t('terms.section3_2Intro')}</p>
             <ul>
-              <li>Conduct themselves professionally and respectfully</li>
-              <li>Verify the identity and credentials of other users before engaging in any transaction</li>
-              <li>Communicate honestly about job requirements, skills, and availability</li>
-              <li>Report suspicious activity or fraudulent behavior immediately</li>
-              <li>Not use the Platform for illegal activities or scams</li>
+              <li>{t('terms.section3_2_1')}</li>
+              <li>{t('terms.section3_2_2')}</li>
+              <li>{t('terms.section3_2_3')}</li>
+              <li>{t('terms.section3_2_4')}</li>
+              <li>{t('terms.section3_2_5')}</li>
             </ul>
           </section>
 
           <section>
-            <h2>4. Limitation of Liability</h2>
+            <h2>{t('terms.section4Title')}</h2>
             <p className="important-notice">
-              <strong>IMPORTANT: ResiLinked and its operators ARE NOT LIABLE for:</strong>
+              <strong>{t('terms.section4Important')}</strong>
             </p>
             <ul>
-              <li>Any disputes, disagreements, or conflicts between users</li>
-              <li>Quality of work performed or services rendered</li>
-              <li>Payment issues, non-payment, or financial disputes between users</li>
-              <li>Physical injuries, property damage, or losses incurred during work arrangements</li>
-              <li>Fraudulent activities, scams, or misrepresentation by users</li>
-              <li>Identity theft or unauthorized access to user accounts</li>
-              <li>Any direct, indirect, incidental, or consequential damages arising from platform use</li>
+              <li>{t('terms.section4_1')}</li>
+              <li>{t('terms.section4_2')}</li>
+              <li>{t('terms.section4_3')}</li>
+              <li>{t('terms.section4_4')}</li>
+              <li>{t('terms.section4_5')}</li>
+              <li>{t('terms.section4_6')}</li>
+              <li>{t('terms.section4_7')}</li>
             </ul>
-            <p>
-              Users acknowledge that all transactions, agreements, and work arrangements are conducted 
-              <strong> at their own risk</strong> and ResiLinked is merely a facilitator.
-            </p>
+            <p>{t('terms.section4Note')}</p>
           </section>
 
           <section>
-            <h2>5. Safety and Security</h2>
-            <h3>5.1 User Verification</h3>
-            <p>
-              While ResiLinked requires ID verification, we cannot guarantee the authenticity of all users. 
-              Users are responsible for conducting their own due diligence before entering into any agreement.
-            </p>
+            <h2>{t('terms.section5Title')}</h2>
+            <h3>{t('terms.section5_1Title')}</h3>
+            <p>{t('terms.section5_1Para')}</p>
 
-            <h3>5.2 Safety Recommendations</h3>
-            <p>We strongly recommend users to:</p>
+            <h3>{t('terms.section5_2Title')}</h3>
+            <p>{t('terms.section5_2Intro')}</p>
             <ul>
-              <li>Meet in public places for initial consultations</li>
-              <li>Review user ratings and reviews before hiring or accepting work</li>
-              <li>Inform family or friends about work arrangements and locations</li>
-              <li>Trust their instincts and decline any suspicious offers</li>
-              <li>Use in-app messaging for documented communication</li>
+              <li>{t('terms.section5_2_1')}</li>
+              <li>{t('terms.section5_2_2')}</li>
+              <li>{t('terms.section5_2_3')}</li>
+              <li>{t('terms.section5_2_4')}</li>
+              <li>{t('terms.section5_2_5')}</li>
             </ul>
           </section>
 
           <section>
-            <h2>6. Payment and Transactions</h2>
-            <p>
-              ResiLinked <strong>does not process payments</strong> or act as an intermediary for financial 
-              transactions. All payment arrangements are made directly between users. The Platform is not 
-              responsible for:
-            </p>
+            <h2>{t('terms.section6Title')}</h2>
+            <p>{t('terms.section6Para')}</p>
             <ul>
-              <li>Non-payment or late payment issues</li>
-              <li>Disputed charges or refunds</li>
-              <li>Tax obligations arising from user transactions</li>
-              <li>Financial losses of any kind</li>
+              <li>{t('terms.section6_1')}</li>
+              <li>{t('terms.section6_2')}</li>
+              <li>{t('terms.section6_3')}</li>
+              <li>{t('terms.section6_4')}</li>
             </ul>
-            <p>
-              Users are advised to establish clear payment terms in writing before commencing any work.
-            </p>
+            <p>{t('terms.section6Note')}</p>
           </section>
 
           <section>
-            <h2>7. Content and Intellectual Property</h2>
-            <p>
-              Users retain ownership of content they post but grant ResiLinked a license to use, display, 
-              and distribute such content on the Platform. Users must not post:
-            </p>
+            <h2>{t('terms.section7Title')}</h2>
+            <p>{t('terms.section7Para')}</p>
             <ul>
-              <li>Copyrighted material without permission</li>
-              <li>Offensive, discriminatory, or inappropriate content</li>
-              <li>False or misleading information</li>
-              <li>Spam or unsolicited advertisements</li>
+              <li>{t('terms.section7_1')}</li>
+              <li>{t('terms.section7_2')}</li>
+              <li>{t('terms.section7_3')}</li>
+              <li>{t('terms.section7_4')}</li>
             </ul>
           </section>
 
           <section>
-            <h2>8. Privacy and Data</h2>
-            <p>
-              Your use of ResiLinked is also governed by our Privacy Policy. We collect and use personal 
-              information as described in that policy. Users consent to:
-            </p>
+            <h2>{t('terms.section8Title')}</h2>
+            <p>{t('terms.section8Para')}</p>
             <ul>
-              <li>Collection of profile information and ID verification data</li>
-              <li>Use of data for platform functionality and improvements</li>
-              <li>Sharing of public profile information with other users</li>
+              <li>{t('terms.section8_1')}</li>
+              <li>{t('terms.section8_2')}</li>
+              <li>{t('terms.section8_3')}</li>
             </ul>
           </section>
 
           <section>
-            <h2>9. Account Termination</h2>
-            <p>
-              ResiLinked reserves the right to suspend or terminate user accounts for:
-            </p>
+            <h2>{t('terms.section9Title')}</h2>
+            <p>{t('terms.section9Para')}</p>
             <ul>
-              <li>Violation of these Terms of Service</li>
-              <li>Fraudulent or illegal activity</li>
-              <li>Multiple user reports or complaints</li>
-              <li>Misuse of the Platform</li>
+              <li>{t('terms.section9_1')}</li>
+              <li>{t('terms.section9_2')}</li>
+              <li>{t('terms.section9_3')}</li>
+              <li>{t('terms.section9_4')}</li>
             </ul>
-            <p>Users may also request account deletion at any time through account settings.</p>
+            <p>{t('terms.section9Note')}</p>
           </section>
 
           <section>
-            <h2>10. Dispute Resolution</h2>
-            <p>
-              In the event of disputes between users, ResiLinked encourages direct communication and 
-              resolution. The Platform may provide a reporting mechanism but is not obligated to mediate 
-              or resolve disputes. Users agree to:
-            </p>
+            <h2>{t('terms.section10Title')}</h2>
+            <p>{t('terms.section10Para')}</p>
             <ul>
-              <li>Attempt good-faith resolution directly with the other party</li>
-              <li>Not hold ResiLinked liable for user disputes</li>
-              <li>Seek legal remedies independently if necessary</li>
+              <li>{t('terms.section10_1')}</li>
+              <li>{t('terms.section10_2')}</li>
+              <li>{t('terms.section10_3')}</li>
             </ul>
           </section>
 
           <section>
-            <h2>11. Indemnification</h2>
-            <p>
-              Users agree to indemnify and hold harmless ResiLinked, its operators, employees, and affiliates 
-              from any claims, damages, losses, or expenses (including legal fees) arising from:
-            </p>
+            <h2>{t('terms.section11Title')}</h2>
+            <p>{t('terms.section11Para')}</p>
             <ul>
-              <li>User's violation of these Terms</li>
-              <li>User's interactions with other users</li>
-              <li>User's content or activities on the Platform</li>
-              <li>Any third-party claims related to user's conduct</li>
+              <li>{t('terms.section11_1')}</li>
+              <li>{t('terms.section11_2')}</li>
+              <li>{t('terms.section11_3')}</li>
+              <li>{t('terms.section11_4')}</li>
             </ul>
           </section>
 
           <section>
-            <h2>12. Modifications to Terms</h2>
-            <p>
-              ResiLinked reserves the right to modify these Terms of Service at any time. Users will be 
-              notified of significant changes via email or platform notification. Continued use of the 
-              Platform after changes constitutes acceptance of the modified terms.
-            </p>
+            <h2>{t('terms.section12Title')}</h2>
+            <p>{t('terms.section12Para')}</p>
           </section>
 
           <section>
-            <h2>13. Governing Law</h2>
-            <p>
-              These Terms of Service are governed by the laws of the Philippines. Any disputes arising 
-              from these terms shall be resolved in accordance with Philippine law.
-            </p>
+            <h2>{t('terms.section13Title')}</h2>
+            <p>{t('terms.section13Para')}</p>
           </section>
 
           <section>
-            <h2>14. Contact Information</h2>
-            <p>
-              For questions or concerns about these Terms of Service, please contact us at:
-            </p>
+            <h2>{t('terms.section14Title')}</h2>
+            <p>{t('terms.section14Para')}</p>
             <p className="contact-info">
-              <strong>Email:</strong> resilinked@gmail.com<br />
-              <strong>Platform:</strong> Submit a support ticket through the Help section
-            </p>
-          </section>
-
-          <section>
-            <h2>15. Acknowledgment</h2>
-            <p className="acknowledgment-text">
-              By clicking "I Accept" or by registering on ResiLinked, you acknowledge that you have read, 
-              understood, and agree to be bound by these Terms of Service. You specifically acknowledge that 
-              <strong> ResiLinked is not liable for any disputes, damages, or losses</strong> arising from 
-              your use of the Platform or interactions with other users.
+              <strong>{t('terms.section14Email')}</strong> resilinked@gmail.com<br />
+              <strong>{t('terms.section14Platform')}</strong> {t('terms.section14PlatformText')}
             </p>
           </section>
         </div>
 
         <div className="tos-footer">
-          <Link to="/register" className="back-btn"> Back to Registration</Link>
+          <button onClick={handleGoBack} className="back-btn">
+             {t('common.goBack') || 'Go Back'}
+          </button>
         </div>
       </div>
 
@@ -351,6 +313,11 @@ function TermsOfService() {
           font-weight: 600;
           transition: all 0.3s ease;
           font-size: 1rem;
+          border: none;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
         }
 
         .back-btn {

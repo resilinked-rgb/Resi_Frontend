@@ -8,7 +8,6 @@ import Login from './components/Login'
 import Register from './components/Register'
 import RegistrationSuccess from './components/RegistrationSuccess'
 import TermsOfService from './components/TermsOfService'
-import Landing from './components/Landing'
 import Profile from './components/Profile'
 import PostJob from './components/PostJob'
 import SearchJobs from './components/SearchJobs'
@@ -83,8 +82,8 @@ function ProtectedRoute({ children, requiredUserType = null }) {
   
   // Redirect if wrong user type
   if (requiredUserType && user?.userType !== requiredUserType) {
-    console.log('Wrong user type, redirecting to landing');
-    return <Navigate to="/landing" replace />
+    console.log('Wrong user type, redirecting to home');
+    return <Navigate to="/" replace />
   }
   
   // User is authenticated and has correct role
@@ -126,12 +125,6 @@ function App() {
             <Route path="/verify-email-change/:token" element={<VerifyEmailChange />} />
             
             {/* Protected routes */}
-            <Route path="/landing" element={
-              <ProtectedRoute>
-                <Landing />
-              </ProtectedRoute>
-            } />
-            
             <Route path="/profile" element={
               <ProtectedRoute>
                 <Profile />

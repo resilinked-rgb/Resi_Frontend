@@ -1,15 +1,37 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useLanguage } from '../context/LanguageContext'
 import apiService from '../api'
 import { getProfilePictureUrl } from '../utils/imageHelper'
 
 function Home() {
+  const { t } = useLanguage()
   const [popularJobs, setPopularJobs] = useState([])
   const [topRatedUsers, setTopRatedUsers] = useState([])
   const [loading, setLoading] = useState(true)
+  const [currentSlide, setCurrentSlide] = useState(0)
+  const [cardsToShow, setCardsToShow] = useState(3)
   const { isAuthenticated, user } = useAuth()
   const navigate = useNavigate()
+  const carouselRef = useRef(null)
+
+  // Handle responsive cards display
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth <= 768) {
+        setCardsToShow(1)
+      } else if (window.innerWidth <= 1024) {
+        setCardsToShow(2)
+      } else {
+        setCardsToShow(3)
+      }
+    }
+
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   useEffect(() => {
     loadData()
@@ -29,8 +51,8 @@ function Home() {
       console.log('Top rated users response:', usersResponse);
       
       setPopularJobs(jobsResponse.jobs || [])
-      // The backend returns the array directly, not wrapped in an object
-      const topRated = Array.isArray(usersResponse) ? usersResponse : (usersResponse.users || usersResponse.data || []);
+      // The backend returns { workers: [...] }
+      const topRated = usersResponse.workers || usersResponse.users || usersResponse.data || [];
       console.log('Setting top rated users:', topRated);
       setTopRatedUsers(topRated)
     } catch (error) {
@@ -38,6 +60,29 @@ function Home() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const nextSlide = () => {
+    if (topRatedUsers.length <= cardsToShow) return
+    setCurrentSlide(prev => (prev + 1) % topRatedUsers.length)
+  }
+
+  const prevSlide = () => {
+    if (topRatedUsers.length <= cardsToShow) return
+    setCurrentSlide(prev => (prev - 1 + topRatedUsers.length) % topRatedUsers.length)
+  }
+
+  // Get the visible cards based on current slide with wrapping
+  const getVisibleCards = () => {
+    if (topRatedUsers.length === 0) return []
+    if (topRatedUsers.length <= cardsToShow) return topRatedUsers
+    
+    const cards = []
+    for (let i = 0; i < cardsToShow; i++) {
+      const index = (currentSlide + i) % topRatedUsers.length
+      cards.push({ ...topRatedUsers[index], displayIndex: i })
+    }
+    return cards
   }
 
   const handleSearchJobs = () => {
@@ -50,7 +95,7 @@ function Home() {
     } else if (user?.userType === 'employer' || user?.userType === 'both' || user?.userType === 'admin') {
       navigate('/post-job')
     } else {
-      alert('Only employers can post jobs. Please update your profile to become an employer.')
+      alert(t('home.employerOnly'))
       navigate('/profile')
     }
   }
@@ -59,19 +104,19 @@ function Home() {
     <div className="home-container fade-in">
       <section className="hero">
         <div className="hero-content">
-          <h2>Welcome to ResiLinked</h2>
-          <p>Find jobs based on your skills and abilities!</p>
+          <h2>{t('home.welcome')}</h2>
+          <p>{t('home.tagline')}</p>
           <div className="button-row">
             <button onClick={handleSearchJobs} className="btn">
-              🔍 Search for Jobs
+              🔍 {t('home.searchJobs')}
             </button>
             {isAuthenticated ? (
               <button onClick={handlePostJob} className="btn">
-                ➕ Post a Job
+                ➕ {t('home.postJob')}
               </button>
             ) : (
               <Link to="/login" className="btn">
-                👤 Login to Post
+                👤 {t('home.loginToPost')}
               </Link>
             )}
           </div>
@@ -80,23 +125,23 @@ function Home() {
 
       <section className="how-section">
         <div className="how-section-container">
-          <h2>How ResiLinked Works</h2>
+          <h2>{t('home.howItWorks')}</h2>
           <div className="how-steps">
             <div>
               <span>1</span>
-              Sign-in and Create a Profile
+              {t('home.step1')}
             </div>
             <div>
               <span>2</span>
-              Search for Jobs or Candidates
+              {t('home.step2')}
             </div>
             <div>
               <span>3</span>
-              Apply for Jobs
+              {t('home.step3')}
             </div>
             <div>
               <span>4</span>
-              Give Ratings and Connect
+              {t('home.step4')}
             </div>
           </div>
         </div>
@@ -104,10 +149,10 @@ function Home() {
 
       <section className="jobs-section jobs-section-white">
         <div className="jobs-section-container jobs-section-container-white">
-          <h2 className="jobs-section-title-white">Popular Jobs</h2>
+          <h2 className="jobs-section-title-white">{t('home.popularJobs')}</h2>
           <div className="jobs-list">
             {loading ? (
-              <div className="no-data">📊 Loading popular jobs...</div>
+              <div className="no-data">📊 {t('common.loading')} {t('home.popularJobs').toLowerCase()}...</div>
             ) : popularJobs.length > 0 ? (
               popularJobs.map((job, index) => (
                 <button
@@ -130,7 +175,7 @@ function Home() {
               ))
             ) : (
                 <div className="no-data">
-                📋 No jobs available at the moment
+                📋 {t('home.noJobsAvailable')}
               </div>
             )}
           </div>
@@ -139,59 +184,80 @@ function Home() {
 
       <section className="testimonials-section">
         <div className="testimonials-section-container">
-          <h2>Top Rated Workers</h2>
-          <div className="testimonials-list">
-            {loading ? (
-              <div className="no-data">📝 Loading top rated workers...</div>
-            ) : topRatedUsers.length > 0 ? (
-              topRatedUsers.map((user, index) => (
-                <div key={user._id || index} className="testimonial-card">
-                  <div className="testimonial-header">
-                    <div className="testimonial-avatar-large">
-                      {getProfilePictureUrl(user) ? (
-                        <img src={getProfilePictureUrl(user)} alt={`${user.firstName} ${user.lastName}`} />
-                      ) : (
-                        user.firstName?.[0] || 'U'
-                      )}
-                    </div>
-                    <div className="testimonial-info">
-                      <div className="testimonial-name">
-                        {user.firstName} {user.lastName}
-                      </div>
-                      <div className="testimonial-rating">
-                        <div className="testimonial-stars">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <span key={star} className={star <= Math.round(user.averageRating || 0) ? 'star filled' : 'star'}>
-                              ★
-                            </span>
-                          ))}
+          <h2>⭐ {t('landing.topRatedWorkers')}</h2>
+          <p className="section-subtitle">{t('landing.topRatedDescription')}</p>
+          
+          {loading ? (
+            <div className="no-data">📝 {t('common.loading')} {t('landing.topRatedWorkers').toLowerCase()}...</div>
+          ) : topRatedUsers.length === 0 ? (
+            <div className="no-data">💬 {t('landing.noWorkersAvailable')}</div>
+          ) : (
+            <div className="carousel-container">
+              {topRatedUsers.length > cardsToShow && (
+                <button 
+                  className="carousel-button prev" 
+                  onClick={prevSlide}
+                  aria-label="Previous"
+                >
+                  ❮
+                </button>
+              )}
+              
+              <div className="carousel-wrapper" ref={carouselRef}>
+                <div className="carousel-track">
+                  {getVisibleCards().map((user, index) => (
+                    <Link
+                      key={`${user._id}-${index}`}
+                      to={`/profile/${user._id}`}
+                      className="worker-card"
+                    >
+                      <div className="worker-avatar">
+                        {getProfilePictureUrl(user) ? (
+                          <img src={getProfilePictureUrl(user)} alt={`${user.firstName} ${user.lastName}`} />
+                        ) : (
+                          <div className="avatar-placeholder">
+                            {user.firstName?.[0]}{user.lastName?.[0]}
+                          </div>
+                        )}
+                        <div className="rating-badge">
+                          ⭐ {(user.averageRating || 0).toFixed(1)}
                         </div>
-                        <span className="rating-score">
-                          {(user.averageRating || 0).toFixed(1)} ({user.ratingCount || 0} reviews)
-                        </span>
                       </div>
-                    </div>
-                  </div>
-                  <div className="testimonial-skills">
-                    {user.skills && user.skills.length > 0 ? (
-                      user.skills.slice(0, 3).map((skill, idx) => (
-                        <span key={idx} className="skill-badge">{skill}</span>
-                      ))
-                    ) : (
-                      <span className="no-skills">No skills listed</span>
-                    )}
-                  </div>
-                  <div className="testimonial-location">
-                    📍 {user.barangay || 'Location not specified'}
-                  </div>
+                      <div className="worker-info">
+                        <h3>{user.firstName} {user.lastName}</h3>
+                        <p className="worker-location">📍 {user.barangay || t('landing.locationNotSpecified')}</p>
+                        <p className="worker-skills">
+                          {user.skills && user.skills.length > 0 
+                            ? user.skills.slice(0, 3).join(', ')
+                            : t('landing.noSkillsListed')}
+                        </p>
+                        <div className="worker-stats">
+                          <span className="stat">
+                            <span className="stat-icon">💼</span>
+                            {user.completedJobs || 0} {t('landing.jobsCompleted')}
+                          </span>
+                          <span className="stat">
+                            <span className="stat-icon">⭐</span>
+                            {user.totalRatings || user.ratingCount || 0} {t('landing.reviews')}
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
-              ))
-            ) : (
-              <div className="no-data">
-                💬 No top rated workers available yet
               </div>
-            )}
-          </div>
+              
+              {topRatedUsers.length > cardsToShow && (
+                <button 
+                  className="carousel-button next" 
+                  onClick={nextSlide}
+                  aria-label="Next"
+                >
+                  ❯
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </section>
 
@@ -484,7 +550,7 @@ function Home() {
         }
         
         .testimonials-section-container {
-          max-width: 1200px;
+          max-width: 1400px;
           margin: 0 auto;
           padding: 0 var(--spacing-8);
         }
@@ -492,8 +558,212 @@ function Home() {
         .testimonials-section h2 {
           font-size: var(--font-size-4xl);
           font-weight: 700;
-          color: var(--gray-800);
-          margin-bottom: var(--spacing-16);
+          background: linear-gradient(135deg, var(--primary-700) 0%, var(--primary-500) 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          margin-bottom: var(--spacing-3);
+        }
+        
+        .section-subtitle {
+          color: var(--gray-600);
+          font-size: var(--font-size-lg);
+          margin-bottom: var(--spacing-8);
+        }
+
+        /* Carousel Styles */
+        .carousel-container {
+          position: relative;
+          max-width: 100%;
+          padding: var(--spacing-4) 0;
+        }
+
+        .carousel-wrapper {
+          overflow: hidden;
+          margin: 0 var(--spacing-12);
+          position: relative;
+          width: 100%;
+        }
+
+        .carousel-track {
+          display: flex;
+          gap: var(--spacing-6);
+          width: 100%;
+        }
+
+        .worker-card {
+          flex: 0 0 calc((100% - (2 * var(--spacing-6))) / 3);
+          max-width: calc((100% - (2 * var(--spacing-6))) / 3);
+          min-width: 0;
+          background: white;
+          border-radius: var(--radius-xl);
+          padding: var(--spacing-6);
+          box-shadow: 0 4px 20px rgba(147, 51, 234, 0.1);
+          border: 2px solid transparent;
+          transition: all var(--transition-normal);
+          text-decoration: none;
+          color: inherit;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+        }
+
+        .worker-card:hover {
+          transform: translateY(-8px);
+          box-shadow: 0 12px 40px rgba(147, 51, 234, 0.2);
+          border-color: var(--primary-400);
+        }
+
+        .worker-avatar {
+          position: relative;
+          margin-bottom: var(--spacing-4);
+        }
+
+        .worker-avatar img,
+        .avatar-placeholder {
+          width: 120px;
+          height: 120px;
+          border-radius: 50%;
+          object-fit: cover;
+          border: 4px solid var(--primary-200);
+        }
+
+        .avatar-placeholder {
+          background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%);
+          color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: var(--font-size-3xl);
+          font-weight: 700;
+        }
+
+        .rating-badge {
+          position: absolute;
+          bottom: -5px;
+          right: -5px;
+          background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+          color: white;
+          padding: var(--spacing-2) var(--spacing-3);
+          border-radius: var(--radius-full);
+          font-size: var(--font-size-sm);
+          font-weight: 700;
+          box-shadow: 0 4px 12px rgba(255, 165, 0, 0.4);
+        }
+
+        .worker-info {
+          width: 100%;
+        }
+
+        .worker-info h3 {
+          font-size: var(--font-size-xl);
+          color: var(--gray-900);
+          margin-bottom: var(--spacing-2);
+          font-weight: 700;
+        }
+
+        .worker-location {
+          color: var(--gray-600);
+          font-size: var(--font-size-sm);
+          margin-bottom: var(--spacing-3);
+        }
+
+        .worker-skills {
+          color: var(--primary-700);
+          font-size: var(--font-size-sm);
+          margin-bottom: var(--spacing-4);
+          padding: var(--spacing-2) var(--spacing-3);
+          background: rgba(168, 85, 247, 0.1);
+          border-radius: var(--radius-lg);
+          font-weight: 500;
+        }
+
+        .worker-stats {
+          display: flex;
+          gap: var(--spacing-4);
+          justify-content: center;
+          padding-top: var(--spacing-3);
+          border-top: 1px solid var(--gray-200);
+        }
+
+        .stat {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: var(--spacing-1);
+          font-size: var(--font-size-xs);
+          color: var(--gray-600);
+        }
+
+        .stat-icon {
+          font-size: var(--font-size-base);
+        }
+
+        .carousel-button {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          background: white;
+          border: 2px solid var(--primary-400);
+          color: var(--primary-700);
+          width: 48px;
+          height: 48px;
+          border-radius: 50%;
+          cursor: pointer;
+          font-size: var(--font-size-2xl);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 4px 16px rgba(147, 51, 234, 0.2);
+          transition: all var(--transition-normal);
+          z-index: 10;
+        }
+
+        .carousel-button:hover:not(:disabled) {
+          background: var(--primary-600);
+          color: white;
+          transform: translateY(-50%) scale(1.1);
+        }
+
+        .carousel-button:disabled {
+          opacity: 0.3;
+          cursor: not-allowed;
+        }
+
+        .carousel-button.prev {
+          left: 0;
+        }
+
+        .carousel-button.next {
+          right: 0;
+        }
+
+        .carousel-dots {
+          display: flex;
+          gap: var(--spacing-2);
+          justify-content: center;
+          margin-top: var(--spacing-6);
+        }
+
+        .dot {
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+          background: var(--gray-300);
+          border: none;
+          cursor: pointer;
+          transition: all var(--transition-normal);
+        }
+
+        .dot.active {
+          background: var(--primary-600);
+          width: 32px;
+          border-radius: var(--radius-full);
+        }
+
+        .dot:hover {
+          background: var(--primary-400);
         }
         
         .testimonials-list {
@@ -619,6 +889,37 @@ function Home() {
           background: var(--gray-100);
           border-radius: var(--radius-xl);
           border: 2px dashed var(--gray-300);
+        }
+
+        /* Carousel Responsive Design */
+        @media (max-width: 1024px) {
+          .worker-card {
+            flex: 0 0 calc((100% - var(--spacing-6)) / 2);
+            max-width: calc((100% - var(--spacing-6)) / 2);
+          }
+        }
+
+        @media (max-width: 768px) {
+          .worker-card {
+            flex: 0 0 100%;
+            max-width: 100%;
+          }
+
+          .carousel-wrapper {
+            margin: 0 var(--spacing-6);
+          }
+
+          .carousel-button {
+            width: 40px;
+            height: 40px;
+            font-size: 1.2rem;
+          }
+
+          .worker-avatar img,
+          .avatar-placeholder {
+            width: 100px;
+            height: 100px;
+          }
         }
 
         /* Responsive Design */

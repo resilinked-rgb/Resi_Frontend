@@ -1,9 +1,11 @@
 import { useState, useEffect, useContext } from 'react'
+import { useTranslation } from '../hooks/useTranslation'
 import { AuthContext } from '../context/AuthContext'
 import { AlertContext } from '../context/AlertContext'
 import apiService from '../api'
 
 function GoalManagement() {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true)
   const [goals, setGoals] = useState({
     active: [],
@@ -37,10 +39,38 @@ function GoalManagement() {
       const response = await apiService.getMyGoals()
       
       if (response && response.categorizedGoals) {
+        const categorizedGoals = response.categorizedGoals
+        
+        // Auto-activate priority goal if no active goal exists
+        if (categorizedGoals.active.length === 0 && categorizedGoals.pending.length > 0) {
+          // Find the priority goal
+          const priorityGoal = categorizedGoals.pending.find(goal => goal.isPriority)
+          
+          if (priorityGoal) {
+            try {
+              // Automatically activate the priority goal
+              await apiService.setActiveGoal(priorityGoal._id, false)
+              success(`"${priorityGoal.description}" has been automatically activated!`)
+              // Reload goals to get updated state
+              const updatedResponse = await apiService.getMyGoals()
+              if (updatedResponse && updatedResponse.categorizedGoals) {
+                setGoals({
+                  active: updatedResponse.categorizedGoals.active || [],
+                  pending: updatedResponse.categorizedGoals.pending || [],
+                  completed: updatedResponse.categorizedGoals.completed || []
+                })
+              }
+              return
+            } catch (err) {
+              console.error('Error auto-activating priority goal:', err)
+            }
+          }
+        }
+        
         setGoals({
-          active: response.categorizedGoals.active || [],
-          pending: response.categorizedGoals.pending || [],
-          completed: response.categorizedGoals.completed || []
+          active: categorizedGoals.active || [],
+          pending: categorizedGoals.pending || [],
+          completed: categorizedGoals.completed || []
         })
       } else {
         setGoals({
@@ -63,11 +93,11 @@ function GoalManagement() {
       setCurrentGoal(goal)
       setGoalFormData({
         description: goal.description,
-        targetAmount: goal.targetAmount.toString(),
-        currentAmount: goal.currentAmount.toString()
+        targetAmount: goal.targetAmount,
+        currentAmount: goal.currentAmount
       })
     } else {
-      // New goal
+      // Create new goal
       setCurrentGoal(null)
       setGoalFormData({
         description: '',
@@ -77,7 +107,7 @@ function GoalManagement() {
     }
     setShowGoalModal(true)
   }
-  
+
   const handleGoalInputChange = (e) => {
     const { name, value } = e.target
     setGoalFormData(prev => ({
@@ -85,92 +115,32 @@ function GoalManagement() {
       [name]: value
     }))
   }
-  
+
   const handleSaveGoal = async (e) => {
     e.preventDefault()
     
     try {
-      const goalData = {
-        description: goalFormData.description,
-        targetAmount: parseFloat(goalFormData.targetAmount),
-        currentAmount: parseFloat(goalFormData.currentAmount || '0')
-      }
-      
-      // Check if the goal would be completed with these values
-      const wouldBeCompleted = goalData.currentAmount >= goalData.targetAmount
-      
-      let result
-      let wasActiveGoalCompleted = false
-      
       if (currentGoal) {
-        // Check if this was an active goal that is now being completed
-        wasActiveGoalCompleted = currentGoal.isActive && wouldBeCompleted
-        
         // Update existing goal
-        result = await apiService.updateGoal(currentGoal._id, goalData)
-        
-        if (wouldBeCompleted) {
-          success('Goal updated and marked as completed!')
-        } else {
-          success('Goal updated successfully!')
-        }
+        await apiService.updateGoal(currentGoal._id, goalFormData)
+        success('Goal updated successfully!')
       } else {
         // Create new goal
-        result = await apiService.createGoal(goalData)
-        
-        if (wouldBeCompleted) {
-          success('New goal created and marked as completed!')
-        } else {
-          success('New goal created successfully!')
-        }
+        await apiService.createGoal(goalFormData)
+        success('Goal created successfully!')
       }
       
       setShowGoalModal(false)
-      
-      // If an active goal was just completed, look for priority goals to activate
-      if (wasActiveGoalCompleted) {
-        await activateNextPriorityGoal()
-      } else {
-        // Just refresh the goals
-        loadGoals()
-      }
+      loadGoals()
     } catch (err) {
       console.error('Error saving goal:', err)
       showError('Failed to save goal. Please try again.')
     }
   }
-  
-  const activateNextPriorityGoal = async () => {
-    try {
-      // First load the updated goals
-      const response = await apiService.getMyGoals()
-      
-      if (response && response.categorizedGoals) {
-        const pendingGoals = response.categorizedGoals.pending || []
-        
-        // Find priority goals
-        const priorityGoal = pendingGoals.find(goal => goal.isPriority)
-        
-        if (priorityGoal) {
-          // Activate the priority goal
-          await apiService.setActiveGoal(priorityGoal._id)
-          success(`Priority goal "${priorityGoal.description}" has been automatically activated!`)
-        }
-      }
-      
-      // Finally, reload all goals
-      loadGoals()
-    } catch (err) {
-      console.error('Error activating priority goal:', err)
-      // Still load goals, even if auto-activation fails
-      loadGoals()
-    }
-  }
-  
-  // Open delete confirmation modal
+
   const openDeleteModal = (goal) => {
-    setGoalToDelete(goal);
-    setShowDeleteModal(true);
+    setGoalToDelete(goal)
+    setShowDeleteModal(true)
   }
   
   // Handle goal deletion with modal
@@ -205,11 +175,10 @@ function GoalManagement() {
     try {
       if (isPriority) {
         // If setting as priority (next goal), update it with isPriority flag
-        const response = await apiService.updateGoal(goalId, { isPriority: true })
-        // Show custom success message for priority
+        await apiService.updateGoal(goalId, { isPriority: true })
         success('Goal set as "Next Up" and will be activated automatically when your current goal is completed!')
         // Reload goals to show the changes
-        loadGoals()
+        await loadGoals()
       } else {
         // If setting as active, activate it directly
         const response = await apiService.setActiveGoal(goalId, false)
@@ -220,33 +189,35 @@ function GoalManagement() {
           success('Goal set as active!')
         }
         // Reload goals to show the changes
-        loadGoals()
+        await loadGoals()
       }
     } catch (err) {
       console.error('Error setting goal:', err)
       // Extract error message from response
       const errorMessage = err?.alert || err?.message || 'Failed to update goal. Please try again.'
       showError(errorMessage)
+      // Still reload goals in case it partially succeeded
+      await loadGoals()
     }
   }
   
   return (
     <div className="goal-management-container">
-      <h1 className="goals-heading">Financial Goal Management</h1>
+      <h1 className="goals-heading">{t('goals.title') || 'Financial Goal Management'}</h1>
       
       <div className="actions-panel">
         <button 
           className="action-btn primary" 
           onClick={() => handleOpenGoalModal()}
         >
-          <span className="icon">+</span> Create New Goal
+          <span className="icon">+</span> {t('goals.create') || 'Create New Goal'}
         </button>
       </div>
       
       {loading ? (
         <div className="loading-state">
           <div className="spinner large"></div>
-          <p>Loading your goals...</p>
+          <p>{t('goals.loading') || 'Loading your goals...'}</p>
         </div>
       ) : (
         <div className="goals-wrapper">
@@ -256,21 +227,21 @@ function GoalManagement() {
               className={`tab-btn ${activeTab === 'active' ? 'active' : ''}`} 
               onClick={() => setActiveTab('active')}
             >
-              Active Goal
+              {t('goals.active') || 'Active Goal'}
               <span className="tab-count">{goals.active.length}</span>
             </button>
             <button 
               className={`tab-btn ${activeTab === 'pending' ? 'active' : ''}`} 
               onClick={() => setActiveTab('pending')}
             >
-              Pending Goals
+              {t('goals.pending') || 'Pending Goals'}
               <span className="tab-count">{goals.pending.length}</span>
             </button>
             <button 
               className={`tab-btn ${activeTab === 'completed' ? 'active' : ''}`} 
               onClick={() => setActiveTab('completed')}
             >
-              Completed Goals
+              {t('goals.completed') || 'Completed Goals'}
               <span className="tab-count">{goals.completed.length}</span>
             </button>
           </div>
@@ -288,14 +259,14 @@ function GoalManagement() {
                           <button 
                             className="edit-btn"
                             onClick={() => handleOpenGoalModal(goal)}
-                            title="Edit Goal"
+                            title={t('goals.edit')}
                           >
                             ✎
                           </button>
                           <button 
                             className="delete-btn"
                             onClick={() => openDeleteModal(goal)}
-                            title="Delete Goal"
+                            title={t('goals.delete')}
                           >
                             ×
                           </button>
@@ -316,14 +287,15 @@ function GoalManagement() {
                       </div>
                       
                       <div className="goal-footer">
-                        <span className="progress-percentage">{goal.progress.toFixed(1)}% Complete</span>
+                        <span className="progress-percentage">{goal.progress.toFixed(1)}% {t('goals.complete')}</span>
+                        <span className="active-badge">🎯 {t('goals.activeBadge')}</span>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
                 <div className="no-goals">
-                  <p>No active goal. Please create a new goal or activate an existing one.</p>
+                  <p>{t('goals.noPendingGoals') || 'No pending goals yet.'}</p>
                 </div>
               )}
             </div>
@@ -335,21 +307,21 @@ function GoalManagement() {
               {goals.pending.length > 0 ? (
                 <div className="goals-grid">
                   {goals.pending.map((goal) => (
-                    <div className="goal-card pending" key={goal._id}>
+                    <div className="goal-card" key={goal._id}>
                       <div className="goal-header">
                         <h3>{goal.description}</h3>
                         <div className="goal-actions">
                           <button 
                             className="edit-btn"
                             onClick={() => handleOpenGoalModal(goal)}
-                            title="Edit Goal"
+                            title={t('goals.edit')}
                           >
                             ✎
                           </button>
                           <button 
                             className="delete-btn"
                             onClick={() => openDeleteModal(goal)}
-                            title="Delete Goal"
+                            title={t('goals.delete')}
                           >
                             ×
                           </button>
@@ -370,24 +342,24 @@ function GoalManagement() {
                       </div>
                       
                       <div className="goal-footer">
-                        <span className="progress-percentage">{goal.progress.toFixed(1)}% Complete</span>
+                        <span className="progress-percentage">{goal.progress.toFixed(1)}% {t('goals.complete')}</span>
                         <div className="goal-buttons">
                           {goal.isPriority ? (
-                            <span className="priority-badge">Next Up</span>
+                            <span className="priority-badge">{t('goals.nextUp') || 'Next Up'}</span>
                           ) : (
                             <button 
                               className="priority-btn"
                               onClick={() => handleSetActiveGoal(goal._id, true)}
-                              title="Set as next goal when current active goal completes"
+                              title={t('goals.setAsNext')}
                             >
-                              Set as Priority
+                              {t('goals.setAsPriority') || 'Set as Next Up'}
                             </button>
                           )}
                           <button 
                             className="activate-btn"
                             onClick={() => handleSetActiveGoal(goal._id)}
                           >
-                            Set as Active
+                            {t('goals.setAsActive') || 'Set as Active'}
                           </button>
                         </div>
                       </div>
@@ -396,7 +368,7 @@ function GoalManagement() {
                 </div>
               ) : (
                 <div className="no-goals">
-                  <p>No pending goals yet.</p>
+                  <p>{t('goals.noPendingGoals') || 'No pending goals yet.'}</p>
                 </div>
               )}
             </div>
@@ -411,7 +383,7 @@ function GoalManagement() {
                     <div className="goal-card completed" key={goal._id}>
                       <div className="goal-header">
                         <h3>{goal.description}</h3>
-                        <div className="completed-badge">Completed!</div>
+                        <div className="completed-badge">{t('goals.completed') || 'Completed!'}</div>
                       </div>
                       
                       <div className="goal-amounts">
@@ -425,9 +397,9 @@ function GoalManagement() {
                       </div>
                       
                       <div className="goal-footer">
-                        <span className="progress-percentage">100% Complete</span>
+                        <span className="progress-percentage">100% {t('goals.complete')}</span>
                         <span className="completion-date">
-                          {goal.completedAt ? new Date(goal.completedAt).toLocaleDateString() : 'Completed'}
+                          {goal.completedAt ? new Date(goal.completedAt).toLocaleDateString() : t('goals.completed')}
                         </span>
                       </div>
                     </div>
@@ -435,7 +407,7 @@ function GoalManagement() {
                 </div>
               ) : (
                 <div className="no-goals">
-                  <p>No completed goals yet. Keep working towards your financial targets!</p>
+                  <p>{t('goals.noCompletedGoals') || 'No completed goals yet. Keep working towards your financial targets!'}</p>
                 </div>
               )}
             </div>
@@ -448,32 +420,32 @@ function GoalManagement() {
         <div className="modal-overlay" onClick={() => setShowGoalModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <button className="close-btn" onClick={() => setShowGoalModal(false)}>×</button>
-            <h2>{currentGoal ? 'Edit Goal' : 'Create New Goal'}</h2>
+            <h2>{currentGoal ? t('goals.edit') || 'Edit Goal' : t('goals.create') || 'Create New Goal'}</h2>
             
             <form onSubmit={handleSaveGoal}>
               <div className="form-group">
-                <label htmlFor="description">Goal Description</label>
+                <label htmlFor="description">{t('goals.description') || 'Goal Description'}</label>
                 <input
                   type="text"
                   id="description"
                   name="description"
                   value={goalFormData.description}
                   onChange={handleGoalInputChange}
-                  placeholder="e.g., Monthly Savings, New Car, etc."
+                  placeholder={t('goals.descriptionPlaceholder') || 'e.g., Monthly Savings, New Car, etc.'}
                   required
                 />
               </div>
               
               <div className="form-row">
                 <div className="form-group">
-                  <label htmlFor="targetAmount">Target Amount (₱)</label>
+                  <label htmlFor="targetAmount">{t('goals.targetAmount') || 'Target Amount (₱)'}</label>
                   <input
                     type="number"
                     id="targetAmount"
                     name="targetAmount"
                     value={goalFormData.targetAmount}
                     onChange={handleGoalInputChange}
-                    placeholder="e.g., 10000"
+                    placeholder={t('goals.targetAmountPlaceholder') || 'e.g., 10000'}
                     min="1"
                     step="any"
                     required
@@ -481,14 +453,14 @@ function GoalManagement() {
                 </div>
                 
                 <div className="form-group">
-                  <label htmlFor="currentAmount">Current Amount (₱)</label>
+                  <label htmlFor="currentAmount">{t('goals.currentAmount') || 'Current Amount (₱)'}</label>
                   <input
                     type="number"
                     id="currentAmount"
                     name="currentAmount"
                     value={goalFormData.currentAmount}
                     onChange={handleGoalInputChange}
-                    placeholder="e.g., 0"
+                    placeholder={t('goals.currentAmountPlaceholder') || 'e.g., 0'}
                     min="0"
                     step="any"
                     required
@@ -498,18 +470,16 @@ function GoalManagement() {
               
               <div className="modal-actions">
                 <button type="button" className="btn-secondary" onClick={() => setShowGoalModal(false)}>
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button type="submit" className="btn-primary">
-                  {currentGoal ? 'Update Goal' : 'Create Goal'}
+                  {t('common.saveChanges')}
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
-      
-
       
       <style>{`
         .goal-management-container {
@@ -1006,6 +976,21 @@ function GoalManagement() {
           100% { transform: scale(1.2); opacity: 1; }
         }
 
+        .active-badge {
+          background: linear-gradient(135deg, #4299e1, #3182ce);
+          color: white;
+          font-size: 0.875rem;
+          font-weight: 700;
+          padding: 0.5rem 1rem;
+          border-radius: 8px;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          box-shadow: 0 3px 6px rgba(66, 153, 225, 0.3);
+          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+          border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
         .completed-badge {
           background: linear-gradient(135deg, #68d391, #48bb78);
           color: white;
@@ -1341,36 +1326,35 @@ function GoalManagement() {
         <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
           <div className="modal-content delete-modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>Confirm Deletion</h3>
+              <h3>{t('goals.confirmDeletion') || 'Confirm Deletion'}</h3>
               <button className="modal-close" onClick={() => setShowDeleteModal(false)}>×</button>
             </div>
             
             <div className="modal-body">
               <div className="delete-warning">
                 <div className="warning-icon">⚠️</div>
-                <h4>Are you sure you want to delete this goal?</h4>
+                <h4>{t('goals.deleteConfirmationTitle') || 'Are you sure you want to delete this goal?'}</h4>
                 <p>
-                  <strong>"{goalToDelete.description}"</strong> will be moved to trash. 
-                  You can restore it later by contacting an administrator if needed.
+                  <strong>"{goalToDelete.description}"</strong> {t('goals.deleteConfirmationMessage')}
                 </p>
                 
                 <div className="delete-goal-details">
                   <div className="detail-item">
-                    <span className="detail-label">Target Amount:</span>
+                    <span className="detail-label">{t('goals.targetAmount')}:</span>
                     <span className="detail-value">₱{goalToDelete.targetAmount.toLocaleString()}</span>
                   </div>
                   <div className="detail-item">
-                    <span className="detail-label">Current Amount:</span>
+                    <span className="detail-label">{t('goals.currentAmount')}:</span>
                     <span className="detail-value">₱{goalToDelete.currentAmount.toLocaleString()}</span>
                   </div>
                   <div className="detail-item">
-                    <span className="detail-label">Progress:</span>
+                    <span className="detail-label">{t('goals.progress')}:</span>
                     <span className="detail-value">{goalToDelete.progress?.toFixed(1) || '0'}%</span>
                   </div>
                   {goalToDelete.isActive && (
                     <div className="detail-item">
-                      <span className="detail-label">Status:</span>
-                      <span className="status-badge active">Active Goal</span>
+                      <span className="detail-label">{t('goals.status')}:</span>
+                      <span className="status-badge active">{t('goals.activeGoal')}</span>
                     </div>
                   )}
                 </div>
@@ -1380,13 +1364,13 @@ function GoalManagement() {
                     className="btn secondary" 
                     onClick={() => setShowDeleteModal(false)}
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </button>
                   <button 
                     className="btn danger" 
                     onClick={handleDeleteGoal}
                   >
-                    Delete Goal
+                    {t('goals.deleteGoal')}
                   </button>
                 </div>
               </div>

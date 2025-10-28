@@ -1,6 +1,7 @@
 // Comprehensive translation file for ResiLinked
 export const translations = {
   en: {
+    lang: 'en', // Language code
     // Navigation
     nav: {
       home: 'Home',
@@ -24,14 +25,20 @@ export const translations = {
     // Common buttons and actions
     common: {
       loading: 'Loading...',
+      saving: 'Saving...',
       save: 'Save',
       saveChanges: 'Save Changes',
       cancel: 'Cancel',
       delete: 'Delete',
       edit: 'Edit',
       back: 'Back',
+      goBack: 'Go Back',
       next: 'Next',
       previous: 'Previous',
+      goTo: 'Go to slide',
+      user: 'User',
+      notSpecified: 'Not specified',
+      locationNotSpecified: 'Location not specified',
       submit: 'Submit',
       confirm: 'Confirm',
       search: 'Search',
@@ -72,10 +79,42 @@ export const translations = {
       more: 'More'
     },
 
+    // Home Page
+    home: {
+      welcome: 'Welcome to ResiLinked',
+      tagline: 'Find jobs based on your skills and abilities!',
+      searchJobs: 'Search for Jobs',
+      postJob: 'Post a Job',
+      loginToPost: 'Login to Post',
+      howItWorks: 'How ResiLinked Works',
+      step1: 'Sign-in and Create a Profile',
+      step2: 'Search for Jobs or Candidates',
+      step3: 'Apply for Jobs',
+      step4: 'Give Ratings and Connect',
+      popularJobs: 'Popular Jobs',
+      noJobsAvailable: 'No jobs available at the moment',
+      employerOnly: 'Only employers can post jobs. Please update your profile to become an employer.'
+    },
+
     // Landing/Dashboard
     landing: {
       welcome: 'Welcome',
       welcomeBack: 'Welcome back',
+      findWorkersMessage: 'Find skilled workers for your projects',
+      findJobsMessage: 'Discover work opportunities near you',
+      findWorkers: 'Find Workers',
+      findJobs: 'Find Jobs',
+      myDashboard: 'My Dashboard',
+      topRatedWorkers: 'Top Rated Workers',
+      topRatedDescription: 'Connect with our most highly-rated professionals',
+      noSkillsListed: 'No skills listed',
+      noWorkersAvailable: 'No top-rated workers available at this time',
+      jobsCompleted: 'jobs',
+      reviews: 'reviews',
+      recentJobs: 'Recent Job Opportunities',
+      recentJobsDescription: 'Browse the latest job postings in your area',
+      viewJobDetails: 'View job details',
+      noJobsAvailable: 'No jobs available right now',
       quickStats: 'Quick Stats',
       recentActivity: 'Recent Activity',
       notifications: 'Notifications',
@@ -123,13 +162,26 @@ export const translations = {
 
     // Registration
     register: {
+      // Header
       title: 'Create Account',
       subtitle: 'Create a new account',
+      logoAlt: 'ResiLinked Logo',
+      
+      // Steps
       step1: 'Personal Info',
-      step2: 'Contact Info',
-      step3: 'Account Details',
-      step4: 'Job Preferences',
+      step2: 'Account Details',
+      step3: 'Contact & Location',
+      step4: 'Skills & User Type',
       step5: 'Documents',
+      
+      // Progress Labels
+      labelPersonal: 'Personal',
+      labelAccount: 'Account',
+      labelContact: 'Contact',
+      labelSkills: 'Skills',
+      labelDocuments: 'Documents',
+      
+      // Step 1: Personal Information
       firstName: 'First Name',
       lastName: 'Last Name',
       middleName: 'Middle Name',
@@ -138,42 +190,158 @@ export const translations = {
       sex: 'Sex',
       male: 'Male',
       female: 'Female',
+      other: 'Other',
       civilStatus: 'Civil Status',
       single: 'Single',
       married: 'Married',
       widowed: 'Widowed',
       separated: 'Separated',
+      
+      // Step 2: Account Details
       email: 'Email Address',
+      emailPlaceholder: 'email@example.com',
+      password: 'Password',
+      confirmPassword: 'Confirm Password',
+      confirmPasswordPlaceholder: 'Repeat the password',
+      showPassword: 'Show password',
+      hidePassword: 'Hide password',
+      
+      // Password Strength
+      passwordStrengthWeak: 'Weak',
+      passwordStrengthFair: 'Fair',
+      passwordStrengthGood: 'Good',
+      passwordStrengthStrong: 'Strong',
+      passwordRequirementsTitle: 'Password Requirements:',
+      reqLength: 'At least 8 characters',
+      reqUppercase: 'One uppercase letter',
+      reqLowercase: 'One lowercase letter',
+      reqNumber: 'One number',
+      reqMatch: 'Passwords match',
+      passwordsMatch: 'Passwords match!',
+      passwordsDoNotMatch: 'Passwords do not match!',
+      
+      // Step 3: Contact & Location
       mobileNo: 'Mobile Number',
+      mobileNumber: 'Mobile Number',
+      mobilePlaceholder: '+639XXXXXXXXX',
+      addressPlaceholder: 'Complete address',
       barangay: 'Barangay',
+      selectBarangay: 'Select Barangay',
+      otherBarangay: 'Other (Please specify)',
+      specifyBarangay: 'Specify your barangay',
       address: 'Complete Address',
       street: 'Street',
       city: 'City',
       province: 'Province',
       zipCode: 'Zip Code',
-      password: 'Password',
-      confirmPassword: 'Confirm Password',
+      
+      // Step 4: Skills & User Type
       userType: 'User Type',
+      selectUserType: 'Select User Type',
       employee: 'Employee',
       employer: 'Employer',
+      both: 'Both',
       skills: 'Skills',
       selectSkills: 'Select your skills',
-      companyName: 'Company Name',
-      companyDescription: 'Company Description',
+      skillsSelected: '${count} skills selected',
+      otherSkill: 'Other (Please specify)',
+      specifySkill: 'Specify your skill',
+      skillsHelper: 'Select skills that match your expertise',
+      
+      // Available Skills
+      skillCarpentry: 'Carpentry',
+      skillPlumbing: 'Plumbing',
+      skillElectrician: 'Electrician',
+      skillElectrical: 'Electrical',
+      skillPainting: 'Painting',
+      skillMasonry: 'Masonry',
+      skillWelding: 'Welding',
+      skillConstruction: 'Construction',
+      skillCleaning: 'Cleaning',
+      skillLandscaping: 'Landscaping',
+      skillGardening: 'Gardening',
+      skillDriver: 'Driver',
+      skillDriving: 'Driving',
+      skillCooking: 'Cooking',
+      skillSewing: 'Sewing',
+      skillHaircut: 'Haircut/Barber',
+      skillMechanic: 'Mechanic',
+      skillAircon: 'Aircon Technician',
+      skillBabysitting: 'Babysitting',
+      skillTutoring: 'Tutoring',
+      skillITSupport: 'IT Support',
+      skillCustomerService: 'Customer Service',
+      skillOther: 'Other',
+      
+      // Step 5: ID & Documents
       idType: 'ID Type',
+      selectIDType: 'Select ID Type',
       idNumber: 'ID Number',
       idFrontImage: 'ID Front Image',
       idBackImage: 'ID Back Image',
       profilePicture: 'Profile Picture',
-      acceptTOS: 'I accept the Terms of Service',
+      uploadHint: 'Click to upload or drag and drop',
+      uploadedFile: 'Uploaded',
+      changeFile: 'Change File',
+      removeFile: 'Remove file',
+      
+      // ID Types
+      idDriversLicense: "Driver's License",
+      idSSS: 'SSS ID',
+      idUMID: 'UMID',
+      idPhilHealth: 'PhilHealth ID',
+      idPostal: 'Postal ID',
+      idVoters: "Voter's ID",
+      idPRC: 'PRC ID',
+      idPassport: 'Passport',
+      idNBI: 'NBI Clearance',
+      idBarangay: 'Barangay ID',
+      
+      // Terms of Service
+      acceptTOS: 'I accept the',
+      termsOfService: 'Terms of Service',
+      viewFullTerms: 'View Full Terms',
+      tosAgreement: 'I have read and agree to the',
+      tosDisclaimer: 'I understand that ResiLinked and its operators will not be held accountable for any disputes, issues, or incidents that may arise between users.',
+      
+      // Buttons
+      previous: 'Previous',
+      next: 'Next',
+      submit: 'Create Account',
+      submitting: 'Creating Account...',
+      
+      // Footer
       alreadyHaveAccount: 'Already have an account?',
       loginHere: 'Login here',
-      emailAlreadyExists: 'This email is already registered. Please use a different email or login instead.',
-      registrationSuccess: 'Registration successful! Please check your email for verification.',
-      fillAllFields: 'Please fill all required fields',
+      returnHome: 'Return to Home',
+      
+      // Validation Messages
+      passwordRequired: 'Password is required',
+      passwordMinLength: 'Password must be at least 8 characters',
+      confirmPasswordRequired: 'Please confirm your password',
       passwordMismatch: 'Passwords do not match',
-      passwordRequirements: 'Password must be at least 8 characters',
-      selectAtLeastOneSkill: 'Please select at least one skill'
+      fillPersonalInfo: 'Please fill in all personal information fields',
+      fillAccountDetails: 'Please fill in all account details',
+      passwordNotMeetReqs: 'Password does not meet requirements',
+      fillContactLocation: 'Please fill in all contact and location fields',
+      specifyBarangayError: 'Please specify your barangay',
+      selectUserTypeError: 'Please select a user type',
+      selectSkillError: 'Please select at least one skill',
+      specifySkillError: 'Please specify your skill',
+      fillIDDocuments: 'Please fill in all ID and document fields',
+      acceptTOSError: 'You must accept the Terms of Service to continue',
+      
+      // API Messages
+      emailAlreadyExists: 'This email is already registered. Please use a different email or login instead.',
+      emailCheckFailed: 'Failed to verify email availability. Please try again.',
+      registrationSuccess: 'Registration successful! Please check your email for verification.',
+      registrationFailed: 'Registration failed. Please try again.',
+      connectionError: 'Connection error. Please try again.',
+      
+      // Loading
+      checkingEmail: 'Checking email availability...',
+      uploadingFiles: 'Uploading files...',
+      processingRegistration: 'Processing registration...'
     },
 
     // Login
@@ -192,31 +360,178 @@ export const translations = {
       loginFailed: 'Login failed. Please try again.'
     },
 
+    // About Page
+    about: {
+      title: 'About Resi',
+      tagline: 'Connecting skilled workers with opportunities',
+      ourMission: 'Our Mission',
+      missionText: 'Resi is dedicated to bridging the gap between talented workers and employers seeking their skills. We believe in creating meaningful employment connections that benefit both job seekers and businesses, fostering a thriving community of professionals.',
+      whatWeDo: 'What We Do',
+      jobMatching: 'Job Matching',
+      jobMatchingText: 'Our advanced matching algorithm connects workers with jobs that fit their skills, experience, and preferences.',
+      easySearch: 'Easy Search',
+      easySearchText: 'Browse thousands of job listings and worker profiles with powerful search and filter capabilities.',
+      directCommunication: 'Direct Communication',
+      directCommunicationText: 'Message directly with employers or workers through our secure in-platform chat system.',
+      ratingsReviews: 'Ratings & Reviews',
+      ratingsReviewsText: 'Build trust through our transparent rating system that showcases work quality and reliability.',
+      goalSetting: 'Goal Setting',
+      goalSettingText: 'Track your career goals and job search progress with our integrated goal management system.',
+      securePlatform: 'Secure Platform',
+      securePlatformText: 'Your data is protected with enterprise-level security measures and privacy controls.',
+      whoWeServe: 'Who We Serve',
+      workers: 'Workers',
+      workersText: "Whether you're a skilled tradesperson, freelancer, or professional seeking new opportunities, Resi helps you find work that matches your expertise and schedule.",
+      employers: 'Employers',
+      employersText: 'Post jobs, search for qualified workers, and build your team with confidence. Our platform streamlines the hiring process from posting to placement.',
+      ourValues: 'Our Values',
+      transparency: 'Transparency',
+      transparencyText: 'Clear communication and honest interactions between all parties',
+      quality: 'Quality',
+      qualityText: 'Commitment to connecting the right people with the right opportunities',
+      trust: 'Trust',
+      trustText: 'Building a reliable platform where users can engage with confidence',
+      innovation: 'Innovation',
+      innovationText: 'Continuously improving our features to serve our community better',
+      support: 'Support',
+      supportText: 'Providing responsive assistance whenever our users need help',
+      getInTouch: 'Get In Touch',
+      getInTouchText: "Have questions or need assistance? We're here to help!",
+      email: 'Email',
+      phone: 'Phone',
+      location: 'Location',
+      businessHours: 'Business Hours',
+      businessHoursText: 'Monday - Friday, 9:00 AM - 6:00 PM EST',
+      visitHelpCenter: 'Visit Help Center',
+      getStarted: 'Get Started'
+    },
+
     // Help Center
     help: {
-      title: 'Help Center',
-      subtitle: 'How can we help you?',
-      searchPlaceholder: 'Search for help...',
-      categories: 'Categories',
-      faq: 'Frequently Asked Questions',
-      contactSupport: 'Contact Support',
+      title: 'Help and Support',
+      subtitle: 'Frequently asked questions and support for ResiLinked',
+      searchPlaceholder: 'Search questions...',
+      noResults: 'No questions found for',
+      tryDifferent: 'Try different search terms or contact support.',
+      needHelp: 'Need Help?',
       chatWithSupport: 'Chat with Support',
       emailSupport: 'Email Support',
+      email: 'Email',
+      phone: 'Phone',
+      hours: 'Hours',
+      location: 'Location',
+      monSat: 'Mon-Sat: 8AM-6PM',
+      quickLinks: 'Quick Links',
+      backToDashboard: 'Back to Dashboard',
+      myProfile: 'My Profile',
+      settings: 'Settings',
+      findJobs: 'Find Jobs',
+      aboutUs: 'About Us',
+      privacyPolicy: 'Privacy Policy',
+      contactSupport: 'Contact Support',
+      name: 'Name',
+      subject: 'Subject',
+      selectTopic: 'Select a topic...',
+      accountIssues: 'Account Issues',
+      technicalSupport: 'Technical Support',
+      jobPosting: 'Job Posting',
+      profileManagement: 'Profile Management',
+      billingPayments: 'Billing & Payments',
+      reportProblem: 'Report a Problem',
+      featureRequest: 'Feature Request',
+      generalInquiry: 'General Inquiry',
+      other: 'Other',
+      templateAdded: 'A message template has been added below. Please customize it with your details.',
+      message: 'Message',
+      messagePlaceholder: 'Describe your concern or question...',
+      cancel: 'Cancel',
+      sending: 'Sending...',
+      sendMessage: 'Send Message',
       mustBeLoggedIn: 'You need to be logged in to chat with support. Please login or register first.',
+      
+      // FAQ Categories
       gettingStarted: 'Getting Started',
       accountManagement: 'Account Management',
-      jobPosting: 'Job Posting',
-      applications: 'Applications',
+      findingWork: 'Finding Work',
+      forEmployers: 'For Employers',
+      ratingsReviews: 'Ratings and Reviews',
       messaging: 'Messaging',
-      payments: 'Payments',
       safety: 'Safety & Security',
       troubleshooting: 'Troubleshooting',
-      howToRegister: 'How do I register?',
-      howToPostJob: 'How do I post a job?',
-      howToApply: 'How to apply for a job?',
-      howToMessage: 'How to send messages?',
-      needMoreHelp: 'Need more help?',
-      getInTouch: 'Get in touch with our support team'
+      
+      // FAQ Questions & Answers - Getting Started
+      q1: 'How do I create an account on ResiLinked?',
+      a1: 'Click the "Register" button on the homepage and fill in your personal information including name, email, mobile number, and address. Upload a valid government-issued ID for verification. After registration, check your email for a confirmation link to activate your account.',
+      q2: 'How long does account verification take?',
+      a2: 'Account verification typically takes 1-3 business days. Our admin team reviews your submitted documents to ensure authenticity and compliance. You will receive an email notification once your account is verified. If verification takes longer than 3 days, please contact our support team.',
+      q3: 'I cannot log in to my account. What should I do?',
+      a3: 'First, ensure you are using the correct email and password. If you forgot your password, click "Forgot Password" on the login page to reset it. Make sure your account is verified - check your email for a verification link. If problems persist, contact support for assistance.',
+      
+      // FAQ Questions & Answers - Account Management
+      q4: 'How do I reset my password?',
+      a4: 'On the login page, click "Forgot Password". Enter your registered email address and you will receive a password reset link. Click the link in your email and follow the instructions to create a new secure password. The reset link expires after 1 hour for security purposes.',
+      q5: 'How do I update my profile information?',
+      a5: 'Log in to your account and go to your Profile page. Click "Edit Profile" to modify your personal information, work skills, bio, and profile picture. Make sure to click "Save Changes" when done. Updated information will be reflected immediately on your profile.',
+      q6: 'Can I delete my account?',
+      a6: 'Yes, you can request account deletion from your Settings page. Please note that deleting your account is permanent and cannot be undone. All your data, including job applications and messages, will be removed. Contact support if you need help with account deletion.',
+      q7: 'Who can see my profile information?',
+      a7: 'Your basic profile (name, skills, and work experience) is visible only to verified employers when you apply to their jobs. Your contact information (email, phone) is only shared when you accept a job or the employer selects you. Your profile is never publicly visible on search engines.',
+      
+      // FAQ Questions & Answers - Finding Work
+      q8: 'How do I search for jobs on ResiLinked?',
+      a8: 'Go to the "Find Jobs" page from your dashboard. Use the search bar to look for specific job titles or skills. You can filter jobs by location (barangay), job type, salary range, and date posted. Click on any job card to view full details including requirements, salary, and employer information.',
+      q9: 'How do I apply for a job?',
+      a9: 'On the job details page, click the "Apply Now" button. Your profile information will be sent to the employer automatically. The employer can then view your profile and contact you directly if interested. You can track your applications in your Dashboard under "My Applications".',
+      q10: 'How can I track my job applications?',
+      a10: 'Go to your Dashboard and click on "My Applications" to see all jobs you have applied to. You can see the application status (pending, reviewed, accepted, or rejected). Employers can also send you direct messages regarding your application through our messaging system.',
+      q11: 'What is the job matching feature?',
+      a11: 'ResiLinked uses smart matching to suggest jobs that fit your skills and location. Go to the "Matched Jobs" section in your dashboard to see jobs recommended specifically for you. Update your skills regularly to get better job matches.',
+      
+      // FAQ Questions & Answers - For Employers
+      q12: 'How do I post a job on ResiLinked?',
+      a12: 'First, register as an "Employer" or "Both" user type. Once verified, go to your Dashboard and click "Post a Job". Fill in job details including title, description, requirements, salary, and location. Your job post will be visible to all qualified workers immediately after submission.',
+      q13: 'Is there a fee to post jobs?',
+      a13: 'No! Posting jobs on ResiLinked is completely free. You can post unlimited job openings without any charges. Our mission is to connect employers with local skilled workers efficiently and affordably.',
+      q14: 'How do I manage job applicants?',
+      a14: 'In your Employer Dashboard, go to "My Jobs" and click on any job post. You will see a list of all applicants with their profiles. You can view their skills, experience, and ratings. Contact applicants directly through our messaging system or using their provided contact information.',
+      q15: 'Can I edit or delete my job posts?',
+      a15: 'Yes! Go to "My Jobs" in your dashboard, find the job you want to modify, and click "Edit" to update job details or "Delete" to remove the posting. Editing preserves existing applications, while deleting removes the job permanently.',
+      
+      // FAQ Questions & Answers - Ratings and Reviews
+      q16: 'How does the rating system work?',
+      a16: 'After completing a job, both the employer and worker can rate each other from 1 to 5 stars. Ratings help build trust in the community. Good ratings improve your profile visibility and increase your chances of getting hired or finding reliable workers.',
+      q17: 'Can I see ratings before hiring someone?',
+      a17: 'Yes! Each user profile displays their average rating and total number of completed jobs. You can also read written reviews from previous employers or workers. This helps you make informed decisions when hiring or accepting work.',
+      q18: 'What if I receive an unfair rating?',
+      a18: 'If you believe a rating is unfair or inappropriate, you can report it to our support team. We will review the situation and take appropriate action. Provide evidence such as screenshots or messages to support your claim.',
+      
+      // FAQ Questions & Answers - Safety & Security
+      q19: 'Is my personal information secure?',
+      a19: 'Yes! We use industry-standard encryption and security measures to protect your data. Your password is encrypted, and sensitive information like your ID documents are stored securely. We never share your personal data with third parties without your explicit consent.',
+      q20: 'How do I avoid scams on ResiLinked?',
+      a20: 'Only accept jobs from verified employers. Never send money to anyone claiming to be from ResiLinked. Be cautious of jobs asking for upfront fees or personal bank details. Report suspicious accounts immediately. Use our in-app messaging for all communication to maintain a record.',
+      q21: 'How do I report suspicious activity or users?',
+      a21: 'Click on the user profile and select "Report User". Choose a reason for reporting and provide details. You can also report job posts by clicking the report icon on the job card. Our team investigates all reports within 24 hours and takes appropriate action.',
+      q22: 'How do I know if an employer is verified?',
+      a22: 'Verified employers have a blue checkmark badge on their profile. This means they have submitted valid business documents and been approved by our admin team. We recommend working only with verified employers for your safety.',
+      
+      // FAQ Questions & Answers - Messaging (Payments & Goals)
+      q23: 'How do I receive payment for my work?',
+      a23: 'Payment terms are agreed upon directly between you and the employer. ResiLinked does not process payments. Discuss payment methods, rates, and schedules before starting work. Get everything in writing for your protection.',
+      q24: 'What is the Goals feature?',
+      a24: 'The Goals feature helps you track your income and savings targets. Set a financial goal (e.g., "Save ₱10,000 for new equipment"), and update your progress as you earn money from completed jobs. This helps you stay motivated and financially organized.',
+      q25: 'How do goal priorities work?',
+      a25: 'You can set multiple goals and prioritize them. Your highest priority goal appears at the top of your dashboard. When you earn money, update your highest priority goal first. This system helps you focus on what matters most.',
+      
+      // FAQ Questions & Answers - Troubleshooting
+      q26: 'Which browsers are supported?',
+      a26: 'ResiLinked works best on the latest versions of Google Chrome, Mozilla Firefox, Safari, and Microsoft Edge. For the best experience, keep your browser updated. The platform is also mobile-responsive and works on all smartphones and tablets.',
+      q27: 'The website is loading slowly. What should I do?',
+      a27: 'Try refreshing the page or clearing your browser cache. Check your internet connection. If the problem persists, the issue might be on our end - please wait a few minutes and try again. Contact support if issues continue.',
+      q28: 'Is there a mobile app for ResiLinked?',
+      a28: 'Currently, ResiLinked is a web-based platform accessible through any mobile browser. We are working on developing native mobile apps for Android and iOS. In the meantime, you can use the website on your phone - it is fully mobile-responsive.',
+      q29: 'I am getting an error message. What should I do?',
+      a29: 'Take a screenshot of the error message and note what you were doing when it occurred. Try logging out and logging back in. Clear your browser cache and cookies. If the error persists, contact our support team with the screenshot and error details.'
     },
 
     // Search Workers
@@ -284,6 +599,8 @@ export const translations = {
       invitationFailed: 'Failed to send invitation',
       alreadyInvited: 'This worker has already been invited to this job',
       jobClosed: 'This job is no longer accepting applications',
+      noSkills: 'No skills listed',
+      selectJobFirst: 'Please select a job first',
       addCustomSkill: 'Add custom skill',
       other: 'Other'
     },
@@ -323,6 +640,20 @@ export const translations = {
       saveAsDraft: 'Save as Draft',
       postJob: 'Post Job',
       postingJob: 'Posting Job...',
+        commonSkills: [
+          'Plumbing',
+          'Carpentry',
+          'Cleaning',
+          'Electrical',
+          'Painting',
+          'Gardening',
+          'Cooking',
+          'Driving',
+          'Babysitting',
+          'Tutoring',
+          'IT Support',
+          'Customer Service'
+        ],
       skills: {
         houseCleaning: 'House Cleaning',
         laundry: 'Laundry',
@@ -460,6 +791,7 @@ export const translations = {
       education: 'Education',
       ratings: 'Ratings',
       reviews: 'Reviews',
+      recentRatings: 'Recent Ratings',
       contact: 'Contact',
       contactInformation: 'Contact Information',
       report: 'Report User',
@@ -530,7 +862,9 @@ export const translations = {
       rejected: 'Rejected',
       withdrawn: 'Withdrawn',
       withdraw: 'Withdraw Application',
-      confirmWithdraw: "Are you sure you want to withdraw your application?"
+      confirmWithdraw: "Are you sure you want to withdraw your application?",
+      completedBy: 'Completed by',
+      completed: 'Completed'
     },
 
     // Employer Dashboard
@@ -564,6 +898,8 @@ export const translations = {
       complete: 'Complete',
       viewApplicants: 'View Applicants',
       inviteWorker: 'Invite Worker',
+      topRatedWorkers: 'Top Rated Workers',
+      recommendedWorkers: 'Recommended Workers',
       noApplications: 'No applications received yet',
       applicantName: 'Applicant Name',
       appliedOn: 'Applied On',
@@ -650,6 +986,7 @@ export const translations = {
       noApplications: 'You have not applied to any jobs yet',
       exploreJobs: 'Explore available jobs',
       matchScore: 'Match Score',
+      match: 'Match',
       matchPercentage: 'Match',
       sameArea: 'Same Area',
       matchingSkills: 'Matching Skills',
@@ -710,26 +1047,366 @@ export const translations = {
     },
 
     // About Us
-    about: {
-      title: 'About Us',
-      mission: 'Our Mission',
-      vision: 'Our Vision',
-      whatWeDo: 'What We Do',
-      whyChooseUs: 'Why Choose Us',
-      ourTeam: 'Our Team',
-      getInTouch: 'Get In Touch'
-    },
-
     // Privacy Policy
     privacy: {
+      // Header
       title: 'Privacy Policy',
-      lastUpdated: 'Last Updated',
-      introduction: 'Introduction',
-      dataCollection: 'Data Collection',
-      dataUsage: 'How We Use Your Data',
-      dataSecurity: 'Data Security',
-      yourRights: 'Your Rights',
-      contactUs: 'Contact Us'
+      lastUpdated: 'Last Updated: December 2024',
+      
+      // 1. Introduction
+      section1Title: '1. Introduction',
+      section1Para1: 'Welcome to Resi ("we," "our," or "us"). We are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform.',
+      section1Para2: 'By using Resi, you agree to the collection and use of information in accordance with this policy. If you do not agree with our policies and practices, please do not use our services.',
+      
+      // 2. Information We Collect
+      section2Title: '2. Information We Collect',
+      section2_1Title: '2.1 Personal Information',
+      section2_1Intro: 'When you register and use our platform, we may collect:',
+      section2_1_1: 'Account Information:',
+      section2_1_1Detail: 'Name, email address, phone number, password',
+      section2_1_2: 'Profile Information:',
+      section2_1_2Detail: 'Bio, skills, experience, education, location, profile photo',
+      section2_1_3: 'Verification Documents:',
+      section2_1_3Detail: 'ID verification documents for identity confirmation',
+      section2_1_4: 'Employment Information:',
+      section2_1_4Detail: 'Work history, job preferences, availability',
+      
+      section2_2Title: '2.2 Automatically Collected Information',
+      section2_2_1: 'Usage Data:',
+      section2_2_1Detail: 'Pages visited, features used, time spent on platform',
+      section2_2_2: 'Device Information:',
+      section2_2_2Detail: 'IP address, browser type, operating system',
+      section2_2_3: 'Cookies and Tracking:',
+      section2_2_3Detail: 'Session cookies, analytics data',
+      
+      section2_3Title: '2.3 Information from Third Parties',
+      section2_3_1: 'Social media profile information (if you choose to link accounts)',
+      section2_3_2: 'Background check information (with your consent)',
+      section2_3_3: 'Payment processing information',
+      
+      // 3. How We Use Your Information
+      section3Title: '3. How We Use Your Information',
+      section3Intro: 'We use the collected information for the following purposes:',
+      section3_1: 'Account Management:',
+      section3_1Detail: 'Create and maintain your account, authenticate users',
+      section3_2: 'Job Matching:',
+      section3_2Detail: 'Connect workers with suitable job opportunities',
+      section3_3: 'Communication:',
+      section3_3Detail: 'Send notifications, updates, and respond to inquiries',
+      section3_4: 'Platform Improvement:',
+      section3_4Detail: 'Analyze usage patterns and improve features',
+      section3_5: 'Safety and Security:',
+      section3_5Detail: 'Prevent fraud, protect users, enforce terms of service',
+      section3_6: 'Legal Compliance:',
+      section3_6Detail: 'Comply with legal obligations and regulations',
+      section3_7: 'Marketing:',
+      section3_7Detail: 'Send promotional materials (you can opt out at any time)',
+      
+      // 4. How We Share Your Information
+      section4Title: '4. How We Share Your Information',
+      section4Intro: 'We may share your information in the following circumstances:',
+      
+      section4_1Title: '4.1 With Other Users',
+      section4_1Para: 'Profile information, ratings, and reviews are visible to other users to facilitate connections and build trust within the platform.',
+      
+      section4_2Title: '4.2 Service Providers',
+      section4_2Para: 'We share information with third-party service providers who perform services on our behalf, including:',
+      section4_2_1: 'Cloud hosting services (e.g., AWS, MongoDB Atlas)',
+      section4_2_2: 'Email service providers',
+      section4_2_3: 'SMS notification services',
+      section4_2_4: 'Analytics platforms',
+      section4_2_5: 'Payment processors',
+      
+      section4_3Title: '4.3 Legal Requirements',
+      section4_3Para: 'We may disclose your information if required by law, court order, or government regulation, or to protect our rights, safety, and property.',
+      
+      section4_4Title: '4.4 Business Transfers',
+      section4_4Para: 'In the event of a merger, acquisition, or sale of assets, your information may be transferred to the acquiring entity.',
+      
+      // 5. Data Security
+      section5Title: '5. Data Security',
+      section5Intro: 'We implement appropriate technical and organizational measures to protect your personal information:',
+      section5_1: 'Encryption:',
+      section5_1Detail: 'Data is encrypted in transit using SSL/TLS protocols',
+      section5_2: 'Access Controls:',
+      section5_2Detail: 'Restricted access to personal information on a need-to-know basis',
+      section5_3: 'Secure Storage:',
+      section5_3Detail: 'Data stored on secure servers with regular backups',
+      section5_4: 'Regular Audits:',
+      section5_4Detail: 'Security practices reviewed and updated regularly',
+      section5_5: 'Password Protection:',
+      section5_5Detail: 'Passwords hashed and salted using industry standards',
+      section5Warning: '⚠️ While we strive to protect your information, no method of transmission over the internet is 100% secure. Please use strong passwords and keep your login credentials confidential.',
+      
+      // 6. Your Privacy Rights
+      section6Title: '6. Your Privacy Rights',
+      section6Intro: 'You have the following rights regarding your personal information:',
+      section6_1: 'Access:',
+      section6_1Detail: 'Request a copy of the personal information we hold about you',
+      section6_2: 'Correction:',
+      section6_2Detail: 'Update or correct inaccurate information',
+      section6_3: 'Deletion:',
+      section6_3Detail: 'Request deletion of your account and personal data',
+      section6_4: 'Data Portability:',
+      section6_4Detail: 'Request your data in a portable format',
+      section6_5: 'Opt-Out:',
+      section6_5Detail: 'Unsubscribe from marketing communications at any time',
+      section6_6: 'Restriction:',
+      section6_6Detail: 'Request restriction of processing in certain circumstances',
+      section6Contact: 'To exercise these rights, please contact us at',
+      section6ContactEmail: 'privacy@resi.com',
+      section6ContactOr: 'or through your account settings.',
+      
+      // 7. Cookies and Tracking
+      section7Title: '7. Cookies and Tracking Technologies',
+      section7Intro: 'We use cookies and similar tracking technologies to enhance your experience:',
+      section7_1: 'Essential Cookies:',
+      section7_1Detail: 'Required for platform functionality (authentication, security)',
+      section7_2: 'Analytics Cookies:',
+      section7_2Detail: 'Help us understand how users interact with our platform',
+      section7_3: 'Preference Cookies:',
+      section7_3Detail: 'Remember your settings and preferences',
+      section7Note: 'You can control cookies through your browser settings. Note that disabling certain cookies may affect platform functionality.',
+      
+      // 8. Data Retention
+      section8Title: '8. Data Retention',
+      section8Intro: 'We retain your personal information for as long as necessary to provide our services and comply with legal obligations:',
+      section8_1: 'Active account data is retained while your account is active',
+      section8_2: 'Deleted account data is retained for 30 days before permanent deletion',
+      section8_3: 'Some information may be retained longer for legal or business purposes',
+      section8_4: 'Transaction records kept for 7 years for tax and accounting purposes',
+      
+      // 9. Children's Privacy
+      section9Title: "9. Children's Privacy",
+      section9Para: 'Our platform is not intended for individuals under 18 years of age. We do not knowingly collect personal information from children. If you believe we have collected information from a child, please contact us immediately at',
+      
+      // 10. International Data Transfers
+      section10Title: '10. International Data Transfers',
+      section10Para: 'Your information may be transferred to and processed in countries other than your country of residence. We ensure appropriate safeguards are in place to protect your information in accordance with this Privacy Policy and applicable data protection laws.',
+      
+      // 11. Third-Party Links
+      section11Title: '11. Third-Party Links',
+      section11Para: 'Our platform may contain links to third-party websites or services. We are not responsible for the privacy practices of these external sites. We encourage you to review their privacy policies before providing any personal information.',
+      
+      // 12. Changes to This Policy
+      section12Title: '12. Changes to This Privacy Policy',
+      section12Intro: 'We may update this Privacy Policy from time to time. We will notify you of significant changes by:',
+      section12_1: 'Posting the new policy on this page',
+      section12_2: 'Updating the "Last Updated" date',
+      section12_3: 'Sending an email notification for material changes',
+      section12Note: 'Your continued use of the platform after changes are posted constitutes acceptance of the updated policy.',
+      
+      // 13. Contact Us
+      section13Title: '13. Contact Us',
+      section13Intro: 'If you have questions, concerns, or requests regarding this Privacy Policy or your personal information, please contact us:',
+      contactEmail: 'Email:',
+      contactSupport: 'Support Email:',
+      contactPhone: 'Phone:',
+      contactAddress: 'Address:',
+      ctaHelpCenter: 'Visit Help Center',
+      ctaSettings: 'Account Settings'
+    },
+
+    // Terms of Service
+    terms: {
+      // Header
+      title: 'Terms of Service',
+      effectiveDate: 'Effective Date: October 23, 2025',
+      lastUpdated: 'Last Updated: October 23, 2025',
+      
+      // Sections
+      section1Title: '1. Acceptance of Terms',
+      section1Para: 'By accessing or using ResiLinked ("the Platform"), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.',
+      
+      section2Title: '2. Platform Purpose',
+      section2Para: 'ResiLinked is a community-based platform designed to connect workers (employees) with employers within local communities. The Platform serves as a facilitator and does not employ any users or guarantee any employment relationships.',
+      section2AltTitle: '2. Description of Service',
+      section2AltPara: 'ResiLinked is a platform that connects workers and employers in local communities. We facilitate:',
+      section2Alt_1: 'Job posting and job searching',
+      section2Alt_2: 'Profile creation and management',
+      section2Alt_3: 'Communication between users',
+      section2Alt_4: 'Ratings and reviews',
+      section2Alt_5: 'Job application tracking',
+      
+      section3Title: '3. User Responsibilities',
+      section3_1Title: '3.1 Account Creation',
+      section3_1Intro: 'Users must:',
+      section3_1_1: 'Provide accurate and truthful information during registration',
+      section3_1_2: 'Maintain the confidentiality of their account credentials',
+      section3_1_3: 'Be at least 18 years of age or have parental/guardian consent',
+      section3_1_4: 'Submit valid government-issued identification for verification',
+      
+      section3_2Title: '3.2 User Conduct',
+      section3_2Intro: 'Users agree to:',
+      section3_2_1: 'Conduct themselves professionally and respectfully',
+      section3_2_2: 'Verify the identity and credentials of other users before engaging in any transaction',
+      section3_2_3: 'Communicate honestly about job requirements, skills, and availability',
+      section3_2_4: 'Report suspicious activity or fraudulent behavior immediately',
+      section3_2_5: 'Not use the Platform for illegal activities or scams',
+      
+      section3AltIntro: 'As a user of ResiLinked, you agree to:',
+      section3Alt_1: 'Provide accurate and truthful information',
+      section3Alt_2: 'Maintain the confidentiality of your account',
+      section3Alt_3: 'Use the platform lawfully and respectfully',
+      section3Alt_4: 'Not engage in fraudulent or deceptive practices',
+      section3Alt_5: 'Not harass, threaten, or harm other users',
+      section3Alt_6: 'Verify information independently before entering agreements',
+      
+      section4Title: '4. Limitation of Liability',
+      section4Important: 'IMPORTANT: ResiLinked and its operators ARE NOT LIABLE for:',
+      section4_1: 'Any disputes, disagreements, or conflicts between users',
+      section4_2: 'Quality of work performed or services rendered',
+      section4_3: 'Payment issues, non-payment, or financial disputes between users',
+      section4_4: 'Physical injuries, property damage, or losses incurred during work arrangements',
+      section4_5: 'Fraudulent activities, scams, or misrepresentation by users',
+      section4_6: 'Identity theft or unauthorized access to user accounts',
+      section4_7: 'Any direct, indirect, incidental, or consequential damages arising from platform use',
+      section4Note: 'Users acknowledge that all transactions, agreements, and work arrangements are conducted at their own risk and ResiLinked is merely a facilitator.',
+      
+      section4AltTitle: '4. Platform Role and Limitations',
+      section4AltImportant: 'Important: ResiLinked is a CONNECTION PLATFORM ONLY. We:',
+      section4Alt_1: 'DO NOT employ workers or hire on behalf of employers',
+      section4Alt_2: 'DO NOT guarantee the quality, safety, or legality of jobs or services',
+      section4Alt_3: 'DO NOT conduct background checks or verify user credentials',
+      section4Alt_4: 'DO NOT mediate disputes between users',
+      section4Alt_5: 'DO NOT process payments between users',
+      
+      section5Title: '5. Safety and Security',
+      section5_1Title: '5.1 User Verification',
+      section5_1Para: 'While ResiLinked requires ID verification, we cannot guarantee the authenticity of all users. Users are responsible for conducting their own due diligence before entering into any agreement.',
+      
+      section5_2Title: '5.2 Safety Recommendations',
+      section5_2Intro: 'We strongly recommend users to:',
+      section5_2_1: 'Meet in public places for initial consultations',
+      section5_2_2: 'Review user ratings and reviews before hiring or accepting work',
+      section5_2_3: 'Inform family or friends about work arrangements and locations',
+      section5_2_4: 'Trust their instincts and decline any suspicious offers',
+      section5_2_5: 'Use in-app messaging for documented communication',
+      
+      section5AltTitle: '5. Limitation of Liability',
+      section5AltIntro: 'By using ResiLinked, you acknowledge and agree that:',
+      section5Alt_1: 'ResiLinked and its operators WILL NOT BE HELD LIABLE for any damages, losses, injuries, or disputes arising from:',
+      section5Alt_1_1: 'Interactions between users',
+      section5Alt_1_2: 'Job agreements or employment relationships',
+      section5Alt_1_3: 'Quality of work performed or not performed',
+      section5Alt_1_4: 'Payment disputes between users',
+      section5Alt_1_5: 'Fraudulent users or scammers',
+      section5Alt_1_6: 'Personal injury or property damage',
+      section5Alt_1_7: 'Theft, harassment, or criminal activity',
+      section5Alt_1_8: 'Inaccurate information provided by users',
+      section5Alt_2: 'You use the platform AT YOUR OWN RISK and are solely responsible for verifying the identity, credentials, and trustworthiness of other users.',
+      section5Alt_3: 'ResiLinked is provided "AS IS" without warranties of any kind, express or implied.',
+      
+      section6Title: '6. Payment and Transactions',
+      section6Para: 'ResiLinked does not process payments or act as an intermediary for financial transactions. All payment arrangements are made directly between users. The Platform is not responsible for:',
+      section6_1: 'Non-payment or late payment issues',
+      section6_2: 'Disputed charges or refunds',
+      section6_3: 'Tax obligations arising from user transactions',
+      section6_4: 'Financial losses of any kind',
+      section6Note: 'Users are advised to establish clear payment terms in writing before commencing any work.',
+      
+      section6AltTitle: '6. User Conduct',
+      section6AltIntro: 'You agree NOT to:',
+      section6Alt_1: 'Post false or misleading information',
+      section6Alt_2: 'Impersonate any person or entity',
+      section6Alt_3: 'Use the platform for illegal activities',
+      section6Alt_4: 'Spam or send unsolicited messages',
+      section6Alt_5: 'Violate any applicable laws or regulations',
+      section6Alt_6: 'Attempt to hack, disrupt, or damage the platform',
+      
+      section7Title: '7. Content and Intellectual Property',
+      section7Para: 'Users retain ownership of content they post but grant ResiLinked a license to use, display, and distribute such content on the Platform. Users must not post:',
+      section7_1: 'Copyrighted material without permission',
+      section7_2: 'Offensive, discriminatory, or inappropriate content',
+      section7_3: 'False or misleading information',
+      section7_4: 'Spam or unsolicited advertisements',
+      
+      section7AltTitle: '7. Account Termination',
+      section7AltPara: 'We reserve the right to suspend or terminate accounts that violate these terms or engage in prohibited conduct, without prior notice.',
+      
+      section8Title: '8. Privacy and Data',
+      section8Para: 'Your use of ResiLinked is also governed by our Privacy Policy. We collect and use personal information as described in that policy. Users consent to:',
+      section8_1: 'Collection of profile information and ID verification data',
+      section8_2: 'Use of data for platform functionality and improvements',
+      section8_3: 'Sharing of public profile information with other users',
+      
+      section8AltPara: 'Your use of ResiLinked is also governed by our Privacy Policy. We collect and process data as described in that policy. You consent to our data practices by using the platform.',
+      
+      section9Title: '9. Account Termination',
+      section9Para: 'ResiLinked reserves the right to suspend or terminate user accounts for:',
+      section9_1: 'Violation of these Terms of Service',
+      section9_2: 'Fraudulent or illegal activity',
+      section9_3: 'Multiple user reports or complaints',
+      section9_4: 'Misuse of the Platform',
+      section9Note: 'Users may also request account deletion at any time through account settings.',
+      
+      section9AltTitle: '9. Content Ownership',
+      section9AltPara: 'You retain ownership of content you post on ResiLinked. However, by posting content, you grant ResiLinked a license to use, display, and distribute that content on the platform.',
+      
+      section10Title: '10. Dispute Resolution',
+      section10Para: 'In the event of disputes between users, ResiLinked encourages direct communication and resolution. The Platform may provide a reporting mechanism but is not obligated to mediate or resolve disputes. Users agree to:',
+      section10_1: 'Attempt good-faith resolution directly with the other party',
+      section10_2: 'Not hold ResiLinked liable for user disputes',
+      section10_3: 'Seek legal remedies independently if necessary',
+      
+      section10AltTitle: '10. Indemnification',
+      section10AltPara: 'You agree to indemnify and hold harmless ResiLinked, its operators, and affiliates from any claims, damages, or expenses arising from your use of the platform or violation of these terms.',
+      
+      section11Title: '11. Indemnification',
+      section11Para: 'Users agree to indemnify and hold harmless ResiLinked, its operators, employees, and affiliates from any claims, damages, losses, or expenses (including legal fees) arising from:',
+      section11_1: "User's violation of these Terms",
+      section11_2: "User's interactions with other users",
+      section11_3: "User's content or activities on the Platform",
+      section11_4: "Any third-party claims related to user's conduct",
+      
+      section11AltTitle: '11. Safety Recommendations',
+      section11AltIntro: 'While we are not liable for user interactions, we strongly recommend:',
+      section11Alt_1: 'Meeting in public places for initial meetings',
+      section11Alt_2: 'Verifying user profiles and reviews',
+      section11Alt_3: 'Using the in-app messaging system',
+      section11Alt_4: 'Reporting suspicious behavior immediately',
+      section11Alt_5: 'Trusting your instincts',
+      section11Alt_6: 'Not sharing sensitive personal information prematurely',
+      
+      section12Title: '12. Modifications to Terms',
+      section12Para: 'ResiLinked reserves the right to modify these Terms of Service at any time. Users will be notified of significant changes via email or platform notification. Continued use of the Platform after changes are posted constitutes acceptance of the modified terms.',
+      
+      section12AltTitle: '12. Dispute Resolution',
+      section12AltPara: 'Any disputes arising from these terms or use of the platform shall be resolved through binding arbitration in accordance with the laws of the Republic of the Philippines.',
+      
+      section13Title: '13. Governing Law',
+      section13Para: 'These Terms of Service are governed by the laws of the Philippines. Any disputes arising from these terms shall be resolved in accordance with Philippine law.',
+      
+      section13AltTitle: '13. Changes to Terms',
+      section13AltPara: 'We reserve the right to modify these Terms of Service at any time. Continued use of the platform after changes constitutes acceptance of the modified terms.',
+      
+      section14Title: '14. Contact Information',
+      section14Para: 'For questions or concerns about these Terms of Service, please contact us at:',
+      section14Email: 'Email:',
+      section14Platform: 'Platform:',
+      section14PlatformText: 'Submit a support ticket through the Help section',
+      
+      section14AltTitle: '14. Governing Law',
+      section14AltPara: 'These Terms of Service are governed by the laws of the Republic of the Philippines.',
+      
+      section15Title: '15. Acknowledgment',
+      section15Para: 'By using ResiLinked, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service. You specifically acknowledge that ResiLinked is not liable for any disputes, damages, or losses arising from your use of the Platform or interactions with other users.',
+      
+      section15AltTitle: '15. Contact Information',
+      section15AltPara: 'For questions about these Terms of Service, please contact us through the platform\'s support system.',
+      
+      // Modal specific
+      modalAcknowledgment: 'BY CLICKING "I ACCEPT" OR USING RESILINKED, YOU ACKNOWLEDGE THAT YOU HAVE READ, UNDERSTOOD, AND AGREE TO BE BOUND BY THESE TERMS OF SERVICE.',
+      closeButton: 'Close',
+      
+      // Footer
+      backToRegistration: 'Back to Registration',
+      
+      // Common terms
+      atOwnRisk: 'at their own risk',
+      doNot: 'DO NOT',
+      important: 'Important:',
+      stronglyRecommend: 'We strongly recommend'
     },
 
     // Admin Dashboard
@@ -787,11 +1464,46 @@ export const translations = {
       profileUpdated: 'Profile updated successfully!',
       passwordChanged: 'Password changed successfully!',
       emailChanged: 'Email changed successfully!'
+    },
+
+    // Goals
+    goals: {
+      title: 'Financial Goal Management',
+      create: 'Create New Goal',
+      edit: 'Edit Goal',
+      delete: 'Delete Goal',
+      deleteGoal: 'Delete Goal',
+      active: 'Active Goal',
+      pending: 'Pending Goals',
+      completed: 'Completed Goals',
+      activeGoal: 'Active',
+      activeBadge: 'Active Goal',
+      complete: 'Complete',
+      description: 'Goal Description',
+      descriptionPlaceholder: 'e.g., Monthly Savings, New Car, etc.',
+      targetAmount: 'Target Amount',
+      targetAmountPlaceholder: 'e.g., 10000',
+      currentAmount: 'Current Amount',
+      currentAmountPlaceholder: 'e.g., 0',
+      progress: 'Progress',
+      setAsActive: 'Set as Active',
+      setAsPriority: 'Set as Next Up',
+      setAsNext: 'Set as Next Goal',
+      nextUp: 'Next Up',
+      loading: 'Loading your goals...',
+      noPendingGoals: 'No pending goals yet.',
+      noCompletedGoals: 'No completed goals yet. Keep working towards your financial targets!',
+      confirmDeletion: 'Confirm Deletion',
+      deleteConfirmationTitle: 'Are you sure you want to delete this goal?',
+      deleteConfirmationMessage: 'will be moved to trash. This action cannot be undone.',
+      status: 'Status',
+      saveSettings: 'Save Settings'
     }
   },
 
   // TAGALOG TRANSLATIONS
   tl: {
+    lang: 'tl', // Language code
     // Navigation
     nav: {
       home: 'Bahay',
@@ -815,14 +1527,20 @@ export const translations = {
     // Common buttons and actions
     common: {
       loading: 'Naglo-load...',
+      saving: 'Nag-se-save...',
       save: 'I-save',
       saveChanges: 'I-save ang mga Pagbabago',
       cancel: 'Kanselahin',
       delete: 'Tanggalin',
       edit: 'I-edit',
       back: 'Bumalik',
+      goBack: 'Bumalik',
       next: 'Susunod',
       previous: 'Nakaraan',
+      goTo: 'Pumunta sa slide',
+      user: 'Gumagamit',
+      notSpecified: 'Hindi tinukoy',
+      locationNotSpecified: 'Hindi tinukoy ang lokasyon',
       submit: 'Isumite',
       confirm: 'Kumpirmahin',
       search: 'Maghanap',
@@ -863,10 +1581,42 @@ export const translations = {
       more: 'Higit pa'
     },
 
+    // Home Page
+    home: {
+      welcome: 'Maligayang Pagdating sa ResiLinked',
+      tagline: 'Maghanap ng trabaho batay sa iyong kasanayan at kakayahan!',
+      searchJobs: 'Maghanap ng Trabaho',
+      postJob: 'Mag-post ng Trabaho',
+      loginToPost: 'Mag-login para Mag-post',
+      howItWorks: 'Paano Gumagana ang ResiLinked',
+      step1: 'Mag-sign in at Lumikha ng Profile',
+      step2: 'Maghanap ng Trabaho o Kandidato',
+      step3: 'Mag-apply ng Trabaho',
+      step4: 'Magbigay ng Rating at Makipag-ugnayan',
+      popularJobs: 'Sikat na Trabaho',
+      noJobsAvailable: 'Walang available na trabaho sa ngayon',
+      employerOnly: 'Ang mga employer lamang ang maaaring mag-post ng trabaho. Mangyaring i-update ang iyong profile upang maging employer.'
+    },
+
     // Landing/Dashboard
     landing: {
       welcome: 'Maligayang Pagdating',
       welcomeBack: 'Maligayang Pagbabalik',
+      findWorkersMessage: 'Maghanap ng mga bihasang manggagawa para sa iyong proyekto',
+      findJobsMessage: 'Tuklasin ang mga oportunidad sa trabaho malapit sa iyo',
+      findWorkers: 'Maghanap ng Manggagawa',
+      findJobs: 'Maghanap ng Trabaho',
+      myDashboard: 'Aking Dashboard',
+      topRatedWorkers: 'Pinakamataas na Rating na Manggagawa',
+      topRatedDescription: 'Makipag-ugnayan sa aming pinakamataas na naka-rate na mga propesyonal',
+      noSkillsListed: 'Walang nakalistang kasanayan',
+      noWorkersAvailable: 'Walang available na top-rated na manggagawa sa ngayon',
+      jobsCompleted: 'trabaho',
+      reviews: 'mga review',
+      recentJobs: 'Kamakailang Oportunidad sa Trabaho',
+      recentJobsDescription: 'I-browse ang pinakabagong mga trabaho sa iyong lugar',
+      viewJobDetails: 'Tingnan ang detalye ng trabaho',
+      noJobsAvailable: 'Walang available na trabaho sa ngayon',
       quickStats: 'Mabilis na Stats',
       recentActivity: 'Kamakailang Aktibidad',
       notifications: 'Mga Abiso',
@@ -914,13 +1664,26 @@ export const translations = {
 
     // Registration
     register: {
+      // Header
       title: 'Gumawa ng Account',
       subtitle: 'Gumawa ng bagong account',
+      logoAlt: 'Logo ng ResiLinked',
+      
+      // Steps
       step1: 'Personal na Impormasyon',
-      step2: 'Impormasyon sa Pakikipag-ugnayan',
-      step3: 'Detalye ng Account',
-      step4: 'Kagustuhan sa Trabaho',
+      step2: 'Detalye ng Account',
+      step3: 'Contact & Lokasyon',
+      step4: 'Mga Kasanayan & Uri ng User',
       step5: 'Mga Dokumento',
+      
+      // Progress Labels
+      labelPersonal: 'Personal',
+      labelAccount: 'Account',
+      labelContact: 'Contact',
+      labelSkills: 'Kasanayan',
+      labelDocuments: 'Dokumento',
+      
+      // Step 1: Personal Information
       firstName: 'Pangalan',
       lastName: 'Apelyido',
       middleName: 'Gitnang Pangalan',
@@ -929,42 +1692,158 @@ export const translations = {
       sex: 'Kasarian',
       male: 'Lalaki',
       female: 'Babae',
+      other: 'Iba',
       civilStatus: 'Katayuang Sibil',
       single: 'Single',
       married: 'Kasal',
       widowed: 'Biyudo/Biyuda',
       separated: 'Hiwalay',
+      
+      // Step 2: Account Details
       email: 'Email Address',
+      emailPlaceholder: 'email@example.com',
+      password: 'Password',
+      confirmPassword: 'Kumpirmahin ang Password',
+      confirmPasswordPlaceholder: 'Ulitin ang password',
+      showPassword: 'Ipakita ang password',
+      hidePassword: 'Itago ang password',
+      
+      // Password Strength
+      passwordStrengthWeak: 'Mahina',
+      passwordStrengthFair: 'Katamtaman',
+      passwordStrengthGood: 'Mabuti',
+      passwordStrengthStrong: 'Malakas',
+      passwordRequirementsTitle: 'Mga Kinakailangan sa Password:',
+      reqLength: 'Hindi bababa sa 8 character',
+      reqUppercase: 'Isang malaking titik',
+      reqLowercase: 'Isang maliit na titik',
+      reqNumber: 'Isang numero',
+      reqMatch: 'Tugma ang mga password',
+      passwordsMatch: 'Tugma ang mga password!',
+      passwordsDoNotMatch: 'Hindi tugma ang mga password!',
+      
+      // Step 3: Contact & Location
       mobileNo: 'Numero ng Cellphone',
+      mobileNumber: 'Numero ng Cellphone',
+      mobilePlaceholder: '+639XXXXXXXXX',
+      addressPlaceholder: 'Kumpletong address',
       barangay: 'Barangay',
+      selectBarangay: 'Pumili ng Barangay',
+      otherBarangay: 'Iba (Itukoy)',
+      specifyBarangay: 'Itukoy ang iyong barangay',
       address: 'Kumpletong Address',
       street: 'Kalye',
       city: 'Lungsod',
       province: 'Lalawigan',
       zipCode: 'Zip Code',
-      password: 'Password',
-      confirmPassword: 'Kumpirmahin ang Password',
+      
+      // Step 4: Skills & User Type
       userType: 'Uri ng User',
+      selectUserType: 'Pumili ng Uri ng User',
       employee: 'Empleyado',
       employer: 'Employer',
+      both: 'Pareho',
       skills: 'Mga Kasanayan',
       selectSkills: 'Pumili ng iyong mga kasanayan',
-      companyName: 'Pangalan ng Kumpanya',
-      companyDescription: 'Deskripsyon ng Kumpanya',
+      skillsSelected: '${count} kasanayan ang napili',
+      otherSkill: 'Iba (Itukoy)',
+      specifySkill: 'Itukoy ang iyong kasanayan',
+      skillsHelper: 'Pumili ng mga kasanayan na tugma sa iyong kakayahan',
+      
+      // Available Skills
+      skillCarpentry: 'Karpintero',
+      skillPlumbing: 'Tubero',
+      skillElectrician: 'Elektrisyan',
+      skillElectrical: 'Elektrisyan',
+      skillPainting: 'Pagpipintura',
+      skillMasonry: 'Mason',
+      skillWelding: 'Paghahabi/Welding',
+      skillConstruction: 'Konstruksyon',
+      skillCleaning: 'Paglilinis',
+      skillLandscaping: 'Landscaping',
+      skillGardening: 'Paghahalaman',
+      skillDriver: 'Driver',
+      skillDriving: 'Pagmamaneho',
+      skillCooking: 'Pagluluto',
+      skillSewing: 'Pagtahi',
+      skillHaircut: 'Gupit/Barbero',
+      skillMechanic: 'Mekaniko',
+      skillAircon: 'Aircon Technician',
+      skillBabysitting: 'Pag-aalaga ng Bata',
+      skillTutoring: 'Pagtuturo',
+      skillITSupport: 'IT Support',
+      skillCustomerService: 'Customer Service',
+      skillOther: 'Iba',
+      
+      // Step 5: ID & Documents
       idType: 'Uri ng ID',
+      selectIDType: 'Pumili ng Uri ng ID',
       idNumber: 'Numero ng ID',
       idFrontImage: 'Harap ng ID',
       idBackImage: 'Likod ng ID',
       profilePicture: 'Larawan ng Profile',
-      acceptTOS: 'Tinatanggap ko ang Mga Tuntunin ng Serbisyo',
+      uploadHint: 'I-click para mag-upload o i-drag at i-drop',
+      uploadedFile: 'Na-upload na',
+      changeFile: 'Palitan ang File',
+      removeFile: 'Tanggalin ang file',
+      
+      // ID Types
+      idDriversLicense: 'Lisensya sa Pagmamaneho',
+      idSSS: 'SSS ID',
+      idUMID: 'UMID',
+      idPhilHealth: 'PhilHealth ID',
+      idPostal: 'Postal ID',
+      idVoters: 'Voter\'s ID',
+      idPRC: 'PRC ID',
+      idPassport: 'Passport',
+      idNBI: 'NBI Clearance',
+      idBarangay: 'Barangay ID',
+      
+      // Terms of Service
+      acceptTOS: 'Tinatanggap ko ang',
+      termsOfService: 'Mga Tuntunin ng Serbisyo',
+      viewFullTerms: 'Tingnan ang Buong Tuntunin',
+      tosAgreement: 'Nabasa at sumasang-ayon ako sa',
+      tosDisclaimer: 'Nauunawaan ko na ang ResiLinked at ang mga operator nito ay hindi mananagot para sa anumang hindi pagkakaunawaan, isyu, o insidente na maaaring lumitaw sa pagitan ng mga user.',
+      
+      // Buttons
+      previous: 'Nakaraan',
+      next: 'Susunod',
+      submit: 'Gumawa ng Account',
+      submitting: 'Ginagawa ang Account...',
+      
+      // Footer
       alreadyHaveAccount: 'Mayroon nang account?',
       loginHere: 'Mag-login dito',
-      emailAlreadyExists: 'Ang email na ito ay nakarehistro na. Gumamit ng ibang email o mag-login na lang.',
-      registrationSuccess: 'Matagumpay ang pagpaparehistro! Pakisuri ang iyong email para sa beripikasyon.',
-      fillAllFields: 'Pakipunan ang lahat ng kinakailangang patlang',
+      returnHome: 'Bumalik sa Home',
+      
+      // Validation Messages
+      passwordRequired: 'Kinakailangan ang password',
+      passwordMinLength: 'Ang password ay dapat na hindi bababa sa 8 character',
+      confirmPasswordRequired: 'Pakikumpirma ang iyong password',
       passwordMismatch: 'Hindi tugma ang mga password',
-      passwordRequirements: 'Ang password ay dapat na hindi bababa sa 8 character',
-      selectAtLeastOneSkill: 'Pumili ng kahit isang kasanayan'
+      fillPersonalInfo: 'Pakipunan ang lahat ng personal na impormasyon',
+      fillAccountDetails: 'Pakipunan ang lahat ng detalye ng account',
+      passwordNotMeetReqs: 'Hindi natutugunan ang mga kinakailangan sa password',
+      fillContactLocation: 'Pakipunan ang lahat ng contact at lokasyon',
+      specifyBarangayError: 'Itukoy ang iyong barangay',
+      selectUserTypeError: 'Pumili ng uri ng user',
+      selectSkillError: 'Pumili ng kahit isang kasanayan',
+      specifySkillError: 'Itukoy ang iyong kasanayan',
+      fillIDDocuments: 'Pakipunan ang lahat ng ID at dokumento',
+      acceptTOSError: 'Dapat mong tanggapin ang Mga Tuntunin ng Serbisyo upang magpatuloy',
+      
+      // API Messages
+      emailAlreadyExists: 'Ang email na ito ay nakarehistro na. Gumamit ng ibang email o mag-login na lang.',
+      emailCheckFailed: 'Nabigo ang pag-verify ng email. Subukan muli.',
+      registrationSuccess: 'Matagumpay ang pagpaparehistro! Pakisuri ang iyong email para sa beripikasyon.',
+      registrationFailed: 'Nabigo ang pagpaparehistro. Subukan muli.',
+      connectionError: 'May problema sa koneksyon. Subukan muli.',
+      
+      // Loading
+      checkingEmail: 'Sinusuri ang email...',
+      uploadingFiles: 'Nag-a-upload ng mga file...',
+      processingRegistration: 'Pinoproseso ang pagpaparehistro...'
     },
 
     // Login
@@ -983,31 +1862,178 @@ export const translations = {
       loginFailed: 'Nabigo ang pag-login. Subukan muli.'
     },
 
+    // About Page
+    about: {
+      title: 'Tungkol sa Resi',
+      tagline: 'Nag-uugnay ng mga bihasang manggagawa sa mga oportunidad',
+      ourMission: 'Aming Misyon',
+      missionText: 'Ang Resi ay nakatuon sa pagsasara ng agwat sa pagitan ng mga talentadong manggagawa at mga employer na naghahanap ng kanilang mga kasanayan. Naniniwala kami sa paglikha ng makabuluhang koneksyon sa trabaho na makakatulong sa parehong mga naghahanap ng trabaho at mga negosyo, na nagpapaunlad ng isang maunlad na komunidad ng mga propesyonal.',
+      whatWeDo: 'Ano ang Aming Ginagawa',
+      jobMatching: 'Pagtutugma ng Trabaho',
+      jobMatchingText: 'Ang aming advanced na algorithm sa pagtutugma ay nag-uugnay ng mga manggagawa sa mga trabahong akma sa kanilang mga kasanayan, karanasan, at kagustuhan.',
+      easySearch: 'Madaling Paghahanap',
+      easySearchText: 'Mag-browse ng libu-libong listahan ng trabaho at mga profile ng manggagawa gamit ang malakas na kakayahan sa paghahanap at pag-filter.',
+      directCommunication: 'Direktang Komunikasyon',
+      directCommunicationText: 'Direktang makipag-mensahe sa mga employer o manggagawa sa pamamagitan ng aming secure na in-platform chat system.',
+      ratingsReviews: 'Mga Rating at Review',
+      ratingsReviewsText: 'Bumuo ng tiwala sa pamamagitan ng aming transparent na sistema ng rating na nagpapakita ng kalidad at pagiging maaasahan sa trabaho.',
+      goalSetting: 'Pagtatakda ng Layunin',
+      goalSettingText: 'Subaybayan ang iyong mga layunin sa karera at pag-unlad sa paghahanap ng trabaho gamit ang aming integrated na sistema ng pamamahala ng layunin.',
+      securePlatform: 'Secure na Platform',
+      securePlatformText: 'Ang iyong data ay protektado ng mga hakbang sa seguridad at kontrol sa privacy na antas ng enterprise.',
+      whoWeServe: 'Sino ang Aming Pinagsisilbihan',
+      workers: 'Mga Manggagawa',
+      workersText: 'Maging isa kang bihasang tradesperson, freelancer, o propesyonal na naghahanap ng bagong oportunidad, tumutulong ang Resi na makahanap ka ng trabaho na tumutugma sa iyong kadalubhasaan at iskedyul.',
+      employers: 'Mga Employer',
+      employersText: 'Mag-post ng mga trabaho, maghanap ng mga kwalipikadong manggagawa, at bumuo ng iyong koponan nang may tiwala. Ang aming platform ay nagpapasimple ng proseso ng pag-hire mula sa pag-post hanggang sa placement.',
+      ourValues: 'Aming Mga Halaga',
+      transparency: 'Transparency',
+      transparencyText: 'Malinaw na komunikasyon at tapat na pakikipag-ugnayan sa lahat ng partido',
+      quality: 'Kalidad',
+      qualityText: 'Pangako sa pag-ugnay ng tamang tao sa tamang oportunidad',
+      trust: 'Tiwala',
+      trustText: 'Pagbuo ng maaasahang platform kung saan ang mga user ay maaaring makipag-ugnayan nang may kumpiyansa',
+      innovation: 'Inobasyon',
+      innovationText: 'Patuloy na pagpapabuti ng aming mga feature upang mas mapaglingkuran ang aming komunidad',
+      support: 'Suporta',
+      supportText: 'Pagbibigay ng mabilis na tulong tuwing kailangan ng aming mga user ng tulong',
+      getInTouch: 'Makipag-ugnayan',
+      getInTouchText: 'May mga tanong o kailangan ng tulong? Nandito kami para tumulong!',
+      email: 'Email',
+      phone: 'Telepono',
+      location: 'Lokasyon',
+      businessHours: 'Oras ng Negosyo',
+      businessHoursText: 'Lunes - Biyernes, 9:00 AM - 6:00 PM EST',
+      visitHelpCenter: 'Bisitahin ang Help Center',
+      getStarted: 'Magsimula'
+    },
+
     // Help Center
     help: {
-      title: 'Help Center',
-      subtitle: 'Paano kami makakatulong?',
-      searchPlaceholder: 'Maghanap ng tulong...',
-      categories: 'Mga Kategorya',
-      faq: 'Mga Madalas Itanong',
-      contactSupport: 'Makipag-ugnayan sa Suporta',
+      title: 'Tulong at Suporta',
+      subtitle: 'Mga madalas itanong at suporta para sa ResiLinked',
+      searchPlaceholder: 'Maghanap ng mga tanong...',
+      noResults: 'Walang nahanap na tanong para sa',
+      tryDifferent: 'Subukan ang ibang search terms o makipag-ugnayan sa suporta.',
+      needHelp: 'Kailangan ng Tulong?',
       chatWithSupport: 'Mag-chat sa Suporta',
       emailSupport: 'Mag-email sa Suporta',
+      email: 'Email',
+      phone: 'Telepono',
+      hours: 'Oras',
+      location: 'Lokasyon',
+      monSat: 'Lun-Sab: 8AM-6PM',
+      quickLinks: 'Mabilis na Links',
+      backToDashboard: 'Bumalik sa Dashboard',
+      myProfile: 'Aking Profile',
+      settings: 'Mga Setting',
+      findJobs: 'Maghanap ng Trabaho',
+      aboutUs: 'Tungkol sa Amin',
+      privacyPolicy: 'Patakaran sa Privacy',
+      contactSupport: 'Makipag-ugnayan sa Suporta',
+      name: 'Pangalan',
+      subject: 'Paksa',
+      selectTopic: 'Pumili ng paksa...',
+      accountIssues: 'Mga Isyu sa Account',
+      technicalSupport: 'Suportang Teknikal',
+      jobPosting: 'Pagpopost ng Trabaho',
+      profileManagement: 'Pamamahala ng Profile',
+      billingPayments: 'Pagsingil at Bayad',
+      reportProblem: 'Mag-ulat ng Problema',
+      featureRequest: 'Kahilingan ng Feature',
+      generalInquiry: 'Pangkalahatang Katanungan',
+      other: 'Iba pa',
+      templateAdded: 'Ang template ng mensahe ay naidagdag na sa ibaba. Pakibagay ito gamit ang iyong mga detalye.',
+      message: 'Mensahe',
+      messagePlaceholder: 'Ilarawan ang iyong alalahanin o tanong...',
+      cancel: 'Kanselahin',
+      sending: 'Ipinapadala...',
+      sendMessage: 'Magpadala ng Mensahe',
       mustBeLoggedIn: 'Kailangan mong naka-login para mag-chat sa suporta. Mangyaring mag-login o magrehistro muna.',
+      
+      // FAQ Categories
       gettingStarted: 'Pagsisimula',
       accountManagement: 'Pamamahala ng Account',
-      jobPosting: 'Pagpopost ng Trabaho',
-      applications: 'Mga Aplikasyon',
+      findingWork: 'Paghahanap ng Trabaho',
+      forEmployers: 'Para sa mga Employer',
+      ratingsReviews: 'Mga Rating at Review',
       messaging: 'Pagmemensahe',
-      payments: 'Mga Bayad',
       safety: 'Kaligtasan at Seguridad',
       troubleshooting: 'Pag-aayos ng Problema',
-      howToRegister: 'Paano magrehistro?',
-      howToPostJob: 'Paano mag-post ng trabaho?',
-      howToApply: 'Paano mag-apply para sa trabaho?',
-      howToMessage: 'Paano magpadala ng mensahe?',
-      needMoreHelp: 'Kailangan ng higit pang tulong?',
-      getInTouch: 'Makipag-ugnayan sa aming koponan ng suporta'
+      
+      // FAQ Questions & Answers - Getting Started
+      q1: 'Paano ako gumawa ng account sa ResiLinked?',
+      a1: 'I-click ang "Register" button sa homepage at punan ang iyong personal na impormasyon kabilang ang pangalan, email, mobile number, at address. Mag-upload ng valid government-issued ID para sa verification. Pagkatapos ng registration, tingnan ang iyong email para sa confirmation link upang i-activate ang iyong account.',
+      q2: 'Gaano katagal ang account verification?',
+      a2: 'Ang account verification ay karaniwang tumatagal ng 1-3 business days. Sinusuri ng aming admin team ang iyong mga dokumento upang masiguro ang pagiging tunay at pagsunod. Makakatanggap ka ng email notification kapag na-verify na ang iyong account. Kung ang verification ay tumagal ng higit sa 3 araw, mangyaring makipag-ugnayan sa aming support team.',
+      q3: 'Hindi ako makapag-login sa aking account. Ano ang dapat kong gawin?',
+      a3: 'Una, siguraduhing tama ang iyong email at password. Kung nakalimutan mo ang iyong password, i-click ang "Forgot Password" sa login page upang i-reset ito. Siguraduhing verified ang iyong account - tingnan ang iyong email para sa verification link. Kung patuloy ang problema, makipag-ugnayan sa suporta para sa tulong.',
+      
+      // FAQ Questions & Answers - Account Management
+      q4: 'Paano ko i-reset ang aking password?',
+      a4: 'Sa login page, i-click ang "Forgot Password". Ilagay ang iyong registered email address at makakatanggap ka ng password reset link. I-click ang link sa iyong email at sundin ang mga tagubilin upang gumawa ng bagong secure password. Ang reset link ay mag-e-expire pagkatapos ng 1 oras para sa seguridad.',
+      q5: 'Paano ko i-update ang aking profile information?',
+      a5: 'Mag-login sa iyong account at pumunta sa iyong Profile page. I-click ang "Edit Profile" upang baguhin ang iyong personal na impormasyon, work skills, bio, at profile picture. Siguraduhing i-click ang "Save Changes" kapag tapos na. Ang na-update na impormasyon ay agad na makikita sa iyong profile.',
+      q6: 'Pwede ko bang i-delete ang aking account?',
+      a6: 'Oo, maaari mong hilingin ang account deletion mula sa iyong Settings page. Pakitandaan na ang pag-delete ng iyong account ay permanente at hindi na mababawi. Lahat ng iyong data, kabilang ang job applications at messages, ay aalisin. Makipag-ugnayan sa suporta kung kailangan mo ng tulong sa account deletion.',
+      q7: 'Sino ang makakakita ng aking profile information?',
+      a7: 'Ang iyong basic profile (pangalan, skills, at work experience) ay makikita lamang ng mga verified employers kapag nag-apply ka sa kanilang mga trabaho. Ang iyong contact information (email, phone) ay ibabahagi lamang kapag tinanggap mo ang trabaho o pinili ka ng employer. Ang iyong profile ay hindi kailanman publicly visible sa mga search engines.',
+      
+      // FAQ Questions & Answers - Finding Work
+      q8: 'Paano ako maghanap ng trabaho sa ResiLinked?',
+      a8: 'Pumunta sa "Find Jobs" page mula sa iyong dashboard. Gamitin ang search bar upang maghanap ng mga partikular na job titles o skills. Maaari mong i-filter ang mga trabaho ayon sa lokasyon (barangay), uri ng trabaho, range ng sahod, at petsa ng pag-post. I-click ang anumang job card upang makita ang buong detalye kabilang ang requirements, sahod, at impormasyon ng employer.',
+      q9: 'Paano ako mag-apply para sa trabaho?',
+      a9: 'Sa job details page, i-click ang "Apply Now" button. Ang iyong profile information ay awtomatikong ipapadala sa employer. Maaaring tingnan ng employer ang iyong profile at makipag-ugnayan sa iyo nang direkta kung interesado. Maaari mong subaybayan ang iyong mga application sa iyong Dashboard sa ilalim ng "My Applications".',
+      q10: 'Paano ko masusubaybayan ang aking mga job applications?',
+      a10: 'Pumunta sa iyong Dashboard at i-click ang "My Applications" upang makita ang lahat ng trabahong iyong na-applyan. Makikita mo ang application status (pending, reviewed, accepted, o rejected). Maaari ring magpadala ang mga employer ng direktang mensahe tungkol sa iyong application sa pamamagitan ng aming messaging system.',
+      q11: 'Ano ang job matching feature?',
+      a11: 'Gumagamit ang ResiLinked ng smart matching upang mag-suggest ng mga trabahong akma sa iyong skills at lokasyon. Pumunta sa "Matched Jobs" section sa iyong dashboard upang makita ang mga trabahong inirekomenda para sa iyo. I-update ang iyong skills nang regular upang makakuha ng mas magandang job matches.',
+      
+      // FAQ Questions & Answers - For Employers
+      q12: 'Paano ako mag-post ng trabaho sa ResiLinked?',
+      a12: 'Una, magrehistro bilang "Employer" o "Both" user type. Kapag na-verify na, pumunta sa iyong Dashboard at i-click ang "Post a Job". Punan ang job details kabilang ang title, description, requirements, sahod, at lokasyon. Ang iyong job post ay agad na makikita ng lahat ng qualified workers pagkatapos ng submission.',
+      q13: 'May bayad ba ang pag-post ng trabaho?',
+      a13: 'Hindi! Ang pag-post ng trabaho sa ResiLinked ay ganap na libre. Maaari kang mag-post ng walang limitasyong job openings nang walang bayad. Ang aming misyon ay ikonekta ang mga employer sa mga lokal na skilled workers nang mahusay at abot-kaya.',
+      q14: 'Paano ko papamahalaan ang mga job applicants?',
+      a14: 'Sa iyong Employer Dashboard, pumunta sa "My Jobs" at i-click ang anumang job post. Makikita mo ang listahan ng lahat ng applicants kasama ang kanilang mga profile. Maaari mong tingnan ang kanilang skills, experience, at ratings. Makipag-ugnayan sa mga applicants nang direkta sa pamamagitan ng aming messaging system o gamit ang kanilang ibinigay na contact information.',
+      q15: 'Pwede ko bang i-edit o i-delete ang aking mga job posts?',
+      a15: 'Oo! Pumunta sa "My Jobs" sa iyong dashboard, hanapin ang trabahong nais mong baguhin, at i-click ang "Edit" upang i-update ang job details o "Delete" upang alisin ang posting. Ang pag-edit ay pinapanatili ang existing applications, habang ang pag-delete ay aalisin ang trabaho nang permanente.',
+      
+      // FAQ Questions & Answers - Ratings and Reviews
+      q16: 'Paano gumagana ang rating system?',
+      a16: 'Pagkatapos makumpleto ang trabaho, maaaring mag-rate ang employer at worker sa isa\'t isa mula 1 hanggang 5 bituin. Ang mga rating ay tumutulong na bumuo ng tiwala sa komunidad. Ang magagandang ratings ay nagpapabuti sa iyong profile visibility at nagpapataas ng iyong pagkakataon na makuha o makahanap ng maaasahang workers.',
+      q17: 'Makikita ko ba ang ratings bago mag-hire ng isang tao?',
+      a17: 'Oo! Ang bawat user profile ay nagpapakita ng kanilang average rating at kabuuang bilang ng natapos na trabaho. Maaari mo ring basahin ang mga nakasulat na reviews mula sa mga nakaraang employers o workers. Tumutulong ito sa iyo na gumawa ng matalinong desisyon sa pag-hire o pagtanggap ng trabaho.',
+      q18: 'Paano kung makatanggap ako ng hindi patas na rating?',
+      a18: 'Kung naniniwala ka na ang rating ay hindi patas o hindi naaangkop, maaari mo itong i-report sa aming support team. Sisiyasatin namin ang sitwasyon at gagawa ng naaangkop na aksyon. Magbigay ng ebidensya tulad ng screenshots o mga mensahe upang suportahan ang iyong claim.',
+      
+      // FAQ Questions & Answers - Safety & Security
+      q19: 'Secure ba ang aking personal na impormasyon?',
+      a19: 'Oo! Gumagamit kami ng industry-standard encryption at security measures upang protektahan ang iyong data. Ang iyong password ay naka-encrypt, at ang sensitibong impormasyon tulad ng iyong ID documents ay ligtas na naka-store. Hindi namin kailanman ibinabahagi ang iyong personal data sa third parties nang walang iyong tahasang pahintulot.',
+      q20: 'Paano ko maiiwasan ang mga scam sa ResiLinked?',
+      a20: 'Tumanggap lamang ng trabaho mula sa mga verified employers. Huwag kailanman magpadala ng pera sa sinumang nag-claim na mula sa ResiLinked. Mag-ingat sa mga trabahong humihingi ng upfront fees o personal bank details. I-report kaagad ang mga kahina-hinalang accounts. Gamitin ang aming in-app messaging para sa lahat ng komunikasyon upang mapanatili ang record.',
+      q21: 'Paano ko ire-report ang kahina-hinalang aktibidad o users?',
+      a21: 'I-click ang user profile at piliin ang "Report User". Pumili ng dahilan para sa pag-report at magbigay ng mga detalye. Maaari mo ring i-report ang mga job posts sa pamamagitan ng pag-click sa report icon sa job card. Sinisiyasat ng aming team ang lahat ng mga ulat sa loob ng 24 oras at gumagawa ng naaangkop na aksyon.',
+      q22: 'Paano ko malalaman kung ang employer ay verified?',
+      a22: 'Ang mga verified employers ay may asul na checkmark badge sa kanilang profile. Ibig sabihin nito ay nagsumite sila ng valid business documents at naaprubahan ng aming admin team. Inirerekomenda namin na magtrabaho lamang sa mga verified employers para sa iyong kaligtasan.',
+      
+      // FAQ Questions & Answers - Messaging (Payments & Goals)
+      q23: 'Paano ako makakatanggap ng bayad para sa aking trabaho?',
+      a23: 'Ang payment terms ay napag-usapan nang direkta sa pagitan mo at ng employer. Ang ResiLinked ay hindi nagpoproseso ng mga pagbabayad. Talakayin ang mga payment methods, rates, at schedules bago magsimula ng trabaho. Isulat ang lahat para sa iyong proteksyon.',
+      q24: 'Ano ang Goals feature?',
+      a24: 'Ang Goals feature ay tumutulong sa iyo na subaybayan ang iyong income at savings targets. Magtakda ng financial goal (hal., "Mag-ipon ng ₱10,000 para sa bagong kagamitan"), at i-update ang iyong progress habang kumikita ka ng pera mula sa natapos na trabaho. Tumutulong ito sa iyo na manatiling motivated at organisado sa pananalapi.',
+      q25: 'Paano gumagana ang goal priorities?',
+      a25: 'Maaari kang magtakda ng maraming goals at bigyan ng priyoridad ang mga ito. Ang iyong highest priority goal ay lumalabas sa itaas ng iyong dashboard. Kapag kumita ka ng pera, i-update muna ang iyong highest priority goal. Tumutulong ang sistema na ito na magtoon ka sa kung ano ang pinaka-mahalaga.',
+      
+      // FAQ Questions & Answers - Troubleshooting
+      q26: 'Aling mga browsers ang sinusuportahan?',
+      a26: 'Ang ResiLinked ay gumagana nang pinakamahusay sa pinakabagong bersyon ng Google Chrome, Mozilla Firefox, Safari, at Microsoft Edge. Para sa pinakamahusay na karanasan, panatilihing updated ang iyong browser. Ang platform ay mobile-responsive din at gumagana sa lahat ng smartphones at tablets.',
+      q27: 'Ang website ay mabagal mag-load. Ano ang dapat kong gawin?',
+      a27: 'Subukan ang pag-refresh ng page o pag-clear ng iyong browser cache. Tingnan ang iyong internet connection. Kung patuloy ang problema, maaaring nasa amin ang isyu - mangyaring maghintay ng ilang minuto at subukan muli. Makipag-ugnayan sa suporta kung patuloy ang mga isyu.',
+      q28: 'May mobile app ba para sa ResiLinked?',
+      a28: 'Sa kasalukuyan, ang ResiLinked ay isang web-based platform na maa-access sa pamamagitan ng anumang mobile browser. Nagtratrabaho kami sa pagbuo ng native mobile apps para sa Android at iOS. Sa ngayon, maaari mong gamitin ang website sa iyong telepono - ito ay ganap na mobile-responsive.',
+      q29: 'Nakakakuha ako ng error message. Ano ang dapat kong gawin?',
+      a29: 'Kumuha ng screenshot ng error message at tandaan kung ano ang iyong ginagawa nang mangyari ito. Subukan ang pag-log out at pag-log in muli. I-clear ang iyong browser cache at cookies. Kung patuloy ang error, makipag-ugnayan sa aming support team na may screenshot at error details.'
     },
 
     // Search Workers
@@ -1075,6 +2101,8 @@ export const translations = {
       invitationFailed: 'Nabigong magpadala ng imbitasyon',
       alreadyInvited: 'Ang manggagawang ito ay naimbitahan na sa trabahong ito',
       jobClosed: 'Ang trabahong ito ay hindi na tumatanggap ng mga aplikasyon',
+      noSkills: 'Walang nakalagay na kasanayan',
+      selectJobFirst: 'Mangyaring pumili muna ng trabaho',
       addCustomSkill: 'Magdagdag ng custom na kasanayan',
       other: 'Iba pa'
     },
@@ -1114,6 +2142,20 @@ export const translations = {
       saveAsDraft: 'I-save bilang Draft',
       postJob: 'Mag-post ng Trabaho',
       postingJob: 'Nag-post ng Trabaho...',
+        commonSkills: [
+          'Pagkukumpuni ng Tubo',
+          'Karpinterya',
+          'Paglilinis',
+          'Pagkukumpuni ng Kuryente',
+          'Pagpipinta',
+          'Paghahalaman',
+          'Pagluluto',
+          'Pagmamaneho',
+          'Pag-aalaga ng Bata',
+          'Pagtuturo',
+          'IT Support',
+          'Serbisyo sa Customer'
+        ],
       skills: {
         houseCleaning: 'Paglilinis ng Bahay',
         laundry: 'Paglalaba',
@@ -1202,6 +2244,7 @@ export const translations = {
       location: 'Lokasyon',
       skillsRequired: 'Kinakailangang Kasanayan',
       postedBy: 'Nai-post ni',
+      postedOn: 'Nai-post noong',
       anonymous: 'Anonymous',
       contact: '✉️ Makipag-ugnayan',
       applicantsCount: 'Mga Aplikante',
@@ -1282,6 +2325,7 @@ export const translations = {
       jobDescription: 'Deskripsyon ng Trabaho',
       description: 'Deskripsyon',
       location: 'Lokasyon',
+      price: 'Presyo',
       salary: 'Sahod',
       salaryRange: 'Saklaw ng Sahod',
       category: 'Kategorya',
@@ -1321,7 +2365,9 @@ export const translations = {
       rejected: 'Tinanggihan',
       withdrawn: 'Binawi',
       withdraw: 'Bawiin ang Aplikasyon',
-      confirmWithdraw: 'Sigurado ka bang nais mong bawiin ang iyong aplikasyon?'
+      confirmWithdraw: 'Sigurado ka bang nais mong bawiin ang iyong aplikasyon?',
+      completedBy: 'Natapos ni',
+      completed: 'Natapos'
     },
 
     // Employer Dashboard
@@ -1355,6 +2401,8 @@ export const translations = {
       complete: 'Tapusin',
       viewApplicants: 'Tingnan ang mga Aplikante',
       inviteWorker: 'Mag-imbita ng Manggagawa',
+      topRatedWorkers: 'Mga Pinakamataas na Rated na Manggagawa',
+      recommendedWorkers: 'Mga Inirerekomendang Manggagawa',
       noApplications: 'Walang natanggap na aplikasyon pa',
       applicantName: 'Pangalan ng Aplikante',
       appliedOn: 'Nag-apply Noong',
@@ -1441,6 +2489,7 @@ export const translations = {
       noApplications: 'Wala kang nag-apply na trabaho',
       exploreJobs: 'Tuklasin ang mga available na trabaho',
       matchScore: 'Porsyento ng Tugma',
+      match: 'Tugma',
       matchPercentage: 'Tugma',
       sameArea: 'Parehong Lugar',
       matchingSkills: 'Mga Tugmang Kasanayan',
@@ -1501,26 +2550,366 @@ export const translations = {
     },
 
     // About Us
-    about: {
-      title: 'Tungkol sa Amin',
-      mission: 'Aming Misyon',
-      vision: 'Aming Bisyon',
-      whatWeDo: 'Ano ang Ginagawa Namin',
-      whyChooseUs: 'Bakit Piliin Kami',
-      ourTeam: 'Aming Koponan',
-      getInTouch: 'Makipag-ugnayan'
-    },
-
     // Privacy Policy
     privacy: {
+      // Header
       title: 'Patakaran sa Privacy',
-      lastUpdated: 'Huling Na-update',
-      introduction: 'Panimula',
-      dataCollection: 'Koleksyon ng Data',
-      dataUsage: 'Paano Namin Ginagamit ang Iyong Data',
-      dataSecurity: 'Seguridad ng Data',
-      yourRights: 'Iyong mga Karapatan',
-      contactUs: 'Makipag-ugnayan sa Amin'
+      lastUpdated: 'Huling Na-update: Disyembre 2024',
+      
+      // 1. Introduction
+      section1Title: '1. Panimula',
+      section1Para1: 'Maligayang pagdating sa Resi ("kami," "amin," o "sa amin"). Nakatuon kami sa pagprotekta ng iyong privacy at pagsisiguro ng seguridad ng iyong personal na impormasyon. Ipinapaliwanag ng Privacy Policy na ito kung paano namin kinokolekta, ginagamit, inilalahad, at pinoprotektahan ang iyong impormasyon kapag ginagamit mo ang aming platform.',
+      section1Para2: 'Sa paggamit ng Resi, sumasang-ayon ka sa koleksyon at paggamit ng impormasyon alinsunod sa patakarang ito. Kung hindi ka sumasang-ayon sa aming mga patakaran at kagawian, mangyaring huwag gamitin ang aming mga serbisyo.',
+      
+      // 2. Information We Collect
+      section2Title: '2. Impormasyong Kinokolekta Namin',
+      section2_1Title: '2.1 Personal na Impormasyon',
+      section2_1Intro: 'Kapag nagrehistro at gumamit ka ng aming platform, maaari kaming mangolekta ng:',
+      section2_1_1: 'Impormasyon ng Account:',
+      section2_1_1Detail: 'Pangalan, email address, numero ng telepono, password',
+      section2_1_2: 'Impormasyon ng Profile:',
+      section2_1_2Detail: 'Bio, mga kasanayan, karanasan, edukasyon, lokasyon, larawan ng profile',
+      section2_1_3: 'Mga Dokumento ng Verification:',
+      section2_1_3Detail: 'Mga dokumento ng ID verification para sa pagkumpirma ng pagkakakilanlan',
+      section2_1_4: 'Impormasyon ng Trabaho:',
+      section2_1_4Detail: 'Kasaysayan ng trabaho, mga kagustuhan sa trabaho, availability',
+      
+      section2_2Title: '2.2 Awtomatikong Nakolektang Impormasyon',
+      section2_2_1: 'Data ng Paggamit:',
+      section2_2_1Detail: 'Mga page na binisita, mga feature na ginamit, oras na ginugol sa platform',
+      section2_2_2: 'Impormasyon ng Device:',
+      section2_2_2Detail: 'IP address, uri ng browser, operating system',
+      section2_2_3: 'Cookies at Tracking:',
+      section2_2_3Detail: 'Session cookies, analytics data',
+      
+      section2_3Title: '2.3 Impormasyon mula sa Third Parties',
+      section2_3_1: 'Impormasyon ng social media profile (kung pipiliin mong mag-link ng accounts)',
+      section2_3_2: 'Impormasyon ng background check (sa iyong pahintulot)',
+      section2_3_3: 'Impormasyon ng payment processing',
+      
+      // 3. How We Use Your Information
+      section3Title: '3. Paano Namin Ginagamit ang Iyong Impormasyon',
+      section3Intro: 'Ginagamit namin ang nakolektang impormasyon para sa mga sumusunod na layunin:',
+      section3_1: 'Pamamahala ng Account:',
+      section3_1Detail: 'Gumawa at pamahalaan ang iyong account, mag-authenticate ng mga users',
+      section3_2: 'Pagtutugma ng Trabaho:',
+      section3_2Detail: 'Ikonekta ang mga manggagawa sa angkop na mga oportunidad sa trabaho',
+      section3_3: 'Komunikasyon:',
+      section3_3Detail: 'Magpadala ng mga notification, updates, at tumugon sa mga katanungan',
+      section3_4: 'Pagpapabuti ng Platform:',
+      section3_4Detail: 'Suriin ang mga pattern ng paggamit at pagbutihin ang mga feature',
+      section3_5: 'Kaligtasan at Seguridad:',
+      section3_5Detail: 'Pigilan ang pandaraya, protektahan ang mga users, ipatupad ang terms of service',
+      section3_6: 'Legal Compliance:',
+      section3_6Detail: 'Sumunod sa mga legal na obligasyon at regulasyon',
+      section3_7: 'Marketing:',
+      section3_7Detail: 'Magpadala ng promotional materials (maaari kang mag-opt out anumang oras)',
+      
+      // 4. How We Share Your Information
+      section4Title: '4. Paano Namin Ibinabahagi ang Iyong Impormasyon',
+      section4Intro: 'Maaari naming ibahagi ang iyong impormasyon sa mga sumusunod na sitwasyon:',
+      
+      section4_1Title: '4.1 Sa Ibang Mga Users',
+      section4_1Para: 'Ang impormasyon ng profile, ratings, at reviews ay makikita ng ibang mga users upang mapadali ang mga koneksyon at bumuo ng tiwala sa loob ng platform.',
+      
+      section4_2Title: '4.2 Mga Tagapagbigay ng Serbisyo',
+      section4_2Para: 'Ibinabahagi namin ang impormasyon sa third-party service providers na gumagawa ng mga serbisyo para sa amin, kabilang ang:',
+      section4_2_1: 'Mga serbisyo ng cloud hosting (hal., AWS, MongoDB Atlas)',
+      section4_2_2: 'Mga email service providers',
+      section4_2_3: 'Mga serbisyo ng SMS notification',
+      section4_2_4: 'Mga analytics platforms',
+      section4_2_5: 'Mga payment processors',
+      
+      section4_3Title: '4.3 Mga Legal na Kinakailangan',
+      section4_3Para: 'Maaari naming ilahad ang iyong impormasyon kung kinakailangan ng batas, court order, o government regulation, o upang protektahan ang aming mga karapatan, kaligtasan, at ari-arian.',
+      
+      section4_4Title: '4.4 Mga Paglipat ng Negosyo',
+      section4_4Para: 'Sa kaganapan ng merger, acquisition, o pagbebenta ng assets, ang iyong impormasyon ay maaaring ilipat sa acquiring entity.',
+      
+      // 5. Data Security
+      section5Title: '5. Seguridad ng Data',
+      section5Intro: 'Nagpapatupad kami ng naaangkop na teknikal at organisasyonal na mga hakbang upang protektahan ang iyong personal na impormasyon:',
+      section5_1: 'Encryption:',
+      section5_1Detail: 'Ang data ay naka-encrypt sa transit gamit ang SSL/TLS protocols',
+      section5_2: 'Mga Access Controls:',
+      section5_2Detail: 'Limitadong access sa personal na impormasyon sa need-to-know basis',
+      section5_3: 'Secure Storage:',
+      section5_3Detail: 'Data na naka-store sa secure servers na may regular backups',
+      section5_4: 'Regular Audits:',
+      section5_4Detail: 'Sinusuri at ina-update ang mga security practices nang regular',
+      section5_5: 'Password Protection:',
+      section5_5Detail: 'Mga password na hashed at salted gamit ang industry standards',
+      section5Warning: '⚠️ Habang nagsusumikap kaming protektahan ang iyong impormasyon, walang paraan ng transmission sa internet na 100% secure. Mangyaring gumamit ng malakas na passwords at panatilihing kumpidensyal ang iyong login credentials.',
+      
+      // 6. Your Privacy Rights
+      section6Title: '6. Iyong mga Karapatan sa Privacy',
+      section6Intro: 'Mayroon kang mga sumusunod na karapatan tungkol sa iyong personal na impormasyon:',
+      section6_1: 'Access:',
+      section6_1Detail: 'Hilingin ang kopya ng personal na impormasyon na hawak namin tungkol sa iyo',
+      section6_2: 'Correction:',
+      section6_2Detail: 'I-update o itama ang hindi tamang impormasyon',
+      section6_3: 'Deletion:',
+      section6_3Detail: 'Hilingin ang pagtanggal ng iyong account at personal data',
+      section6_4: 'Data Portability:',
+      section6_4Detail: 'Hilingin ang iyong data sa portable format',
+      section6_5: 'Opt-Out:',
+      section6_5Detail: 'Mag-unsubscribe sa marketing communications anumang oras',
+      section6_6: 'Restriction:',
+      section6_6Detail: 'Hilingin ang restriction ng processing sa ilang sitwasyon',
+      section6Contact: 'Upang gamitin ang mga karapatang ito, mangyaring makipag-ugnayan sa amin sa',
+      section6ContactEmail: 'privacy@resi.com',
+      section6ContactOr: 'o sa pamamagitan ng iyong account settings.',
+      
+      // 7. Cookies and Tracking
+      section7Title: '7. Mga Cookies at Tracking Technologies',
+      section7Intro: 'Gumagamit kami ng cookies at katulad ng tracking technologies upang mapahusay ang iyong karanasan:',
+      section7_1: 'Essential Cookies:',
+      section7_1Detail: 'Kinakailangan para sa functionality ng platform (authentication, security)',
+      section7_2: 'Analytics Cookies:',
+      section7_2Detail: 'Tumutulong sa amin na maintindihan kung paano nakikipag-ugnayan ang mga users sa aming platform',
+      section7_3: 'Preference Cookies:',
+      section7_3Detail: 'Naaalala ang iyong mga settings at preferences',
+      section7Note: 'Maaari mong kontrolin ang cookies sa pamamagitan ng iyong browser settings. Tandaan na ang pag-disable ng ilang cookies ay maaaring makaapekto sa functionality ng platform.',
+      
+      // 8. Data Retention
+      section8Title: '8. Pagreretensyon ng Data',
+      section8Intro: 'Pinapanatili namin ang iyong personal na impormasyon hangga\'t kinakailangan upang magbigay ng aming mga serbisyo at sumunod sa mga legal na obligasyon:',
+      section8_1: 'Ang active account data ay pinapanatili habang aktibo ang iyong account',
+      section8_2: 'Ang deleted account data ay pinapanatili ng 30 araw bago ang permanenteng pagtanggal',
+      section8_3: 'Ang ilang impormasyon ay maaaring panatilihin nang mas matagal para sa legal o business purposes',
+      section8_4: 'Ang mga transaction records ay pinapanatili ng 7 taon para sa tax at accounting purposes',
+      
+      // 9. Children's Privacy
+      section9Title: '9. Privacy ng mga Bata',
+      section9Para: 'Ang aming platform ay hindi inilaan para sa mga indibidwal na wala pang 18 taong gulang. Hindi kami sadyang nangongolekta ng personal na impormasyon mula sa mga bata. Kung naniniwala ka na nakakuha kami ng impormasyon mula sa isang bata, mangyaring makipag-ugnayan sa amin kaagad sa',
+      
+      // 10. International Data Transfers
+      section10Title: '10. Mga International Data Transfers',
+      section10Para: 'Ang iyong impormasyon ay maaaring ilipat at iproseso sa mga bansang iba sa iyong bansang tirahan. Sinisiguro namin na may naaangkop na mga safeguards upang protektahan ang iyong impormasyon alinsunod sa Privacy Policy na ito at naaangkop na mga batas sa data protection.',
+      
+      // 11. Third-Party Links
+      section11Title: '11. Mga Third-Party Links',
+      section11Para: 'Ang aming platform ay maaaring maglaman ng mga link sa third-party websites o serbisyo. Hindi kami responsable para sa mga privacy practices ng mga external sites na ito. Hinihikayat ka naming suriin ang kanilang mga privacy policies bago magbigay ng anumang personal na impormasyon.',
+      
+      // 12. Changes to This Policy
+      section12Title: '12. Mga Pagbabago sa Privacy Policy na Ito',
+      section12Intro: 'Maaari naming i-update ang Privacy Policy na ito paminsan-minsan. Aabisuhan ka namin ng mga makabuluhang pagbabago sa pamamagitan ng:',
+      section12_1: 'Pag-post ng bagong policy sa page na ito',
+      section12_2: 'Pag-update ng "Last Updated" date',
+      section12_3: 'Pagpapadala ng email notification para sa material changes',
+      section12Note: 'Ang iyong patuloy na paggamit ng platform pagkatapos ma-post ang mga pagbabago ay bumubuo ng pagtanggap ng updated policy.',
+      
+      // 13. Contact Us
+      section13Title: '13. Makipag-ugnayan sa Amin',
+      section13Intro: 'Kung mayroon kang mga tanong, alalahanin, o kahilingan tungkol sa Privacy Policy na ito o sa iyong personal na impormasyon, mangyaring makipag-ugnayan sa amin:',
+      contactEmail: 'Email:',
+      contactSupport: 'Support Email:',
+      contactPhone: 'Telepono:',
+      contactAddress: 'Address:',
+      ctaHelpCenter: 'Bisitahin ang Help Center',
+      ctaSettings: 'Mga Setting ng Account'
+    },
+
+    // Terms of Service
+    terms: {
+      // Header
+      title: 'Mga Tuntunin ng Serbisyo',
+      effectiveDate: 'Petsa ng Pagpapatupad: Oktubre 23, 2025',
+      lastUpdated: 'Huling Na-update: Oktubre 23, 2025',
+      
+      // Sections
+      section1Title: '1. Pagtanggap ng mga Tuntunin',
+      section1Para: 'Sa pag-access o paggamit ng ResiLinked ("ang Platform"), sumasang-ayon ka na sumunod sa mga Tuntunin ng Serbisyo na ito. Kung hindi ka sumasang-ayon sa mga tuntuning ito, mangyaring huwag gamitin ang aming mga serbisyo.',
+      
+      section2Title: '2. Layunin ng Platform',
+      section2Para: 'Ang ResiLinked ay isang community-based platform na idinisenyo upang ikonekta ang mga manggagawa (empleyado) sa mga employer sa loob ng mga lokal na komunidad. Ang Platform ay nagsisilbing tagapamagitan at hindi nag-employ ng mga users o garantisado ang anumang employment relationships.',
+      section2AltTitle: '2. Paglalarawan ng Serbisyo',
+      section2AltPara: 'Ang ResiLinked ay isang platform na nag-uugnay ng mga manggagawa at employers sa mga lokal na komunidad. Pinapadali namin ang:',
+      section2Alt_1: 'Pag-post at paghahanap ng trabaho',
+      section2Alt_2: 'Paglikha at pamamahala ng profile',
+      section2Alt_3: 'Komunikasyon sa pagitan ng mga users',
+      section2Alt_4: 'Mga rating at review',
+      section2Alt_5: 'Pagsubaybay ng mga aplikasyon sa trabaho',
+      
+      section3Title: '3. Mga Responsibilidad ng User',
+      section3_1Title: '3.1 Paglikha ng Account',
+      section3_1Intro: 'Ang mga users ay dapat:',
+      section3_1_1: 'Magbigay ng tumpak at tunay na impormasyon sa panahon ng registration',
+      section3_1_2: 'Panatilihing kumpidensyal ang kanilang account credentials',
+      section3_1_3: 'Ay hindi bababa sa 18 taong gulang o may pahintulot ng magulang/tagapag-alaga',
+      section3_1_4: 'Magsumite ng valid government-issued identification para sa verification',
+      
+      section3_2Title: '3.2 Pag-uugali ng User',
+      section3_2Intro: 'Sumasang-ayon ang mga users na:',
+      section3_2_1: 'Kumilos nang propesyonal at may respeto',
+      section3_2_2: 'I-verify ang pagkakakilanlan at credentials ng ibang users bago makipag-transaksyon',
+      section3_2_3: 'Makipag-usap nang tapat tungkol sa mga kinakailangan sa trabaho, skills, at availability',
+      section3_2_4: 'Iulat kaagad ang kahina-hinalang aktibidad o mapanlinlang na pag-uugali',
+      section3_2_5: 'Huwag gamitin ang Platform para sa mga ilegal na aktibidad o scam',
+      
+      section3AltIntro: 'Bilang user ng ResiLinked, sumasang-ayon ka na:',
+      section3Alt_1: 'Magbigay ng tumpak at tunay na impormasyon',
+      section3Alt_2: 'Panatilihing kumpidensyal ang iyong account',
+      section3Alt_3: 'Gamitin ang platform nang legal at may respeto',
+      section3Alt_4: 'Huwag makisali sa mapanlinlang o mapang-api na gawain',
+      section3Alt_5: 'Huwag mang-abala, magbanta, o saktan ang ibang users',
+      section3Alt_6: 'I-verify ang impormasyon nang nakapag-iisa bago pumasok sa mga kasunduan',
+      
+      section4Title: '4. Limitasyon ng Pananagutan',
+      section4Important: 'MAHALAGA: Ang ResiLinked at ang mga operator nito ay HINDI MANANAGOT para sa:',
+      section4_1: 'Anumang alitan, hindi pagkakaunawaan, o salungatan sa pagitan ng mga users',
+      section4_2: 'Kalidad ng trabahong ginawa o mga serbisyong ibinigay',
+      section4_3: 'Mga isyu sa pagbabayad, hindi pagbabayad, o pinansyal na alitan sa pagitan ng mga users',
+      section4_4: 'Pisikal na pinsala, pinsala sa ari-arian, o pagkalugi na nangyari sa panahon ng mga ayos sa trabaho',
+      section4_5: 'Mapanlinlang na aktibidad, scam, o maling representasyon ng mga users',
+      section4_6: 'Pagnanakaw ng pagkakakilanlan o hindi awtorisadong access sa mga user accounts',
+      section4_7: 'Anumang direkta, hindi direkta, insidental, o kahihinatnan na pinsala na nagmumula sa paggamit ng platform',
+      section4Note: 'Kinikilala ng mga users na ang lahat ng transaksyon, kasunduan, at ayos sa trabaho ay isinasagawa sa kanilang sariling panganib at ang ResiLinked ay tagapamagitan lamang.',
+      
+      section4AltTitle: '4. Tungkulin at Limitasyon ng Platform',
+      section4AltImportant: 'Mahalaga: Ang ResiLinked ay isang PLATFORM NG KONEKSYON LAMANG. Kami ay:',
+      section4Alt_1: 'HINDI nag-employ ng mga manggagawa o nag-hire sa ngalan ng mga employers',
+      section4Alt_2: 'HINDI garantisado ang kalidad, kaligtasan, o legalidad ng mga trabaho o serbisyo',
+      section4Alt_3: 'HINDI nagsasagawa ng background checks o nag-verify ng credentials ng user',
+      section4Alt_4: 'HINDI namamagitan sa mga alitan sa pagitan ng mga users',
+      section4Alt_5: 'HINDI nagpoproseso ng mga pagbabayad sa pagitan ng mga users',
+      
+      section5Title: '5. Kaligtasan at Seguridad',
+      section5_1Title: '5.1 Verification ng User',
+      section5_1Para: 'Habang ang ResiLinked ay nangangailangan ng ID verification, hindi namin magagawang garantisado ang pagiging tunay ng lahat ng users. Ang mga users ay responsable sa pagsasagawa ng kanilang sariling due diligence bago pumasok sa anumang kasunduan.',
+      
+      section5_2Title: '5.2 Mga Rekomendasyon sa Kaligtasan',
+      section5_2Intro: 'Lubos naming inirerekomenda sa mga users na:',
+      section5_2_1: 'Magkita sa mga pampublikong lugar para sa mga paunang konsultasyon',
+      section5_2_2: 'Suriin ang mga rating at review ng user bago mag-hire o tumanggap ng trabaho',
+      section5_2_3: 'Ipaalam sa pamilya o kaibigan ang tungkol sa mga ayos sa trabaho at lokasyon',
+      section5_2_4: 'Magtiwala sa kanilang instincts at tanggihan ang anumang kahina-hinalang alok',
+      section5_2_5: 'Gumamit ng in-app messaging para sa documented na komunikasyon',
+      
+      section5AltTitle: '5. Limitasyon ng Pananagutan',
+      section5AltIntro: 'Sa paggamit ng ResiLinked, kinikilala at sumasang-ayon ka na:',
+      section5Alt_1: 'Ang ResiLinked at ang mga operator nito ay HINDI MANANAGOT para sa anumang pinsala, pagkalugi, pinsala, o alitan na nagmumula sa:',
+      section5Alt_1_1: 'Mga interaksyon sa pagitan ng mga users',
+      section5Alt_1_2: 'Mga kasunduan sa trabaho o employment relationships',
+      section5Alt_1_3: 'Kalidad ng trabahong ginawa o hindi ginawa',
+      section5Alt_1_4: 'Mga alitan sa pagbabayad sa pagitan ng mga users',
+      section5Alt_1_5: 'Mapanlinlang na users o scammers',
+      section5Alt_1_6: 'Personal na pinsala o pinsala sa ari-arian',
+      section5Alt_1_7: 'Pagnanakaw, pang-aabala, o kriminal na aktibidad',
+      section5Alt_1_8: 'Hindi tumpak na impormasyon na ibinigay ng mga users',
+      section5Alt_2: 'Ginagamit mo ang platform SA IYONG SARILING PANGANIB at ikaw lang ang responsable sa pag-verify ng pagkakakilanlan, credentials, at pagiging mapagkakatiwalaan ng ibang users.',
+      section5Alt_3: 'Ang ResiLinked ay ibinibigay "AS IS" nang walang anumang warranty, hayagan man o ipinahiwatig.',
+      
+      section6Title: '6. Pagbabayad at Transaksyon',
+      section6Para: 'Ang ResiLinked ay hindi nagpoproseso ng mga pagbabayad o kumilos bilang tagapamagitan para sa mga pinansyal na transaksyon. Ang lahat ng ayos sa pagbabayad ay ginagawa nang direkta sa pagitan ng mga users. Ang Platform ay hindi responsable para sa:',
+      section6_1: 'Mga isyu sa hindi pagbabayad o late payment',
+      section6_2: 'Mga pinagtatalunang singil o refund',
+      section6_3: 'Mga obligasyon sa buwis na nagmumula sa mga transaksyon ng user',
+      section6_4: 'Mga pinansyal na pagkalugi ng anumang uri',
+      section6Note: 'Pinapayuhan ang mga users na magtatag ng malinaw na mga tuntunin sa pagbabayad nang nakasulat bago magsimula ng anumang trabaho.',
+      
+      section6AltTitle: '6. Pag-uugali ng User',
+      section6AltIntro: 'Sumasang-ayon kang HUWAG:',
+      section6Alt_1: 'Mag-post ng maling o nakakalinlang na impormasyon',
+      section6Alt_2: 'Magpanggap na ibang tao o entity',
+      section6Alt_3: 'Gumamit ng platform para sa mga ilegal na aktibidad',
+      section6Alt_4: 'Mag-spam o magpadala ng hindi hiniling na mga mensahe',
+      section6Alt_5: 'Lumabag sa anumang naaangkop na batas o regulasyon',
+      section6Alt_6: 'Subukang mag-hack, mag-disrupt, o sirain ang platform',
+      
+      section7Title: '7. Nilalaman at Ari-arian ng Intelektwal',
+      section7Para: 'Ang mga users ay pinapanatili ang pagmamay-ari ng nilalaman na kanilang na-post ngunit nagbibigay sa ResiLinked ng lisensya na gamitin, ipakita, at ipamahagi ang gayong nilalaman sa Platform. Ang mga users ay hindi dapat mag-post ng:',
+      section7_1: 'Copyrighted na materyales nang walang pahintulot',
+      section7_2: 'Offensive, discriminatory, o hindi naaangkop na nilalaman',
+      section7_3: 'Maling o nakakalinlang na impormasyon',
+      section7_4: 'Spam o hindi hiniling na advertisements',
+      
+      section7AltTitle: '7. Pagtatapos ng Account',
+      section7AltPara: 'Nakalaan sa amin ang karapatang suspindihin o tapusin ang mga account na lumalabag sa mga tuntuning ito o nakikibahagi sa ipinagbabawal na pag-uugali, nang walang paunang abiso.',
+      
+      section8Title: '8. Privacy at Data',
+      section8Para: 'Ang iyong paggamit ng ResiLinked ay pinamamahalaan din ng aming Privacy Policy. Kinokolekta at ginagamit namin ang personal na impormasyon tulad ng inilarawan sa patakarang iyon. Ang mga users ay pumapayag sa:',
+      section8_1: 'Koleksyon ng impormasyon ng profile at data ng ID verification',
+      section8_2: 'Paggamit ng data para sa functionality ng platform at mga pagpapabuti',
+      section8_3: 'Pagbabahagi ng pampublikong impormasyon ng profile sa ibang users',
+      
+      section8AltPara: 'Ang iyong paggamit ng ResiLinked ay pinamamahalaan din ng aming Privacy Policy. Kinokolekta at pinoproseso namin ang data tulad ng inilarawan sa patakarang iyon. Pumapayag ka sa aming mga gawain sa data sa pamamagitan ng paggamit ng platform.',
+      
+      section9Title: '9. Pagtatapos ng Account',
+      section9Para: 'Nakalaan sa ResiLinked ang karapatang suspindihin o tapusin ang mga user accounts para sa:',
+      section9_1: 'Paglabag sa mga Tuntunin ng Serbisyo na ito',
+      section9_2: 'Mapanlinlang o ilegal na aktibidad',
+      section9_3: 'Maraming ulat o reklamo ng user',
+      section9_4: 'Maling paggamit ng Platform',
+      section9Note: 'Maaari ring hilingin ng mga users ang pagtanggal ng account anumang oras sa pamamagitan ng mga setting ng account.',
+      
+      section9AltTitle: '9. Pagmamay-ari ng Nilalaman',
+      section9AltPara: 'Pinapanatili mo ang pagmamay-ari ng nilalaman na iyong na-post sa ResiLinked. Gayunpaman, sa pag-post ng nilalaman, nagbibigay ka sa ResiLinked ng lisensya na gamitin, ipakita, at ipamahagi ang nilalaman na iyon sa platform.',
+      
+      section10Title: '10. Resolusyon ng Alitan',
+      section10Para: 'Sa kaganapan ng mga alitan sa pagitan ng mga users, hinihikayat ng ResiLinked ang direktang komunikasyon at resolusyon. Maaaring magbigay ang Platform ng mekanismo ng pag-uulat ngunit hindi obligadong mamamagitan o lutasin ang mga alitan. Sumasang-ayon ang mga users na:',
+      section10_1: 'Subukan ang resolusyon sa good-faith nang direkta sa kabilang partido',
+      section10_2: 'Huwag panganipin ang ResiLinked na responsable para sa mga alitan ng user',
+      section10_3: 'Hanapin ang mga legal na remedyo nang nakapag-iisa kung kinakailangan',
+      
+      section10AltTitle: '10. Indemnification',
+      section10AltPara: 'Sumasang-ayon kang magbigay ng indemnity at panatilihing walang pinsala ang ResiLinked, ang mga operator nito, at mga kaakibat mula sa anumang mga claim, pinsala, o gastos na nagmumula sa iyong paggamit ng platform o paglabag sa mga tuntuning ito.',
+      
+      section11Title: '11. Indemnification',
+      section11Para: 'Sumasang-ayon ang mga users na magbigay ng indemnity at panatilihing walang pinsala ang ResiLinked, ang mga operators, empleyado, at mga kaakibat nito mula sa anumang mga claim, pinsala, pagkalugi, o gastos (kabilang ang legal fees) na nagmumula sa:',
+      section11_1: 'Paglabag ng user sa mga Tuntunin na ito',
+      section11_2: 'Mga interaksyon ng user sa ibang users',
+      section11_3: 'Nilalaman o aktibidad ng user sa Platform',
+      section11_4: 'Anumang third-party claims na may kaugnayan sa pag-uugali ng user',
+      
+      section11AltTitle: '11. Mga Rekomendasyon sa Kaligtasan',
+      section11AltIntro: 'Habang hindi kami mananagot para sa mga interaksyon ng user, lubos naming inirerekomenda ang:',
+      section11Alt_1: 'Pagkikita sa mga pampublikong lugar para sa mga paunang pagkikita',
+      section11Alt_2: 'Pag-verify ng mga profile at review ng user',
+      section11Alt_3: 'Paggamit ng in-app messaging system',
+      section11Alt_4: 'Pag-uulat ng kahina-hinalang pag-uugali kaagad',
+      section11Alt_5: 'Pagtitiwala sa iyong mga instincts',
+      section11Alt_6: 'Hindi pagbabahagi ng sensitibong personal na impormasyon nang maaga',
+      
+      section12Title: '12. Mga Pagbabago sa mga Tuntunin',
+      section12Para: 'Nakalaan sa ResiLinked ang karapatang baguhin ang mga Tuntunin ng Serbisyo na ito anumang oras. Aabisuhan ang mga users ng makabuluhang mga pagbabago sa pamamagitan ng email o notification ng platform. Ang patuloy na paggamit ng Platform pagkatapos ma-post ang mga pagbabago ay bumubuo ng pagtanggap sa binagong mga tuntunin.',
+      
+      section12AltTitle: '12. Resolusyon ng Alitan',
+      section12AltPara: 'Anumang mga alitan na nagmumula sa mga tuntuning ito o paggamit ng platform ay lulutasin sa pamamagitan ng binding arbitration alinsunod sa mga batas ng Republika ng Pilipinas.',
+      
+      section13Title: '13. Batas na Namamahala',
+      section13Para: 'Ang mga Tuntunin ng Serbisyo na ito ay pinamamahalaan ng mga batas ng Pilipinas. Ang anumang mga alitan na nagmumula sa mga tuntuning ito ay lulutasin alinsunod sa batas ng Pilipinas.',
+      
+      section13AltTitle: '13. Mga Pagbabago sa mga Tuntunin',
+      section13AltPara: 'Nakalaan sa amin ang karapatang baguhin ang mga Tuntunin ng Serbisyo na ito anumang oras. Ang patuloy na paggamit ng platform pagkatapos ng mga pagbabago ay bumubuo ng pagtanggap sa binagong mga tuntunin.',
+      
+      section14Title: '14. Impormasyon sa Pakikipag-ugnayan',
+      section14Para: 'Para sa mga tanong o alalahanin tungkol sa mga Tuntunin ng Serbisyo na ito, mangyaring makipag-ugnayan sa amin sa:',
+      section14Email: 'Email:',
+      section14Platform: 'Platform:',
+      section14PlatformText: 'Magsumite ng support ticket sa pamamagitan ng Help section',
+      
+      section14AltTitle: '14. Batas na Namamahala',
+      section14AltPara: 'Ang mga Tuntunin ng Serbisyo na ito ay pinamamahalaan ng mga batas ng Republika ng Pilipinas.',
+      
+      section15Title: '15. Pagkilala',
+      section15Para: 'Sa paggamit ng ResiLinked, kinikilala mo na nabasa, naintindihan, at sumasang-ayon kang sumunod sa mga Tuntunin ng Serbisyo na ito. Partikular mong kinikilala na ang ResiLinked ay hindi mananagot para sa anumang mga alitan, pinsala, o pagkalugi na nagmumula sa iyong paggamit ng Platform o mga interaksyon sa ibang users.',
+      
+      section15AltTitle: '15. Impormasyon sa Pakikipag-ugnayan',
+      section15AltPara: 'Para sa mga tanong tungkol sa mga Tuntunin ng Serbisyo na ito, mangyaring makipag-ugnayan sa amin sa pamamagitan ng support system ng platform.',
+      
+      // Modal specific
+      modalAcknowledgment: 'SA PAG-CLICK NG "I ACCEPT" O PAGGAMIT NG RESILINKED, KINIKILALA MO NA NABASA, NAINTINDIHAN, AT SUMASANG-AYON KANG SUMUNOD SA MGA TUNTUNIN NG SERBISYO NA ITO.',
+      closeButton: 'Isara',
+      
+      // Footer
+      backToRegistration: 'Bumalik sa Registration',
+      
+      // Common terms
+      atOwnRisk: 'sa kanilang sariling panganib',
+      doNot: 'HINDI',
+      important: 'Mahalaga:',
+      stronglyRecommend: 'Lubos naming inirerekomenda'
     },
 
     // Admin Dashboard
@@ -1578,9 +2967,45 @@ export const translations = {
       profileUpdated: 'Matagumpay na na-update ang profile!',
       passwordChanged: 'Matagumpay na nabago ang password!',
       emailChanged: 'Matagumpay na nabago ang email!'
+    },
+
+    // Goals
+    goals: {
+      title: 'Pamamahala ng Pinansyal na Layunin',
+      create: 'Lumikha ng Bagong Layunin',
+      edit: 'I-edit ang Layunin',
+      delete: 'Tanggalin ang Layunin',
+      deleteGoal: 'Tanggalin ang Layunin',
+      active: 'Aktibong Layunin',
+      pending: 'Nakabinbing Layunin',
+      completed: 'Nakumpleto na Layunin',
+      activeGoal: 'Aktibo',
+      activeBadge: 'Aktibong Layunin',
+      complete: 'Kumpleto',
+      description: 'Paglalarawan ng Layunin',
+      descriptionPlaceholder: 'hal., Buwanang Ipon, Bagong Sasakyan, atbp.',
+      targetAmount: 'Target na Halaga',
+      targetAmountPlaceholder: 'hal., 10000',
+      currentAmount: 'Kasalukuyang Halaga',
+      currentAmountPlaceholder: 'hal., 0',
+      progress: 'Progreso',
+      setAsActive: 'Itakda bilang Aktibo',
+      setAsPriority: 'Itakda bilang Susunod',
+      setAsNext: 'Itakda bilang Susunod na Layunin',
+      nextUp: 'Susunod',
+      loading: 'Naglo-load ng iyong mga layunin...',
+      noPendingGoals: 'Walang nakabinbing layunin pa.',
+      noCompletedGoals: 'Walang natapos na layunin pa. Patuloy na magsikap tungo sa iyong mga pinansyal na target!',
+      confirmDeletion: 'Kumpirmahin ang Pagtanggal',
+      deleteConfirmationTitle: 'Sigurado ka bang gusto mong tanggalin ang layuning ito?',
+      deleteConfirmationMessage: 'ay ililipat sa basurahan. Ang aksyong ito ay hindi na mababawi.',
+      status: 'Katayuan',
+      saveSettings: 'I-save ang mga Setting'
     }
   }
 };
+
+export default translations;
 
 // Helper function to get translation
 export const t = (language, key) => {

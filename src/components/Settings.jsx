@@ -6,10 +6,10 @@ import { Link } from 'react-router-dom'
 import { AuthContext } from '../context/AuthContext'
 import { AlertContext } from '../context/AlertContext'
 import { useLanguage } from '../context/LanguageContext'
-import { t } from '../utils/translations'
 import apiService from '../api'
 
 function Settings() {
+  const { language, changeLanguage, t } = useLanguage()
   const [settings, setSettings] = useState({
     notificationPreferences: {
       job: true,
@@ -51,7 +51,6 @@ function Settings() {
   
   const { user, isLoggedIn } = useContext(AuthContext)
   const { success, error: showError } = useContext(AlertContext)
-  const { language, changeLanguage } = useLanguage()
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -343,14 +342,14 @@ function Settings() {
   return (
     <div className="settings-container">
       <div className="settings-header">
-        <h1>{t(language, 'settings.title')}</h1>
-        <Link to="/landing" className="back-btn">{t(language, 'common.back')} to Dashboard</Link>
+        <h1>{t('settings.title')}</h1>
+        <Link to="/landing" className="back-btn">{t('common.back')} to Dashboard</Link>
       </div>
 
       <div className="settings-content">
         {/* Notification Preferences */}
         <div className="settings-section">
-          <h2>{t(language, 'settings.notifications')}</h2>
+          <h2>{t('settings.notifications')}</h2>
           <div className="setting-item">
             <label className="switch-label">
               <input
@@ -359,9 +358,9 @@ function Settings() {
                 onChange={(e) => handleNotificationChange('job', e.target.checked)}
               />
               <span className="switch"></span>
-              Job notifications
+              {t('settings.jobNotifications')}
             </label>
-            <p className="setting-description">Receive notifications for new job matches</p>
+            <p className="setting-description">{t('settings.receiveJobMatches')}</p>
           </div>
           
           <div className="setting-item">
@@ -372,17 +371,17 @@ function Settings() {
                 onChange={(e) => handleNotificationChange('message', e.target.checked)}
               />
               <span className="switch"></span>
-              Message notifications
+              {t('settings.messageNotifications')}
             </label>
-            <p className="setting-description">Receive notifications for new messages</p>
+            <p className="setting-description">{t('settings.receiveMessages')}</p>
           </div>
         </div>
 
         {/* Language Preferences */}
         <div className="settings-section">
-          <h2>{t(language, 'settings.language')}</h2>
+          <h2>{t('settings.language')}</h2>
           <p className="setting-description" style={{ marginBottom: '1rem' }}>
-            {t(language, 'settings.selectLanguage')}
+            {t('settings.selectLanguage')}
           </p>
           <div className="radio-group">
             <label className="radio-label">
@@ -393,10 +392,10 @@ function Settings() {
                 checked={language === 'en'}
                 onChange={(e) => {
                   changeLanguage(e.target.value);
-                  success(t(e.target.value, 'settings.languageUpdated'));
+                  success(t('settings.languageUpdated'));
                 }}
               />
-              <span className="radio-text">{t(language, 'settings.english')}</span>
+              <span className="radio-text">{t('settings.english')}</span>
             </label>
             <label className="radio-label">
               <input
@@ -406,44 +405,44 @@ function Settings() {
                 checked={language === 'tl'}
                 onChange={(e) => {
                   changeLanguage(e.target.value);
-                  success(t(e.target.value, 'settings.languageUpdated'));
+                  success(t('settings.languageUpdated'));
                 }}
               />
-              <span className="radio-text">{t(language, 'settings.tagalog')}</span>
+              <span className="radio-text">{t('settings.tagalog')}</span>
             </label>
           </div>
         </div>
 
         {/* Account Security */}
         <div className="settings-section">
-          <h2>{t(language, 'settings.account')}</h2>
+          <h2>{t('settings.account')}</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <button 
               className="action-btn primary"
               onClick={() => setShowEmailModal(true)}
             >
               <span className="icon">📧</span>
-              {t(language, 'settings.changeEmail')}
+              {t('settings.changeEmail')}
             </button>
             <button 
               className="action-btn primary"
               onClick={() => setShowPasswordModal(true)}
             >
               <span className="icon">🔑</span>
-              {t(language, 'settings.changePassword')}
+              {t('settings.changePassword')}
             </button>
           </div>
         </div>
 
         {/* Support */}
         <div className="settings-section">
-          <h2>Support</h2>
+          <h2>{t('settings.support')}</h2>
           <button 
             className="action-btn secondary"
             onClick={() => setShowSupportModal(true)}
           >
             <span className="icon">💬</span>
-            Contact Support
+            {t('settings.contactSupport')}
           </button>
         </div>
 
@@ -457,10 +456,10 @@ function Settings() {
             {saving ? (
               <>
                 <div className="spinner"></div>
-                Saving...
+                {t('common.saving')}
               </>
             ) : (
-              'Save Settings'
+              t('goals.saveSettings')
             )}
           </button>
         </div>

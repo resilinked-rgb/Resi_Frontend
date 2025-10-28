@@ -65,7 +65,7 @@ function Register() {
   })
   const [passwordStrength, setPasswordStrength] = useState({
     score: 0,
-    level: 'Weak',
+    level: '',
     color: '#ef4444'
   })
 
@@ -108,16 +108,16 @@ function Register() {
       newRequirements.match = false
     }
     setRequirements(newRequirements)
-    let level = 'Weak'
+    let level = t('register.passwordStrengthWeak')
     let color = '#ef4444'
     if (score >= 4) {
-      level = 'Strong'
+      level = t('register.passwordStrengthStrong')
       color = '#10b981'
     } else if (score >= 3) {
-      level = 'Good'
+      level = t('register.passwordStrengthGood')
       color = '#f59e0b'
     } else if (score >= 2) {
-      level = 'Fair'
+      level = t('register.passwordStrengthFair')
       color = '#f97316'
     }
     setPasswordStrength({ score, level, color })
@@ -374,10 +374,11 @@ function Register() {
         setError(errorMessage);
         setLoading(false);
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        return;ing(false);
+        return;
       }
     }
 
+    setLoading(false);
     setCurrentStep(prev => Math.min(prev + 1, totalSteps));
     setError('');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -552,6 +553,7 @@ function Register() {
                     onChange={handleInputChange}
                     required
                     placeholder={t('register.firstName')}
+                    autoComplete="given-name"
                   />
                 </div>
                 <div className="form-group">
@@ -564,6 +566,7 @@ function Register() {
                     onChange={handleInputChange}
                     required
                     placeholder={t('register.lastName')}
+                    autoComplete="family-name"
                   />
                 </div>
               </div>
@@ -576,11 +579,12 @@ function Register() {
                   value={formData.gender}
                   onChange={handleInputChange}
                   required
+                  autoComplete="sex"
                 >
                   <option value="">{t('common.select')} {t('register.sex')}</option>
                   <option value="male">{t('register.male')}</option>
                   <option value="female">{t('register.female')}</option>
-                  <option value="other">{t('common.or')}</option>
+                  <option value="other">{t('register.other')}</option>
                 </select>
               </div>
             </div>
@@ -599,7 +603,8 @@ function Register() {
                   value={formData.email}
                   onChange={handleInputChange}
                   required
-                  placeholder="email@example.com"
+                  placeholder={t('register.emailPlaceholder')}
+                  autoComplete="email"
                 />
               </div>
 
@@ -623,7 +628,7 @@ function Register() {
                     <div 
                       className="password-toggle-icon" 
                       onClick={() => setShowPassword(!showPassword)}
-                      title={showPassword ? t('common.show') : t('common.show')}
+                      title={showPassword ? t('register.hidePassword') : t('register.showPassword')}
                       style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', zIndex: 2 }}
                     >
                       {showPassword ? (
@@ -663,7 +668,7 @@ function Register() {
                   )}
                 </div>
                 <div className="form-group">
-                  <label htmlFor="confirmPassword">Confirm Password</label>
+                  <label htmlFor="confirmPassword">{t('register.confirmPassword')}</label>
                   <div className="input-wrapper" style={{ position: 'relative' }}>
                     <input
                       type={showConfirmPassword ? "text" : "password"}
@@ -672,7 +677,7 @@ function Register() {
                       value={formData.confirmPassword}
                       onChange={handleInputChange}
                       required
-                      placeholder="Repeat the password"
+                      placeholder={t('register.confirmPasswordPlaceholder')}
                       autoComplete="new-password"
                       style={{
                         borderColor: passwordError === "Passwords match!" ? 'green' : 
@@ -683,7 +688,7 @@ function Register() {
                     <div 
                       className="password-toggle-icon" 
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      title={showConfirmPassword ? "Hide password" : "Show password"}
+                      title={showConfirmPassword ? t('register.hidePassword') : t('register.showPassword')}
                       style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', zIndex: 2 }}
                     >
                       {showConfirmPassword ? (
@@ -703,27 +708,27 @@ function Register() {
               </div>
               {(formData.password || formData.confirmPassword) && (
                 <div className="password-requirements">
-                  <h4>Password Requirements:</h4>
+                  <h4>{t('register.passwordRequirementsTitle')}</h4>
                   <ul>
                     <li className={requirements.length ? 'met' : ''}>
                       <span className="req-icon">{requirements.length ? '✓' : '✗'}</span>
-                      At least 8 characters
+                      {t('register.reqLength')}
                     </li>
                     <li className={requirements.uppercase ? 'met' : ''}>
                       <span className="req-icon">{requirements.uppercase ? '✓' : '✗'}</span>
-                      At least one uppercase letter
+                      {t('register.reqUppercase')}
                     </li>
                     <li className={requirements.lowercase ? 'met' : ''}>
                       <span className="req-icon">{requirements.lowercase ? '✓' : '✗'}</span>
-                      At least one lowercase letter
+                      {t('register.reqLowercase')}
                     </li>
                     <li className={requirements.number ? 'met' : ''}>
                       <span className="req-icon">{requirements.number ? '✓' : '✗'}</span>
-                      At least one number
+                      {t('register.reqNumber')}
                     </li>
                     <li className={formData.confirmPassword && formData.password === formData.confirmPassword ? 'met' : ''}>
                       <span className="req-icon">{formData.confirmPassword && formData.password === formData.confirmPassword ? '✓' : '✗'}</span>
-                      Passwords match
+                      {t('register.reqMatch')}
                     </li>
                   </ul>
                   <style>{`
@@ -776,9 +781,9 @@ function Register() {
           {/* Step 3: Contact & Location */}
           {currentStep === 3 && (
             <div className="form-step fade-in">
-              <h2 className="step-title">Contact & Location</h2>
+              <h2 className="step-title">{t('register.step3')}</h2>
               <div className="form-group">
-                <label htmlFor="mobileNo">Mobile Number</label>
+                <label htmlFor="mobileNo">{t('register.mobileNumber')}</label>
                 <input
                   type="tel"
                   id="mobileNo"
@@ -786,12 +791,13 @@ function Register() {
                   value={formData.mobileNo}
                   onChange={handleInputChange}
                   required
-                  placeholder="09XXXXXXXXX"
+                  placeholder={t('register.mobilePlaceholder')}
+                  autoComplete="tel"
                 />
               </div>
 
               <div className="form-group">
-                <label htmlFor="address">Address</label>
+                <label htmlFor="address">{t('register.address')}</label>
                 <input
                   type="text"
                   id="address"
@@ -799,24 +805,26 @@ function Register() {
                   value={formData.address}
                   onChange={handleInputChange}
                   required
-                  placeholder="Complete address"
+                  placeholder={t('register.addressPlaceholder')}
+                  autoComplete="street-address"
                 />
               </div>
 
               <div className="form-group">
-                <label htmlFor="barangay">Barangay</label>
+                <label htmlFor="barangay">{t('register.barangay')}</label>
                 <select
                   id="barangay"
                   name="barangay"
                   value={formData.barangay}
                   onChange={handleInputChange}
                   required
+                  autoComplete="address-level2"
                 >
-                  <option value="">Select Barangay</option>
+                  <option value="">{t('common.select')} {t('register.barangay')}</option>
                   <option value="Sto. Rosario">Sto. Rosario</option>
                   <option value="Sta. Lucia">Sta. Lucia</option>
                   <option value="Sta. Teresita">Sta. Teresita</option>
-                  <option value="other">Other</option>
+                  <option value="other">{t('register.other')}</option>
                 </select>
                 {formData.barangay === 'other' && (
                   <input
@@ -825,9 +833,10 @@ function Register() {
                     name="otherBarangay"
                     value={formData.otherBarangay}
                     onChange={handleInputChange}
-                    placeholder="Specify your barangay"
+                    placeholder={t('register.specifyBarangay')}
                     style={{ marginTop: '0.5em' }}
                     required={formData.barangay === 'other'}
+                    autoComplete="address-level2"
                   />
                 )}
               </div>
@@ -837,26 +846,28 @@ function Register() {
           {/* Step 4: Skills & User Type */}
           {currentStep === 4 && (
             <div className="form-step fade-in">
-              <h2 className="step-title">Skills & User Type</h2>
+              <h2 className="step-title">{t('register.step4')}</h2>
               <div className="form-group">
-                <label htmlFor="userType">User Type</label>
+                <label htmlFor="userType">{t('register.userType')}</label>
                 <select
                   id="userType"
                   name="userType"
                   value={formData.userType}
                   onChange={handleInputChange}
                   required
+                  autoComplete="organization-title"
                 >
-                  <option value="employee">Employee</option>
-                  <option value="employer">Employer</option>
+                  <option value="employee">{t('register.employee')}</option>
+                  <option value="employer">{t('register.employer')}</option>
                 </select>
               </div>
 
               {formData.userType === 'employee' && (
                 <div className="form-group">
-                  <label htmlFor="skills">Skills <span style={{color:'red'}}>*</span></label>
+                  <label>{t('register.skills')} <span style={{color:'red'}}>*</span></label>
                   <div className="custom-select-container">
                     <div 
+                      id="skills"
                       className="custom-select-header"
                       onClick={() => setSkillsDropdownOpen(!skillsDropdownOpen)}
                       style={{
@@ -866,8 +877,8 @@ function Register() {
                     >
                       <div className="custom-select-value">
                         {formData.skills.length === 0 
-                          ? "Select skills" 
-                          : `${formData.skills.length} skills selected`}
+                          ? t('register.selectSkills')
+                          : `${formData.skills.length} ${formData.skills.length === 1 ? 'skill' : 'skills'} selected`}
                       </div>
                       <div className="custom-select-arrow" style={{ 
                         transform: skillsDropdownOpen ? 'rotate(180deg)' : 'none' 
@@ -883,13 +894,16 @@ function Register() {
                               <div className="checkbox-wrapper">
                                 <input
                                   type="checkbox"
+                                  id={`skill-${skill.toLowerCase().replace(/\s+/g, '-')}`}
+                                  name="skills"
                                   checked={formData.skills.includes(skill)}
                                   onChange={() => handleSkillCheckbox(skill)}
                                   className="skill-checkbox"
+                                  autoComplete="off"
                                 />
                                 <div className="checkbox-custom"></div>
                               </div>
-                              <span className="checkbox-text">{skill.toUpperCase()}</span>
+                              <span className="checkbox-text">{t(`register.skill${skill.replace(/\s+/g, '')}`)}</span>
                             </label>
                           </div>
                         ))}
@@ -904,9 +918,10 @@ function Register() {
                       name="otherSkill"
                       value={formData.otherSkill || ''}
                       onChange={e => setFormData(prev => ({...prev, otherSkill: e.target.value}))}
-                      placeholder="Specify your skill"
+                      placeholder={t('register.specifySkill')}
                       style={{ marginTop: '0.5em' }}
                       required={formData.skills.includes('Other')}
+                      autoComplete="off"
                     />
                   )}
                 </div>
@@ -917,29 +932,30 @@ function Register() {
           {/* Step 5: ID & Documents + TOS */}
           {currentStep === 5 && (
             <div className="form-step fade-in">
-              <h2 className="step-title">Documents & Verification</h2>
+              <h2 className="step-title">{t('register.step5')}</h2>
               <div className="form-row">
                 <div className="form-group">
-                  <label htmlFor="idType">ID Type</label>
+                  <label htmlFor="idType">{t('register.idType')}</label>
                   <select
                     id="idType"
                     name="idType"
                     value={formData.idType}
                     onChange={handleInputChange}
                     required
+                    autoComplete="off"
                   >
-                    <option value="">Select ID type</option>
-                    <option value="drivers_license">Driver's License</option>
-                    <option value="passport">Passport</option>
+                    <option value="">{t('register.selectIDType')}</option>
+                    <option value="drivers_license">{t('register.idDriversLicense')}</option>
+                    <option value="passport">{t('register.idPassport')}</option>
                     <option value="national_id">National ID</option>
-                    <option value="voter_id">Voter's ID</option>
-                    <option value="sss_id">SSS ID</option>
-                    <option value="philhealth_id">PhilHealth ID</option>
+                    <option value="voter_id">{t('register.idVoters')}</option>
+                    <option value="sss_id">{t('register.idSSS')}</option>
+                    <option value="philhealth_id">{t('register.idPhilHealth')}</option>
                     <option value="tin_id">TIN ID</option>
                   </select>
                 </div>
                 <div className="form-group">
-                  <label htmlFor="idNumber">ID Number</label>
+                  <label htmlFor="idNumber">{t('register.idNumber')}</label>
                   <input
                     type="text"
                     id="idNumber"
@@ -947,13 +963,14 @@ function Register() {
                     value={formData.idNumber}
                     onChange={handleInputChange}
                     required
-                    placeholder="ID number"
+                    placeholder={t('register.idNumber')}
+                    autoComplete="off"
                   />
                 </div>
               </div>
 
               <div className="form-group">
-                <label htmlFor="idFrontImage">ID Front Image</label>
+                <label htmlFor="idFrontImage">{t('register.idFrontImage')}</label>
                 {!fileNames.idFrontImage ? (
                   <input
                     type="file"
@@ -980,7 +997,7 @@ function Register() {
                           setFileNames(prev => ({ ...prev, idFrontImage: '' }));
                           if (idFrontInputRef.current) idFrontInputRef.current.value = '';
                         }}
-                        title="Remove file"
+                        title={t('register.removeFile')}
                       >
                         ×
                       </button>
@@ -994,14 +1011,14 @@ function Register() {
                         if (idFrontInputRef.current) idFrontInputRef.current.value = '';
                       }}
                     >
-                      Change File
+                      {t('register.changeFile')}
                     </button>
                   </div>
                 )}
               </div>
 
               <div className="form-group">
-                <label htmlFor="idBackImage">ID Back Image</label>
+                <label htmlFor="idBackImage">{t('register.idBackImage')}</label>
                 {!fileNames.idBackImage ? (
                   <input
                     type="file"
@@ -1028,7 +1045,7 @@ function Register() {
                           setFileNames(prev => ({ ...prev, idBackImage: '' }));
                           if (idBackInputRef.current) idBackInputRef.current.value = '';
                         }}
-                        title="Remove file"
+                        title={t('register.removeFile')}
                       >
                         ×
                       </button>
@@ -1042,14 +1059,14 @@ function Register() {
                         if (idBackInputRef.current) idBackInputRef.current.value = '';
                       }}
                     >
-                      Change File
+                      {t('register.changeFile')}
                     </button>
                   </div>
                 )}
               </div>
 
               <div className="form-group">
-                <label htmlFor="profilePicture">Profile Picture (Optional)</label>
+                <label htmlFor="profilePicture">{t('register.profilePicture')} ({t('common.optional')})</label>
                 {!fileNames.profilePicture ? (
                   <input
                     type="file"
@@ -1075,7 +1092,7 @@ function Register() {
                           setFileNames(prev => ({ ...prev, profilePicture: '' }));
                           if (profilePicInputRef.current) profilePicInputRef.current.value = '';
                         }}
-                        title="Remove file"
+                        title={t('register.removeFile')}
                       >
                         ×
                       </button>
@@ -1089,7 +1106,7 @@ function Register() {
                         if (profilePicInputRef.current) profilePicInputRef.current.value = '';
                       }}
                     >
-                      Change File
+                      {t('register.changeFile')}
                     </button>
                   </div>
                 )}
@@ -1097,26 +1114,28 @@ function Register() {
 
               {/* Terms of Service Checkbox */}
               <div className="tos-container" style={{ marginTop: '1.5rem', marginBottom: '1rem', padding: '1rem', background: 'rgba(147, 51, 234, 0.05)', borderRadius: '12px', border: '2px solid rgba(147, 51, 234, 0.1)' }}>
-                <label className="tos-checkbox-label" style={{ display: 'flex', alignItems: 'flex-start', cursor: 'pointer' }}>
+                <label htmlFor="acceptedTOS" className="tos-checkbox-label" style={{ display: 'flex', alignItems: 'flex-start', cursor: 'pointer' }}>
                   <input
                     type="checkbox"
+                    id="acceptedTOS"
                     name="acceptedTOS"
                     checked={formData.acceptedTOS}
                     onChange={(e) => setFormData(prev => ({ ...prev, acceptedTOS: e.target.checked }))}
                     className="tos-checkbox"
                     style={{ marginTop: '4px', marginRight: '10px', cursor: 'pointer' }}
                     required
+                    autoComplete="off"
                   />
                   <span className="tos-text" style={{ fontSize: '0.9rem', lineHeight: '1.5', color: '#444' }}>
-                    I have read and agree to the{' '}
+                    {t('register.tosAgreement')}{' '}
                     <span 
                       onClick={(e) => { e.preventDefault(); setShowTOSModal(true); }} 
                       className="tos-link"
                       style={{ color: '#7c3aed', fontWeight: '700', textDecoration: 'underline', cursor: 'pointer' }}
                     >
-                      Terms of Service
+                      {t('register.termsOfService')}
                     </span>. 
-                    I understand that ResiLinked and its operators <strong>will not be held accountable</strong> for any disputes, issues, or incidents that may arise between users. <span style={{color:'red', fontWeight:'bold'}}>*</span>
+                    {t('register.tosDisclaimer')} <span style={{color:'red', fontWeight:'bold'}}>*</span>
                   </span>
                 </label>
               </div>
@@ -1131,7 +1150,7 @@ function Register() {
                 className="nav-btn prev-btn" 
                 onClick={prevStep}
               >
-                ← Previous
+                ← {t('register.previous')}
               </button>
             )}
             {currentStep < totalSteps ? (
@@ -1141,7 +1160,7 @@ function Register() {
                 onClick={nextStep}
                 style={{ marginLeft: currentStep === 1 ? 'auto' : '0' }}
               >
-                Next →
+                {t('register.next')} →
               </button>
             ) : (
               <button 
@@ -1152,10 +1171,10 @@ function Register() {
                 {loading ? (
                   <div className="btn-loader">
                     <div className="spinner"></div>
-                    <span>Creating Account...</span>
+                    <span>{t('register.submitting')}</span>
                   </div>
                 ) : (
-                  'Create Account'
+                  t('register.submit')
                 )}
               </button>
             )}
@@ -1163,15 +1182,15 @@ function Register() {
         </form>
 
         <div className="register-footer">
-          <p>Already have an account?</p>
+          <p>{t('register.alreadyHaveAccount')}</p>
           <Link to="/login" className="login-link">
-            Login here
+            {t('register.loginHere')}
           </Link>
         </div>
 
         <div className="back-home">
           <Link to="/" className="back-home-btn">
-            Return to Home
+            {t('register.returnHome')}
           </Link>
         </div>
       </div>

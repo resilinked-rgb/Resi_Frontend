@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useAlert } from '../context/AlertContext'
+import { useTranslation } from '../hooks/useTranslation'
 import apiService from '../api'
 import GoalManagement from './GoalManagement'
 import { getProfilePictureUrl } from '../utils/imageHelper'
@@ -51,6 +52,7 @@ function Profile() {
   
   const { user, updateUser, verifyToken } = useAuth()
   const { success, error: showError } = useAlert()
+  const { t } = useTranslation()
 
   // Check if viewing own profile or someone else's
   const isOwnProfile = !userId || userId === user?._id || userId === user?.userId
@@ -643,7 +645,7 @@ function Profile() {
       <div className="container">
         <div className="loading" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '40vh' }}>
           <div className="spinner" style={{ width: 48, height: 48, border: '6px solid #eee', borderTop: '6px solid #9333ea', borderRadius: '50%', animation: 'spin 1s linear infinite', marginBottom: 16 }}></div>
-          <div>Loading profile...</div>
+          <div>{t('common.loading')}</div>
         </div>
         <style>{`
         /* Edit Profile Modal Modern Styles */
@@ -1104,16 +1106,16 @@ function Profile() {
           <div className="profile-name-section">
             <h1>{profile?.firstName} {profile?.lastName}</h1>
             <div className="profile-barangay">
-              {profile?.barangay} <span className="verified-badge-lg">Barangay-Verified</span>
+              {profile?.barangay} <span className="verified-badge-lg">{t('landing.welcome')}</span>
             </div>
             <div className="profile-user-type">
-              {profile?.userType === 'both' ? 'Employee & Employer' : 
-               profile?.userType === 'employee' ? 'Employee' : 
-               profile?.userType === 'employer' ? 'Employer' : 'User'}
+              {profile?.userType === 'both' ? `${t('register.employee')} & ${t('register.employer')}` : 
+               profile?.userType === 'employee' ? t('register.employee') : 
+               profile?.userType === 'employer' ? t('register.employer') : t('nav.profile')}
             </div>
           </div>
           {isOwnProfile && (
-            <button className="edit-profile-btn" onClick={handleEditProfile}>Edit Profile</button>
+            <button className="edit-profile-btn" onClick={handleEditProfile}>{t('profile.editProfile')}</button>
           )}
           {!isOwnProfile && (
             <Link 
@@ -1125,37 +1127,49 @@ function Profile() {
               }}
               className="message-user-btn"
             >
-              💬 Message {profile?.firstName}
+              💬 {t('profile.message')} {profile?.firstName}
             </Link>
           )}
         </div>
 
         <div className="profile-section">
-          <h2>Skills and Services</h2>
+          <h2>{t('profile.skills')}</h2>
           <div className="profile-skills">
             {profile?.skills && profile.skills.length > 0 ? (
-              profile.skills.map((skill, idx) => (
-                <span className="profile-skill-tag" key={idx}>{skill}</span>
-              ))
-            ) : <span className="profile-skill-tag">No skills listed</span>}
+              profile.skills.map((skill, idx) => {
+                const enCommonSkills = t('postJob.commonSkills', 'en') || [];
+                const tlCommonSkills = t('postJob.commonSkills', 'tl') || [];
+                let displaySkill = skill;
+                if (t('lang') === 'tl') {
+                  // If viewing in Tagalog, translate English skills
+                  const enIdx = enCommonSkills.indexOf(skill);
+                  if (enIdx !== -1) displaySkill = tlCommonSkills[enIdx] || skill;
+                } else {
+                  // If viewing in English, translate Tagalog skills
+                  const tlIdx = tlCommonSkills.indexOf(skill);
+                  if (tlIdx !== -1) displaySkill = enCommonSkills[tlIdx] || skill;
+                }
+                return <span className="profile-skill-tag" key={idx}>{displaySkill}</span>;
+              })
+            ) : <span className="profile-skill-tag">{t('searchWorkers.noSkills') || 'No skills listed'}</span>}
           </div>
         </div>
 
         <div className="profile-section">
-          <h2>Description</h2>
-          <div className="profile-bio">{profile?.bio || 'No description provided.'}</div>
+          <h2>{t('profile.about')}</h2>
+          <div className="profile-bio">{profile?.bio || t('searchJobs.noDescription') || 'No description provided.'}</div>
         </div>
 
         {/* Show recommended jobs if viewing own profile and user is an employee or both */}
         {isOwnProfile && (profile?.userType === 'employee' || profile?.userType === 'both') && (
           <div className="profile-section">
             <div className="section-header-with-actions">
-              <h2>Recommended Jobs</h2>
-              <Link to="/search-jobs" className="view-more-btn">View More Jobs</Link>
+              <h2>{t('employeeDashboard.recommendedJobs')}</h2>
+              <Link to="/search-jobs" className="view-more-btn">{t('common.viewAll')}</Link>
             </div>
             <div className="profile-recommended-jobs">
               {loadingJobs ? (
-                <div className="loading-jobs">Loading recommended jobs...</div>
+                <div className="loading-jobs">{t('common.loading')}...</div>
               ) : recommendedJobs.length > 0 ? (
                 recommendedJobs.map((job, index) => (
                   <div 
@@ -1188,19 +1202,19 @@ function Profile() {
                     </div>
                     <div className="job-card-overlay">
                       <div className="view-details-btn">
-                        {job.alreadyApplied ? 'View Application' : 'View Details'}
+                        {job.alreadyApplied ? t('common.viewDetails') : t('common.viewDetails')}
                       </div>
                     </div>
                     {job.alreadyApplied && (
-                      <div className="applied-badge">Applied</div>
+                      <div className="applied-badge">{t('common.applied')}</div>
                     )}
                   </div>
                 ))
               ) : (
                 <div className="no-jobs-message">
                   {profile?.skills?.length ? 
-                    "No recommended jobs found. Try updating your skills or check back later." : 
-                    "Add skills to your profile to see job recommendations."}
+                    t('employeeDashboard.noMatchingJobs') || "No recommended jobs found. Try updating your skills or check back later." : 
+                    t('employeeDashboard.updateProfile') || "Add skills to your profile to see job recommendations."}
                 </div>
               )}
             </div>
@@ -1213,14 +1227,14 @@ function Profile() {
             <div className="section-header-with-actions">
               <h2>
                 {recommendedWorkers.some(worker => worker.isTopRated) 
-                  ? "Top-Rated Workers" 
-                  : "Recommended Workers"}
+                  ? t('employerDashboard.topRatedWorkers') || "Top-Rated Workers"
+                  : t('employerDashboard.recommendedWorkers') || "Recommended Workers"}
               </h2>
-              <Link to="/search-workers" className="view-more-btn">View More Workers</Link>
+              <Link to="/search-workers" className="view-more-btn">{t('common.viewAll')}</Link>
             </div>
             <div className="profile-recommended-workers">
               {loadingWorkers ? (
-                <div className="loading-workers">Loading workers...</div>
+                <div className="loading-workers">{t('common.loading')}...</div>
               ) : recommendedWorkers.length > 0 ? (
                 recommendedWorkers.map((worker, index) => (
                   <div 
@@ -1261,12 +1275,12 @@ function Profile() {
                             </div>
                             {worker.ratingCount > 0 && (
                               <div className="worker-rating-count">
-                                ({worker.ratingCount} ratings)
+                                ({worker.ratingCount} {t('profile.ratings')})
                               </div>
                             )}
                           </>
                         ) : (
-                          <div className="worker-no-rating">No ratings yet</div>
+                          <div className="worker-no-rating">{t('searchWorkers.noRatings')}</div>
                         )}
                       </div>
                     </div>
@@ -1277,14 +1291,14 @@ function Profile() {
                     )}
                     <div className="worker-card-overlay">
                       <div className="view-details-btn">
-                        View Profile
+                        {t('profile.viewProfile')}
                       </div>
                     </div>
                   </div>
                 ))
               ) : (
                 <div className="no-workers-message">
-                  No workers found at this time.
+                  {t('employerDashboard.noWorkersFound')}
                 </div>
               )}
             </div>
@@ -1302,13 +1316,13 @@ function Profile() {
         {!isOwnProfile && (profile?.userType === 'employer' || profile?.userType === 'both') && (
           <div className="profile-section">
             <div className="section-header-with-actions">
-              <h2>Completed Jobs ({completedJobs.length})</h2>
+              <h2>{t('jobs.completedJobs')} ({completedJobs.length})</h2>
               {completedJobs.length > 5 && !showAllCompletedJobs && (
                 <button 
                   className="view-all-btn"
                   onClick={() => setShowAllCompletedJobs(true)}
                 >
-                  View All
+                  {t('common.viewAll')}
                 </button>
               )}
               {showAllCompletedJobs && (
@@ -1319,7 +1333,7 @@ function Profile() {
                     setCompletedJobsCarouselIndex(0);
                   }}
                 >
-                  Show Less
+                  {t('searchJobs.showLess')}
                 </button>
               )}
             </div>
@@ -1355,7 +1369,7 @@ function Profile() {
                         )}
                         {job.assignedTo && (
                           <div className="job-employee">
-                            <span>Completed by: </span>
+                            <span>{t('jobs.completedBy') || 'Completed by'}: </span>
                             <Link to={`/profile/${job.assignedTo._id}`} className="employee-link">
                               {job.assignedTo.firstName} {job.assignedTo.lastName}
                             </Link>
@@ -1368,7 +1382,7 @@ function Profile() {
                           </div>
                         )}
                         <div className="job-date">
-                          Completed: {new Date(job.completedAt || job.updatedAt).toLocaleDateString()}
+                          {t('jobs.completed') || 'Completed'}: {new Date(job.completedAt || job.updatedAt).toLocaleDateString()}
                         </div>
                       </div>
                     ))}
@@ -1397,14 +1411,14 @@ function Profile() {
                   )}
                 </>
               ) : (
-                <div className="no-completed-jobs">No completed jobs yet.</div>
+                <div className="no-completed-jobs">{t('jobs.noJobsPosted') || 'No completed jobs yet.'}</div>
               )}
             </div>
           </div>
         )}
 
         <div className="profile-section">
-          <h2>Contact Information</h2>
+          <h2>{t('profile.contactInformation')}</h2>
           <div className="profile-contact">
             <div>{profile?.email}</div>
             <div>{profile?.mobileNo}</div>
@@ -1412,18 +1426,18 @@ function Profile() {
         </div>
 
         <div className="profile-section">
-          <h2>Worker Rating</h2>
+          <h2>{t('profile.ratings')}</h2>
           <div className="profile-ratings-carousel">
             {ratings.length > 0 ? ratings.slice(0, 3).map((rating, idx) => (
               <div className="profile-rating-card" key={idx}>
                 <div className="profile-rating-stars">{'★'.repeat(rating.rating)}{'☆'.repeat(5 - rating.rating)}</div>
-                <div className="profile-rating-comment">{rating.comment || 'No comment provided'}</div>
+                <div className="profile-rating-comment">{rating.comment || t('common.noResults')}</div>
                 <div className="profile-rating-footer">
-                  <span className="profile-rating-author">{rating.rater?.firstName || 'Anonymous'} {rating.rater?.lastName || ''}</span>
+                  <span className="profile-rating-author">{rating.rater?.firstName || t('searchJobs.anonymous')} {rating.rater?.lastName || ''}</span>
                   <span className="profile-rating-date">{new Date(rating.createdAt).toLocaleDateString()}</span>
                 </div>
               </div>
-            )) : <div>No ratings yet.</div>}
+            )) : <div>{t('searchWorkers.noRatings')}</div>}
           </div>
         </div>
 
@@ -1432,12 +1446,12 @@ function Profile() {
           <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">
-                <h3>Edit Profile</h3>
+                <h3>{t('profile.editProfile')}</h3>
               </div>
               <form onSubmit={handleSaveProfile} className="edit-form">
                 {/* Profile Picture Upload */}
                 <div className="form-group profile-picture-section">
-                  <label>Profile Picture</label>
+                  <label>{t('register.profilePicture')}</label>
                   <div className="profile-picture-upload">
                     <div className="current-picture">
                       {profile?.profilePicture ? (
@@ -1459,15 +1473,15 @@ function Profile() {
                       disabled={uploading}
                     />
                     <label htmlFor="profilePictureInputModal" className="upload-btn">
-                      {uploading ? 'Uploading...' : 'Change Photo'}
+                      {uploading ? t('common.loading') + '...' : t('profile.changePhoto')}
                     </label>
-                    <small className="upload-hint">JPG, PNG or GIF (max 5MB)</small>
+                    <small className="upload-hint">{t('register.uploadHint') || 'JPG, PNG or GIF (max 5MB)'}</small>
                   </div>
                 </div>
                 
                 <div className="form-row">
                   <div className="form-group">
-                    <label htmlFor="firstName">First Name</label>
+                    <label htmlFor="firstName">{t('register.firstName')}</label>
                     <input
                       type="text"
                       id="firstName"
@@ -1478,7 +1492,7 @@ function Profile() {
                     />
                   </div>
                   <div className="form-group">
-                    <label htmlFor="lastName">Last Name</label>
+                    <label htmlFor="lastName">{t('register.lastName')}</label>
                     <input
                       type="text"
                       id="lastName"
@@ -1490,7 +1504,7 @@ function Profile() {
                   </div>
                 </div>
                 <div className="form-group">
-                  <label htmlFor="bio">Bio</label>
+                  <label htmlFor="bio">{t('profile.aboutMe')}</label>
                   <textarea
                     id="bio"
                     name="bio"
@@ -1500,22 +1514,22 @@ function Profile() {
                   />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="gender">Gender</label>
+                  <label htmlFor="gender">{t('register.sex')}</label>
                   <select
                     id="gender"
                     name="gender"
                     value={editFormData.gender}
                     onChange={handleInputChange}
                   >
-                    <option value="">Select Gender</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
+                    <option value="">{t('register.sex')}</option>
+                    <option value="male">{t('register.male')}</option>
+                    <option value="female">{t('register.female')}</option>
+                    <option value="other">{t('searchWorkers.other')}</option>
                   </select>
                 </div>
                 
                 <div className="form-group">
-                  <label htmlFor="address">Address</label>
+                  <label htmlFor="address">{t('register.address')}</label>
                   <input
                     type="text"
                     id="address"
@@ -1526,7 +1540,7 @@ function Profile() {
                 </div>
                 <div className="form-row">
                   <div className="form-group">
-                    <label htmlFor="barangay">Barangay</label>
+                    <label htmlFor="barangay">{t('register.barangay')}</label>
                     <input
                       type="text"
                       id="barangay"
@@ -1537,7 +1551,7 @@ function Profile() {
                   </div>
                 </div>
                 <div className="form-group">
-                  <label htmlFor="mobileNo">Mobile Number</label>
+                  <label htmlFor="mobileNo">{t('register.mobileNo')}</label>
                   <input
                     type="tel"
                     id="mobileNo"
@@ -1549,13 +1563,13 @@ function Profile() {
                 
                 {/* Skills Section - Moved to Bottom */}
                 <div className="form-group">
-                  <label htmlFor="skills">Skills</label>
+                  <label htmlFor="skills">{t('profile.skills')}</label>
                   <div className="skills-section">
                     <div className="skills-input-container">
                       <input
                         type="text"
                         id="skillInput"
-                        placeholder="Type a skill and press Enter"
+                        placeholder={t('register.selectSkills') || "Type a skill and press Enter"}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' && e.target.value.trim()) {
                             e.preventDefault();
@@ -1575,44 +1589,58 @@ function Profile() {
                           }
                         }}
                       >
-                        Add
+                        {t('postJob.add')}
                       </button>
                     </div>
                     
                     <div className="common-skills">
-                      <label>Common Skills:</label>
+                      <label>{t('postJob.commonSkills') || 'Common Skills'}:</label>
                       <div className="common-skills-options">
-                        {['Plumbing', 'Carpentry', 'Cleaning', 'Electrical', 'Painting', 'Gardening', 
-                          'Cooking', 'Driving', 'Babysitting', 'Tutoring', 'IT Support', 'Customer Service'].map(skill => (
-                          <button 
-                            key={skill}
-                            type="button" 
-                            className={`common-skill-option ${editFormData.skills.includes(skill) ? 'selected' : ''}`}
-                            onClick={() => !editFormData.skills.includes(skill) && handleSkillToggle(skill)}
-                          >
-                            {skill}
-                          </button>
-                        ))}
+                        {(t('postJob.commonSkills') || []).map((translatedSkill, idx) => {
+                          // Get English skill for toggle logic
+                          const enCommonSkills = t('postJob.commonSkills', 'en') || [];
+                          const skill = enCommonSkills[idx] || translatedSkill;
+                          return (
+                            <button
+                              key={skill}
+                              type="button"
+                              className={`common-skill-option ${editFormData.skills.includes(skill) ? 'selected' : ''}`}
+                              onClick={() => !editFormData.skills.includes(skill) && handleSkillToggle(skill)}
+                            >
+                              {translatedSkill}
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
                     
-                    <small className="form-helper-text">Add skills to showcase your expertise. Click on common skills or type your own.</small>
+                    <small className="form-helper-text">{t('register.skillsHelper') || 'Add skills to showcase your expertise. Click on common skills or type your own.'}</small>
                   
                     {editFormData.skills.length > 0 && (
                       <div className="skills-container">
-                        {editFormData.skills.map((skill, index) => (
-                          <span key={index} className="skill-tag">
-                            {skill}
-                            <button
-                              type="button"
-                              className="remove-skill"
-                              onClick={() => removeSkill(skill)}
-                              title="Remove skill"
-                            >
-                              ×
-                            </button>
-                          </span>
-                        ))}
+                        {editFormData.skills.map((skill, index) => {
+                          // Translate if skill is in commonSkills
+                          const enCommonSkills = t('postJob.commonSkills', 'en') || [];
+                          const tlCommonSkills = t('postJob.commonSkills', 'tl') || [];
+                          const enIdx = enCommonSkills.indexOf(skill);
+                          let displaySkill = skill;
+                          if (enIdx !== -1) {
+                            displaySkill = t('postJob.commonSkills')[enIdx] || skill;
+                          }
+                          return (
+                            <span key={index} className="skill-tag">
+                              {displaySkill}
+                              <button
+                                type="button"
+                                className="remove-skill"
+                                onClick={() => removeSkill(skill)}
+                                title={t('common.remove') + ' skill'}
+                              >
+                                ×
+                              </button>
+                            </span>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
@@ -1620,10 +1648,10 @@ function Profile() {
                 
                 <div className="modal-actions">
                   <button type="button" onClick={() => setShowEditModal(false)} className="btn btn-secondary">
-                    Cancel
+                    {t('common.cancel')}
                   </button>
                   <button type="submit" className="btn btn-primary">
-                    Save Changes
+                    {t('common.saveChanges')}
                   </button>
                 </div>
               </form>
@@ -1753,7 +1781,7 @@ function Profile() {
           <div className="modal-overlay" onClick={handleCloseJobModal}>
             <div className="modal-content job-modal-content" onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">
-                <h3>Job Details</h3>
+                <h3>{t('jobs.viewDetails')}</h3>
                 <button onClick={handleCloseJobModal} className="close-btn">×</button>
               </div>
               
@@ -1763,29 +1791,29 @@ function Profile() {
                 <div className="job-modal-section">
                   <div className="job-modal-price">₱{selectedJob.price}</div>
                   <div className="job-modal-posted">
-                    Posted {new Date(selectedJob.datePosted).toLocaleDateString()}
+                    {t('searchJobs.postedOn')} {new Date(selectedJob.datePosted).toLocaleDateString()}
                   </div>
                 </div>
                 
                 <div className="job-modal-section">
-                  <label>Description</label>
+                  <label>{t('searchJobs.description')}</label>
                   <p className="job-modal-description">
-                    {selectedJob.description || "No description provided."}
+                    {selectedJob.description || t('searchJobs.noDescription')}
                   </p>
                 </div>
                 
                 <div className="job-modal-section">
-                  <label>Location</label>
+                  <label>{t('searchJobs.location')}</label>
                   <div className="job-modal-location">
                     {selectedJob.barangay} {selectedJob.locationMatch && (
-                      <span className="location-match-badge">In your area</span>
+                      <span className="location-match-badge">{t('employeeDashboard.sameArea')}</span>
                     )}
                   </div>
                 </div>
                 
                 {selectedJob.skillsRequired && selectedJob.skillsRequired.length > 0 && (
                   <div className="job-modal-section">
-                    <label>Skills Required</label>
+                    <label>{t('jobs.requiredSkills')}</label>
                     <div className="job-modal-skills">
                       {selectedJob.skillsRequired.map((skill, idx) => (
                         <span key={idx} className={`job-modal-skill-tag ${
@@ -1803,7 +1831,7 @@ function Profile() {
                 
                 {selectedJob.postedBy && (
                   <div className="job-modal-section">
-                    <label>Posted By</label>
+                    <label>{t('searchJobs.postedBy')}</label>
                     <div className="job-modal-employer">
                       {selectedJob.postedBy.firstName} {selectedJob.postedBy.lastName}
                     </div>
@@ -1821,13 +1849,13 @@ function Profile() {
                     onClick={handleCloseJobModal} 
                     className="btn btn-secondary"
                   >
-                    Close
+                    {t('common.close')}
                   </button>
                   
                   {profile?.userType !== 'employer' && (
                     selectedJob.alreadyApplied ? (
                       <button className="btn btn-disabled" disabled>
-                        Already Applied
+                        {t('common.applied')}
                       </button>
                     ) : (
                       <button 
@@ -1835,7 +1863,7 @@ function Profile() {
                         className="btn btn-primary"
                         disabled={applyingToJob}
                       >
-                        {applyingToJob ? 'Applying...' : 'Apply Now'}
+                        {applyingToJob ? t('common.loading') + '...' : t('common.applyNow')}
                       </button>
                     )
                   )}
@@ -1850,7 +1878,7 @@ function Profile() {
           <div className="modal-overlay" onClick={handleCloseWorkerModal}>
             <div className="modal-content worker-modal-content" onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">
-                <h3>Worker Profile</h3>
+                <h3>{t('employerDashboard.workerProfile')}</h3>
                 <button onClick={handleCloseWorkerModal} className="close-btn">×</button>
               </div>
               
@@ -1872,10 +1900,10 @@ function Profile() {
                     <h4 className="worker-modal-name">
                       {selectedWorker.firstName} {selectedWorker.lastName}
                       {selectedWorker.isTopRated && (
-                        <span className="worker-modal-badge">★ Top Rated</span>
+                        <span className="worker-modal-badge">★ {t('employerDashboard.topRated') || 'Top Rated'}</span>
                       )}
                     </h4>
-                    <div className="worker-modal-barangay">{selectedWorker.barangay || 'Unknown barangay'}</div>
+                    <div className="worker-modal-barangay">{selectedWorker.barangay || t('searchWorkers.notSpecified')}</div>
                     <div className="worker-modal-rating">
                       {(selectedWorker.rating > 0 || selectedWorker.averageRating > 0) ? (
                         <div className="rating-stars">
@@ -1884,12 +1912,12 @@ function Profile() {
                               : selectedWorker.averageRating ? selectedWorker.averageRating.toFixed(1) : "N/A"}
                           {selectedWorker.ratingCount > 0 && (
                             <span className="rating-count">
-                              ({selectedWorker.ratingCount} ratings)
+                              ({selectedWorker.ratingCount} {t('profile.ratings')})
                             </span>
                           )}
                         </div>
                       ) : (
-                        <div className="no-rating">No ratings yet</div>
+                        <div className="no-rating">{t('searchWorkers.noRatings')}</div>
                       )}
                     </div>
                   </div>
@@ -1897,7 +1925,7 @@ function Profile() {
                 
                 {selectedWorker.bio && (
                   <div className="worker-modal-section">
-                    <label>About</label>
+                    <label>{t('profile.about')}</label>
                     <p className="worker-modal-bio">
                       {selectedWorker.bio}
                     </p>
@@ -1906,7 +1934,7 @@ function Profile() {
                 
                 {selectedWorker.skills && selectedWorker.skills.length > 0 && (
                   <div className="worker-modal-section">
-                    <label>Skills</label>
+                    <label>{t('profile.skills')}</label>
                     <div className="worker-modal-skills">
                       {selectedWorker.skills.map((skill, idx) => (
                         <span key={idx} className="worker-modal-skill-tag">
@@ -1920,7 +1948,7 @@ function Profile() {
                 {/* Display recent ratings if available */}
                 {selectedWorker.detailedRatings && selectedWorker.detailedRatings.length > 0 && (
                   <div className="worker-modal-section">
-                    <label>Recent Ratings</label>
+                    <label>{t('profile.recentRatings') || 'Recent Ratings'}</label>
                     <div className="worker-modal-ratings">
                       {selectedWorker.detailedRatings.map((rating, idx) => (
                         <div key={idx} className="worker-modal-rating-card">
@@ -1928,11 +1956,11 @@ function Profile() {
                             {'★'.repeat(rating.rating)}{'☆'.repeat(5 - rating.rating)}
                           </div>
                           <div className="worker-modal-rating-comment">
-                            {rating.comment || "No comment provided."}
+                            {rating.comment || t('common.noResults')}
                           </div>
                           <div className="worker-modal-rating-footer">
                             <span className="worker-modal-rating-author">
-                              {rating.rater?.firstName || 'Anonymous'} {rating.rater?.lastName || ''}
+                              {rating.rater?.firstName || t('searchJobs.anonymous')} {rating.rater?.lastName || ''}
                             </span>
                             <span className="worker-modal-rating-date">
                               {new Date(rating.createdAt).toLocaleDateString()}
@@ -1952,14 +1980,14 @@ function Profile() {
                 
                 {(profile?.userType === 'employer' || profile?.userType === 'both') && myJobs && myJobs.length > 0 && (
                   <div className="worker-modal-section">
-                    <label>Invite to Job</label>
+                    <label>{t('searchWorkers.inviteToJob')}</label>
                     <div className="job-selection">
                       <select 
                         className="job-select" 
                         id="job-select"
                         disabled={invitingWorker}
                       >
-                        <option value="">Select a job to invite worker</option>
+                        <option value="">{t('searchWorkers.selectJobMessage')}</option>
                         {myJobs.map(job => (
                           <option key={job._id} value={job._id}>
                             {job.title} - ₱{job.price}
@@ -1975,11 +2003,11 @@ function Profile() {
                           if (jobId) {
                             handleInviteWorker(selectedWorker._id, jobId);
                           } else {
-                            showError('Please select a job first');
+                            showError(t('searchWorkers.selectJobFirst') || 'Please select a job first');
                           }
                         }}
                       >
-                        {invitingWorker ? 'Sending Invite...' : 'Send Invitation'}
+                        {invitingWorker ? t('searchWorkers.sendingInvitation') : t('searchWorkers.invite')}
                       </button>
                     </div>
                   </div>
@@ -1990,7 +2018,7 @@ function Profile() {
                     onClick={handleCloseWorkerModal} 
                     className="btn btn-secondary"
                   >
-                    Close
+                    {t('common.close')}
                   </button>
                   
                   <a 
@@ -1999,7 +2027,7 @@ function Profile() {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    View Full Profile
+                    {t('profile.viewProfile')}
                   </a>
                 </div>
               </div>

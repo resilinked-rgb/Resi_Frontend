@@ -1,7 +1,10 @@
 import { useEffect } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 import './TermsOfServiceModal.css';
 
 function TermsOfServiceModal({ isOpen, onClose }) {
+  const { t } = useLanguage();
+
   // Prevent body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
@@ -37,195 +40,152 @@ function TermsOfServiceModal({ isOpen, onClose }) {
     <div className="tos-modal-overlay" onClick={onClose}>
       <div className="tos-modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="tos-modal-header">
-          <h2>Terms of Service</h2>
+          <h2>{t('terms.title')}</h2>
         </div>
         
         <div className="tos-modal-body">
           <div className="tos-last-updated">
-            <strong>Last Updated:</strong> October 23, 2025
+            <strong>{t('terms.lastUpdated')}</strong>
           </div>
 
           <section className="tos-section">
-            <h3>1. Acceptance of Terms</h3>
-            <p>
-              By accessing or using ResiLinked ("the Platform"), you agree to be bound by these Terms of Service. 
-              If you do not agree to these terms, please do not use our services.
-            </p>
+            <h3>{t('terms.section1Title')}</h3>
+            <p>{t('terms.section1Para')}</p>
           </section>
 
           <section className="tos-section">
-            <h3>2. Description of Service</h3>
-            <p>
-              ResiLinked is a platform that connects workers and employers in local communities. We facilitate:
-            </p>
+            <h3>{t('terms.section2AltTitle')}</h3>
+            <p>{t('terms.section2AltPara')}</p>
             <ul>
-              <li>Job posting and job searching</li>
-              <li>Profile creation and management</li>
-              <li>Communication between users</li>
-              <li>Ratings and reviews</li>
-              <li>Job application tracking</li>
+              <li>{t('terms.section2Alt_1')}</li>
+              <li>{t('terms.section2Alt_2')}</li>
+              <li>{t('terms.section2Alt_3')}</li>
+              <li>{t('terms.section2Alt_4')}</li>
+              <li>{t('terms.section2Alt_5')}</li>
             </ul>
           </section>
 
           <section className="tos-section">
-            <h3>3. User Responsibilities</h3>
-            <p>As a user of ResiLinked, you agree to:</p>
+            <h3>{t('terms.section3Title')}</h3>
+            <p>{t('terms.section3AltIntro')}</p>
             <ul>
-              <li>Provide accurate and truthful information</li>
-              <li>Maintain the confidentiality of your account</li>
-              <li>Use the platform lawfully and respectfully</li>
-              <li>Not engage in fraudulent or deceptive practices</li>
-              <li>Not harass, threaten, or harm other users</li>
-              <li>Verify information independently before entering agreements</li>
+              <li>{t('terms.section3Alt_1')}</li>
+              <li>{t('terms.section3Alt_2')}</li>
+              <li>{t('terms.section3Alt_3')}</li>
+              <li>{t('terms.section3Alt_4')}</li>
+              <li>{t('terms.section3Alt_5')}</li>
+              <li>{t('terms.section3Alt_6')}</li>
             </ul>
           </section>
 
           <section className="tos-section">
-            <h3>4. Platform Role and Limitations</h3>
-            <p>
-              <strong>Important:</strong> ResiLinked is a CONNECTION PLATFORM ONLY. We:
-            </p>
+            <h3>{t('terms.section4AltTitle')}</h3>
+            <p><strong>{t('terms.important')}</strong> {t('terms.section4AltImportant')}</p>
             <ul>
-              <li><strong>DO NOT</strong> employ workers or hire on behalf of employers</li>
-              <li><strong>DO NOT</strong> guarantee the quality, safety, or legality of jobs or services</li>
-              <li><strong>DO NOT</strong> conduct background checks or verify user credentials</li>
-              <li><strong>DO NOT</strong> mediate disputes between users</li>
-              <li><strong>DO NOT</strong> process payments between users</li>
+              <li><strong>{t('terms.doNot')}</strong> {t('terms.section4Alt_1')}</li>
+              <li><strong>{t('terms.doNot')}</strong> {t('terms.section4Alt_2')}</li>
+              <li><strong>{t('terms.doNot')}</strong> {t('terms.section4Alt_3')}</li>
+              <li><strong>{t('terms.doNot')}</strong> {t('terms.section4Alt_4')}</li>
+              <li><strong>{t('terms.doNot')}</strong> {t('terms.section4Alt_5')}</li>
             </ul>
           </section>
 
           <section className="tos-section tos-highlight">
-            <h3>5. Limitation of Liability</h3>
-            <p>
-              <strong>By using ResiLinked, you acknowledge and agree that:</strong>
-            </p>
+            <h3>{t('terms.section5AltTitle')}</h3>
+            <p><strong>{t('terms.section5AltIntro')}</strong></p>
             <ul>
               <li>
-                <strong>ResiLinked and its operators WILL NOT BE HELD LIABLE</strong> for any damages, losses, 
-                injuries, or disputes arising from:
+                {t('terms.section5Alt_1')}
                 <ul>
-                  <li>Interactions between users</li>
-                  <li>Job agreements or employment relationships</li>
-                  <li>Quality of work performed or not performed</li>
-                  <li>Payment disputes between users</li>
-                  <li>Fraudulent users or scammers</li>
-                  <li>Personal injury or property damage</li>
-                  <li>Theft, harassment, or criminal activity</li>
-                  <li>Inaccurate information provided by users</li>
+                  <li>{t('terms.section5Alt_1_1')}</li>
+                  <li>{t('terms.section5Alt_1_2')}</li>
+                  <li>{t('terms.section5Alt_1_3')}</li>
+                  <li>{t('terms.section5Alt_1_4')}</li>
+                  <li>{t('terms.section5Alt_1_5')}</li>
+                  <li>{t('terms.section5Alt_1_6')}</li>
+                  <li>{t('terms.section5Alt_1_7')}</li>
+                  <li>{t('terms.section5Alt_1_8')}</li>
                 </ul>
               </li>
-              <li>
-                You use the platform <strong>AT YOUR OWN RISK</strong> and are solely responsible for 
-                verifying the identity, credentials, and trustworthiness of other users.
-              </li>
-              <li>
-                ResiLinked is provided "AS IS" without warranties of any kind, express or implied.
-              </li>
+              <li>{t('terms.section5Alt_2')}</li>
+              <li>{t('terms.section5Alt_3')}</li>
             </ul>
           </section>
 
           <section className="tos-section">
-            <h3>6. User Conduct</h3>
-            <p>You agree NOT to:</p>
+            <h3>{t('terms.section6AltTitle')}</h3>
+            <p>{t('terms.section6AltIntro')}</p>
             <ul>
-              <li>Post false or misleading information</li>
-              <li>Impersonate any person or entity</li>
-              <li>Use the platform for illegal activities</li>
-              <li>Spam or send unsolicited messages</li>
-              <li>Violate any applicable laws or regulations</li>
-              <li>Attempt to hack, disrupt, or damage the platform</li>
+              <li>{t('terms.section6Alt_1')}</li>
+              <li>{t('terms.section6Alt_2')}</li>
+              <li>{t('terms.section6Alt_3')}</li>
+              <li>{t('terms.section6Alt_4')}</li>
+              <li>{t('terms.section6Alt_5')}</li>
+              <li>{t('terms.section6Alt_6')}</li>
             </ul>
           </section>
 
           <section className="tos-section">
-            <h3>7. Account Termination</h3>
-            <p>
-              We reserve the right to suspend or terminate accounts that violate these terms or engage in 
-              prohibited conduct, without prior notice.
-            </p>
+            <h3>{t('terms.section7AltTitle')}</h3>
+            <p>{t('terms.section7AltPara')}</p>
           </section>
 
           <section className="tos-section">
-            <h3>8. Privacy and Data</h3>
-            <p>
-              Your use of ResiLinked is also governed by our Privacy Policy. We collect and process data 
-              as described in that policy. You consent to our data practices by using the platform.
-            </p>
+            <h3>{t('terms.section8Title')}</h3>
+            <p>{t('terms.section8AltPara')}</p>
           </section>
 
           <section className="tos-section">
-            <h3>9. Content Ownership</h3>
-            <p>
-              You retain ownership of content you post on ResiLinked. However, by posting content, you grant 
-              ResiLinked a license to use, display, and distribute that content on the platform.
-            </p>
+            <h3>{t('terms.section9AltTitle')}</h3>
+            <p>{t('terms.section9AltPara')}</p>
           </section>
 
           <section className="tos-section">
-            <h3>10. Indemnification</h3>
-            <p>
-              You agree to indemnify and hold harmless ResiLinked, its operators, and affiliates from any 
-              claims, damages, or expenses arising from your use of the platform or violation of these terms.
-            </p>
+            <h3>{t('terms.section10AltTitle')}</h3>
+            <p>{t('terms.section10AltPara')}</p>
           </section>
 
           <section className="tos-section">
-            <h3>11. Safety Recommendations</h3>
-            <p>
-              While we are not liable for user interactions, we strongly recommend:
-            </p>
+            <h3>{t('terms.section11AltTitle')}</h3>
+            <p>{t('terms.stronglyRecommend')}</p>
             <ul>
-              <li>Meeting in public places for initial meetings</li>
-              <li>Verifying user profiles and reviews</li>
-              <li>Using the in-app messaging system</li>
-              <li>Reporting suspicious behavior immediately</li>
-              <li>Trusting your instincts</li>
-              <li>Not sharing sensitive personal information prematurely</li>
+              <li>{t('terms.section11Alt_1')}</li>
+              <li>{t('terms.section11Alt_2')}</li>
+              <li>{t('terms.section11Alt_3')}</li>
+              <li>{t('terms.section11Alt_4')}</li>
+              <li>{t('terms.section11Alt_5')}</li>
+              <li>{t('terms.section11Alt_6')}</li>
             </ul>
           </section>
 
           <section className="tos-section">
-            <h3>12. Dispute Resolution</h3>
-            <p>
-              Any disputes arising from these terms or use of the platform shall be resolved through 
-              binding arbitration in accordance with the laws of the Republic of the Philippines.
-            </p>
+            <h3>{t('terms.section12AltTitle')}</h3>
+            <p>{t('terms.section12AltPara')}</p>
           </section>
 
           <section className="tos-section">
-            <h3>13. Changes to Terms</h3>
-            <p>
-              We reserve the right to modify these Terms of Service at any time. Continued use of the 
-              platform after changes constitutes acceptance of the modified terms.
-            </p>
+            <h3>{t('terms.section13AltTitle')}</h3>
+            <p>{t('terms.section13AltPara')}</p>
           </section>
 
           <section className="tos-section">
-            <h3>14. Governing Law</h3>
-            <p>
-              These Terms of Service are governed by the laws of the Republic of the Philippines.
-            </p>
+            <h3>{t('terms.section14AltTitle')}</h3>
+            <p>{t('terms.section14AltPara')}</p>
           </section>
 
           <section className="tos-section">
-            <h3>15. Contact Information</h3>
-            <p>
-              For questions about these Terms of Service, please contact us through the platform's 
-              support system.
-            </p>
+            <h3>{t('terms.section15AltTitle')}</h3>
+            <p>{t('terms.section15AltPara')}</p>
           </section>
 
           <div className="tos-acknowledgment">
-            <p>
-              <strong>BY CLICKING "I ACCEPT" OR USING RESILINKED, YOU ACKNOWLEDGE THAT YOU HAVE READ, 
-              UNDERSTOOD, AND AGREE TO BE BOUND BY THESE TERMS OF SERVICE.</strong>
-            </p>
+            <p><strong>{t('terms.modalAcknowledgment')}</strong></p>
           </div>
         </div>
 
         <div className="tos-modal-footer">
           <button className="tos-close-button" onClick={onClose}>
-            Close
+            {t('terms.closeButton')}
           </button>
         </div>
       </div>

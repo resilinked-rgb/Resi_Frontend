@@ -1,113 +1,112 @@
 import { Link } from 'react-router-dom'
+import { useLanguage } from '../context/LanguageContext'
 import styles from './About.module.css'
 
 function About() {
+  const { t } = useLanguage()
+  
   return (
     <div className={styles.aboutContainer}>
       <div className={styles.aboutContent}>
         {/* Header Section */}
         <section className={styles.header}>
-          <h1>About Resi</h1>
-          <p className={styles.tagline}>Connecting skilled workers with opportunities</p>
+          <h1>{t('about.title')}</h1>
+          <p className={styles.tagline}>{t('about.tagline')}</p>
         </section>
 
         {/* Mission Section */}
         <section className={styles.section}>
-          <h2>Our Mission</h2>
+          <h2>{t('about.ourMission')}</h2>
           <p>
-            Resi is dedicated to bridging the gap between talented workers and employers seeking their skills. 
-            We believe in creating meaningful employment connections that benefit both job seekers and businesses, 
-            fostering a thriving community of professionals.
+            {t('about.missionText')}
           </p>
         </section>
 
         {/* What We Do Section */}
         <section className={styles.section}>
-          <h2>What We Do</h2>
+          <h2>{t('about.whatWeDo')}</h2>
           <div className={styles.features}>
             <div className={styles.feature}>
               <div className={styles.icon}>💼</div>
-              <h3>Job Matching</h3>
-              <p>Our advanced matching algorithm connects workers with jobs that fit their skills, experience, and preferences.</p>
+              <h3>{t('about.jobMatching')}</h3>
+              <p>{t('about.jobMatchingText')}</p>
             </div>
             <div className={styles.feature}>
               <div className={styles.icon}>🔍</div>
-              <h3>Easy Search</h3>
-              <p>Browse thousands of job listings and worker profiles with powerful search and filter capabilities.</p>
+              <h3>{t('about.easySearch')}</h3>
+              <p>{t('about.easySearchText')}</p>
             </div>
             <div className={styles.feature}>
               <div className={styles.icon}>💬</div>
-              <h3>Direct Communication</h3>
-              <p>Message directly with employers or workers through our secure in-platform chat system.</p>
+              <h3>{t('about.directCommunication')}</h3>
+              <p>{t('about.directCommunicationText')}</p>
             </div>
             <div className={styles.feature}>
               <div className={styles.icon}>⭐</div>
-              <h3>Ratings & Reviews</h3>
-              <p>Build trust through our transparent rating system that showcases work quality and reliability.</p>
+              <h3>{t('about.ratingsReviews')}</h3>
+              <p>{t('about.ratingsReviewsText')}</p>
             </div>
             <div className={styles.feature}>
               <div className={styles.icon}>🎯</div>
-              <h3>Goal Setting</h3>
-              <p>Track your career goals and job search progress with our integrated goal management system.</p>
+              <h3>{t('about.goalSetting')}</h3>
+              <p>{t('about.goalSettingText')}</p>
             </div>
             <div className={styles.feature}>
               <div className={styles.icon}>🔒</div>
-              <h3>Secure Platform</h3>
-              <p>Your data is protected with enterprise-level security measures and privacy controls.</p>
+              <h3>{t('about.securePlatform')}</h3>
+              <p>{t('about.securePlatformText')}</p>
             </div>
           </div>
         </section>
 
         {/* Who We Serve Section */}
         <section className={styles.section}>
-          <h2>Who We Serve</h2>
+          <h2>{t('about.whoWeServe')}</h2>
           <div className={styles.serve}>
             <div className={styles.serveCard}>
-              <h3>👷 Workers</h3>
-              <p>Whether you're a skilled tradesperson, freelancer, or professional seeking new opportunities, 
-              Resi helps you find work that matches your expertise and schedule.</p>
+              <h3>👷 {t('about.workers')}</h3>
+              <p>{t('about.workersText')}</p>
             </div>
             <div className={styles.serveCard}>
-              <h3>🏢 Employers</h3>
-              <p>Post jobs, search for qualified workers, and build your team with confidence. 
-              Our platform streamlines the hiring process from posting to placement.</p>
+              <h3>🏢 {t('about.employers')}</h3>
+              <p>{t('about.employersText')}</p>
             </div>
           </div>
         </section>
 
         {/* Values Section */}
         <section className={styles.section}>
-          <h2>Our Values</h2>
+          <h2>{t('about.ourValues')}</h2>
           <ul className={styles.values}>
-            <li><strong>Transparency:</strong> Clear communication and honest interactions between all parties</li>
-            <li><strong>Quality:</strong> Commitment to connecting the right people with the right opportunities</li>
-            <li><strong>Trust:</strong> Building a reliable platform where users can engage with confidence</li>
-            <li><strong>Innovation:</strong> Continuously improving our features to serve our community better</li>
-            <li><strong>Support:</strong> Providing responsive assistance whenever our users need help</li>
+            <li><strong>{t('about.transparency')}:</strong> {t('about.transparencyText')}</li>
+            <li><strong>{t('about.quality')}:</strong> {t('about.qualityText')}</li>
+            <li><strong>{t('about.trust')}:</strong> {t('about.trustText')}</li>
+            <li><strong>{t('about.innovation')}:</strong> {t('about.innovationText')}</li>
+            <li><strong>{t('about.support')}:</strong> {t('about.supportText')}</li>
           </ul>
         </section>
 
         {/* Contact Section */}
         <section className={styles.section}>
-          <h2>Get In Touch</h2>
-          <p>Have questions or need assistance? We're here to help!</p>
+          <h2>{t('about.getInTouch')}</h2>
+          <p>{t('about.getInTouchText')}</p>
           <div className={styles.contact}>
             <div className={styles.contactItem}>
-              <strong>Email:</strong> support@resi.com
+              <strong>{t('about.email')}:</strong> support@resi.com
             </div>
             <div className={styles.contactItem}>
-              <strong>Phone:</strong> +1 (555) 123-4567
+              <strong>{t('about.phone')}:</strong> +1 (555) 123-4567
             </div>
             <div className={styles.contactItem}>
-              <strong>Location:</strong> 123 Main Street, Suite 100, City, State 12345
+              <strong>{t('about.location')}:</strong> 123 Main Street, Suite 100, City, State 12345
             </div>
             <div className={styles.contactItem}>
-              <strong>Business Hours:</strong> Monday - Friday, 9:00 AM - 6:00 PM EST
+              <strong>{t('about.businessHours')}:</strong> {t('about.businessHoursText')}
             </div>
           </div>
           <div className={styles.ctaButtons}>
-            <Link to="/help" className={styles.ctaButton}>Visit Help Center</Link>
-            <Link to="/register" className={styles.ctaButton}>Get Started</Link>
+            <Link to="/help" className={styles.ctaButton}>{t('about.visitHelpCenter')}</Link>
+            <Link to="/register" className={styles.ctaButton}>{t('about.getStarted')}</Link>
           </div>
         </section>
       </div>

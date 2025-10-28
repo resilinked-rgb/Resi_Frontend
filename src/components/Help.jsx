@@ -2,11 +2,13 @@ import { useState, useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { AuthContext } from '../context/AuthContext'
 import { AlertContext } from '../context/AlertContext'
+import { useLanguage } from '../context/LanguageContext'
 import apiService from '../api'
 import './Help.module.css' // Changed from default import to side-effect import
 
 // Help Center with comprehensive FAQ and support options
 function Help() {
+  const { t } = useLanguage()
   const { user, token } = useContext(AuthContext)
   const { success, error: showError } = useContext(AlertContext)
   const navigate = useNavigate()
@@ -37,202 +39,202 @@ function Help() {
   const faqData = [
     {
       id: 1,
-      category: 'Getting Started',
+      category: t('help.gettingStarted'),
       icon: 'fas fa-rocket',
       questions: [
         {
           id: 'reg',
-          question: 'How do I create an account on ResiLinked?',
-          answer: 'Click the "Register" button on the homepage and fill in your personal information including name, email, mobile number, and address. Upload a valid government-issued ID for verification. After registration, check your email for a confirmation link to activate your account.'
+          question: t('help.q1'),
+          answer: t('help.a1')
         },
         {
           id: 'verify',
-          question: 'How long does account verification take?',
-          answer: 'Account verification typically takes 1-3 business days. Our admin team reviews your submitted documents to ensure authenticity and compliance. You will receive an email notification once your account is verified. If verification takes longer than 3 days, please contact our support team.'
+          question: t('help.q2'),
+          answer: t('help.a2')
         },
         {
           id: 'login',
-          question: 'I cannot log in to my account. What should I do?',
-          answer: 'First, ensure you are using the correct email and password. If you forgot your password, click "Forgot Password" on the login page to reset it. Make sure your account is verified - check your email for a verification link. If problems persist, contact support for assistance.'
+          question: t('help.q3'),
+          answer: t('help.a3')
         }
       ]
     },
     {
       id: 2,
-      category: 'Account Management',
+      category: t('help.accountManagement'),
       icon: 'fas fa-user-circle',
       questions: [
         {
           id: 'pass',
-          question: 'How do I reset my password?',
-          answer: 'On the login page, click "Forgot Password". Enter your registered email address and you will receive a password reset link. Click the link in your email and follow the instructions to create a new secure password. The reset link expires after 1 hour for security purposes.'
+          question: t('help.q4'),
+          answer: t('help.a4')
         },
         {
           id: 'update',
-          question: 'How do I update my profile information?',
-          answer: 'Log in to your account and go to your Profile page. Click "Edit Profile" to modify your personal information, work skills, bio, and profile picture. Make sure to click "Save Changes" when done. Updated information will be reflected immediately on your profile.'
+          question: t('help.q5'),
+          answer: t('help.a5')
         },
         {
           id: 'delete',
-          question: 'Can I delete my account?',
-          answer: 'Yes, you can request account deletion from your Settings page. Please note that deleting your account is permanent and cannot be undone. All your data, including job applications and messages, will be removed. Contact support if you need help with account deletion.'
+          question: t('help.q6'),
+          answer: t('help.a6')
         },
         {
           id: 'privacy',
-          question: 'Who can see my profile information?',
-          answer: 'Your basic profile (name, skills, and work experience) is visible only to verified employers when you apply to their jobs. Your contact information (email, phone) is only shared when you accept a job or the employer selects you. Your profile is never publicly visible on search engines.'
+          question: t('help.q7'),
+          answer: t('help.a7')
         }
       ]
     },
     {
       id: 3,
-      category: 'Finding Work',
+      category: t('help.findingWork'),
       icon: 'fas fa-briefcase',
       questions: [
         {
           id: 'search',
-          question: 'How do I search for jobs on ResiLinked?',
-          answer: 'Go to the "Find Jobs" page from your dashboard. Use the search bar to look for specific job titles or skills. You can filter jobs by location (barangay), job type, salary range, and date posted. Click on any job card to view full details including requirements, salary, and employer information.'
+          question: t('help.q8'),
+          answer: t('help.a8')
         },
         {
           id: 'apply',
-          question: 'How do I apply for a job?',
-          answer: 'On the job details page, click the "Apply Now" button. Your profile information will be sent to the employer automatically. The employer can then view your profile and contact you directly if interested. You can track your applications in your Dashboard under "My Applications".'
+          question: t('help.q9'),
+          answer: t('help.a9')
         },
         {
           id: 'track',
-          question: 'How can I track my job applications?',
-          answer: 'Go to your Dashboard and click on "My Applications" to see all jobs you have applied to. You can see the application status (pending, reviewed, accepted, or rejected). Employers can also send you direct messages regarding your application through our messaging system.'
+          question: t('help.q10'),
+          answer: t('help.a10')
         },
         {
           id: 'match',
-          question: 'What is the job matching feature?',
-          answer: 'ResiLinked uses smart matching to suggest jobs that fit your skills and location. Go to the "Matched Jobs" section in your dashboard to see jobs recommended specifically for you. Update your skills regularly to get better job matches.'
+          question: t('help.q11'),
+          answer: t('help.a11')
         }
       ]
     },
     {
       id: 4,
-      category: 'For Employers',
+      category: t('help.forEmployers'),
       icon: 'fas fa-building',
       questions: [
         {
           id: 'employer',
-          question: 'How do I post a job on ResiLinked?',
-          answer: 'First, register as an "Employer" or "Both" user type. Once verified, go to your Dashboard and click "Post a Job". Fill in job details including title, description, requirements, salary, and location. Your job post will be visible to all qualified workers immediately after submission.'
+          question: t('help.q12'),
+          answer: t('help.a12')
         },
         {
           id: 'cost',
-          question: 'Is there a fee to post jobs?',
-          answer: 'No! Posting jobs on ResiLinked is completely free. You can post unlimited job openings without any charges. Our mission is to connect employers with local skilled workers efficiently and affordably.'
+          question: t('help.q13'),
+          answer: t('help.a13')
         },
         {
           id: 'manage',
-          question: 'How do I manage job applicants?',
-          answer: 'In your Employer Dashboard, go to "My Jobs" and click on any job post. You will see a list of all applicants with their profiles. You can view their skills, experience, and ratings. Contact applicants directly through our messaging system or using their provided contact information.'
+          question: t('help.q14'),
+          answer: t('help.a14')
         },
         {
           id: 'edit',
-          question: 'Can I edit or delete my job posts?',
-          answer: 'Yes! Go to "My Jobs" in your dashboard, find the job you want to modify, and click "Edit" to update job details or "Delete" to remove the posting. Editing preserves existing applications, while deleting removes the job permanently.'
+          question: t('help.q15'),
+          answer: t('help.a15')
         }
       ]
     },
     {
       id: 5,
-      category: 'Ratings and Reviews',
+      category: t('help.ratingsReviews'),
       icon: 'fas fa-star',
       questions: [
         {
           id: 'rating',
-          question: 'How does the rating system work?',
-          answer: 'After completing a job, both the employer and worker can rate each other from 1 to 5 stars. Ratings help build trust in the community. Good ratings improve your profile visibility and increase your chances of getting hired or finding reliable workers.'
+          question: t('help.q16'),
+          answer: t('help.a16')
         },
         {
           id: 'review',
-          question: 'Can I see ratings before hiring someone?',
-          answer: 'Yes! Each user profile displays their average rating and total number of completed jobs. You can also read written reviews from previous employers or workers. This helps you make informed decisions when hiring or accepting work.'
+          question: t('help.q17'),
+          answer: t('help.a17')
         },
         {
           id: 'dispute',
-          question: 'What if I receive an unfair rating?',
-          answer: 'If you believe a rating is unfair or inappropriate, you can report it to our support team. We will review the situation and take appropriate action. Provide evidence such as screenshots or messages to support your claim.'
+          question: t('help.q18'),
+          answer: t('help.a18')
         }
       ]
     },
     {
       id: 6,
-      category: 'Safety and Security',
+      category: t('help.safety'),
       icon: 'fas fa-shield-alt',
       questions: [
         {
           id: 'safe',
-          question: 'Is my personal information secure?',
-          answer: 'Yes! We use industry-standard encryption and security measures to protect your data. Your password is encrypted, and sensitive information like your ID documents are stored securely. We never share your personal data with third parties without your explicit consent.'
+          question: t('help.q19'),
+          answer: t('help.a19')
         },
         {
           id: 'scam',
-          question: 'How do I avoid scams on ResiLinked?',
-          answer: 'Only accept jobs from verified employers. Never send money to anyone claiming to be from ResiLinked. Be cautious of jobs asking for upfront fees or personal bank details. Report suspicious accounts immediately. Use our in-app messaging for all communication to maintain a record.'
+          question: t('help.q20'),
+          answer: t('help.a20')
         },
         {
           id: 'report',
-          question: 'How do I report suspicious activity or users?',
-          answer: 'Click on the user profile and select "Report User". Choose a reason for reporting and provide details. You can also report job posts by clicking the report icon on the job card. Our team investigates all reports within 24 hours and takes appropriate action.'
+          question: t('help.q21'),
+          answer: t('help.a21')
         },
         {
           id: 'verify',
-          question: 'How do I know if an employer is verified?',
-          answer: 'Verified employers have a blue checkmark badge on their profile. This means they have submitted valid business documents and been approved by our admin team. We recommend working only with verified employers for your safety.'
+          question: t('help.q22'),
+          answer: t('help.a22')
         }
       ]
     },
     {
       id: 7,
-      category: 'Payments and Goals',
+      category: t('help.messaging'),
       icon: 'fas fa-wallet',
       questions: [
         {
           id: 'payment',
-          question: 'How do I receive payment for my work?',
-          answer: 'Payment terms are agreed upon directly between you and the employer. ResiLinked does not process payments. Discuss payment methods, rates, and schedules before starting work. Get everything in writing for your protection.'
+          question: t('help.q23'),
+          answer: t('help.a23')
         },
         {
           id: 'goals',
-          question: 'What is the Goals feature?',
-          answer: 'The Goals feature helps you track your income and savings targets. Set a financial goal (e.g., "Save ₱10,000 for new equipment"), and update your progress as you earn money from completed jobs. This helps you stay motivated and financially organized.'
+          question: t('help.q24'),
+          answer: t('help.a24')
         },
         {
           id: 'priority',
-          question: 'How do goal priorities work?',
-          answer: 'You can set multiple goals and prioritize them. Your highest priority goal appears at the top of your dashboard. When you earn money, update your highest priority goal first. This system helps you focus on what matters most.'
+          question: t('help.q25'),
+          answer: t('help.a25')
         }
       ]
     },
     {
       id: 8,
-      category: 'Technical Support',
+      category: t('help.troubleshooting'),
       icon: 'fas fa-tools',
       questions: [
         {
           id: 'browser',
-          question: 'Which browsers are supported?',
-          answer: 'ResiLinked works best on the latest versions of Google Chrome, Mozilla Firefox, Safari, and Microsoft Edge. For the best experience, keep your browser updated. The platform is also mobile-responsive and works on all smartphones and tablets.'
+          question: t('help.q26'),
+          answer: t('help.a26')
         },
         {
           id: 'slow',
-          question: 'The website is loading slowly. What should I do?',
-          answer: 'Try refreshing the page or clearing your browser cache. Check your internet connection. If the problem persists, the issue might be on our end - please wait a few minutes and try again. Contact support if issues continue.'
+          question: t('help.q27'),
+          answer: t('help.a27')
         },
         {
           id: 'mobile',
-          question: 'Is there a mobile app for ResiLinked?',
-          answer: 'Currently, ResiLinked is a web-based platform accessible through any mobile browser. We are working on developing native mobile apps for Android and iOS. In the meantime, you can use the website on your phone - it is fully mobile-responsive.'
+          question: t('help.q28'),
+          answer: t('help.a28')
         },
         {
           id: 'error',
-          question: 'I am getting an error message. What should I do?',
-          answer: 'Take a screenshot of the error message and note what you were doing when it occurred. Try logging out and logging back in. Clear your browser cache and cookies. If the error persists, contact our support team with the screenshot and error details.'
+          question: t('help.q29'),
+          answer: t('help.a29')
         }
       ]
     }
@@ -263,7 +265,7 @@ function Help() {
   const openSupportChat = async () => {
     // Check if user is logged in
     if (!user || !token) {
-      showError('You need to be logged in to use live chat support. Please login or use Email Support instead.')
+      showError(t('help.mustBeLoggedIn'))
       return
     }
 
@@ -341,8 +343,8 @@ function Help() {
       <div className="content-wrapper">
         <div className="main-content">
           <div className="page-header">
-            <h1><i className="fas fa-life-ring"></i> Help and Support</h1>
-            <p>Frequently asked questions and support for ResiLinked</p>
+            <h1><i className="fas fa-life-ring"></i> {t('help.title')}</h1>
+            <p>{t('help.subtitle')}</p>
           </div>
 
           <div className="search-container">
@@ -351,7 +353,7 @@ function Help() {
               id="helpSearch"
               name="helpSearch"
               className="search-box"
-              placeholder="🔍 Search questions..."
+              placeholder={`🔍 ${t('help.searchPlaceholder')}`}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -403,22 +405,22 @@ function Help() {
           {searchTerm && faqData.every(section => filterQuestions(section.questions).length === 0) && (
             <div className="no-results">
               <i className="fas fa-search"></i>
-              <p>No questions found for "{searchTerm}"</p>
-              <p>Try different search terms or contact support.</p>
+              <p>{t('help.noResults')} "{searchTerm}"</p>
+              <p>{t('help.tryDifferent')}</p>
             </div>
           )}
         </div>
 
         <div className="sidebar">
           <div className="contact-card">
-            <h3><i className="fas fa-headset"></i> Need Help?</h3>
+            <h3><i className="fas fa-headset"></i> {t('help.needHelp')}</h3>
             <button className="contact-btn" onClick={openSupportChat}>
               <i className="fas fa-comments"></i>
-              Chat with Support
+              {t('help.chatWithSupport')}
             </button>
             <button className="contact-btn secondary" onClick={openSupportModal} style={{ marginTop: '10px', background: '#6c757d' }}>
               <i className="fas fa-envelope"></i>
-              Email Support
+              {t('help.emailSupport')}
             </button>
             
             <div className="contact-info">
@@ -426,28 +428,28 @@ function Help() {
                 <div className="contact-method">
                   <i className="fas fa-envelope"></i>
                   <div>
-                    <strong>Email:</strong>
+                    <strong>{t('help.email')}:</strong>
                     <a href="mailto:support@resilinked.com">support@resilinked.com</a>
                   </div>
                 </div>
                 <div className="contact-method">
                   <i className="fas fa-phone"></i>
                   <div>
-                    <strong>Phone:</strong>
+                    <strong>{t('help.phone')}:</strong>
                     <a href="tel:+639451234567">+63 945 123 4567</a>
                   </div>
                 </div>
                 <div className="contact-method">
                   <i className="fas fa-clock"></i>
                   <div>
-                    <strong>Hours:</strong>
-                    <span>Mon-Sat: 8AM-6PM</span>
+                    <strong>{t('help.hours')}:</strong>
+                    <span>{t('help.monSat')}</span>
                   </div>
                 </div>
                 <div className="contact-method">
                   <i className="fas fa-map-marker-alt"></i>
                   <div>
-                    <strong>Location:</strong>
+                    <strong>{t('help.location')}:</strong>
                     <span>San Fernando, Pampanga</span>
                   </div>
                 </div>
@@ -456,24 +458,24 @@ function Help() {
           </div>
 
           <div className="quick-links">
-            <h3>Quick Links</h3>
+            <h3>{t('help.quickLinks')}</h3>
             <Link to="/dashboard" className="quick-link">
-              <i className="fas fa-home"></i> Back to Dashboard
+              <i className="fas fa-home"></i> {t('help.backToDashboard')}
             </Link>
             <Link to="/profile" className="quick-link">
-              <i className="fas fa-user"></i> My Profile
+              <i className="fas fa-user"></i> {t('help.myProfile')}
             </Link>
             <Link to="/user-settings" className="quick-link">
-              <i className="fas fa-cog"></i> Settings
+              <i className="fas fa-cog"></i> {t('help.settings')}
             </Link>
             <Link to="/jobs" className="quick-link">
-              <i className="fas fa-search"></i> Find Jobs
+              <i className="fas fa-search"></i> {t('help.findJobs')}
             </Link>
             <Link to="/about" className="quick-link">
-              <i className="fas fa-info-circle"></i> About Us
+              <i className="fas fa-info-circle"></i> {t('help.aboutUs')}
             </Link>
             <Link to="/privacy" className="quick-link">
-              <i className="fas fa-shield-alt"></i> Privacy Policy
+              <i className="fas fa-shield-alt"></i> {t('help.privacyPolicy')}
             </Link>
           </div>
         </div>
@@ -484,14 +486,14 @@ function Help() {
         <div className="modal-overlay" onClick={() => setShowSupportModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2><i className="fas fa-headset"></i> Contact Support</h2>
+              <h2><i className="fas fa-headset"></i> {t('help.contactSupport')}</h2>
               <button className="modal-close" onClick={() => setShowSupportModal(false)}>×</button>
             </div>
             
             <div className="modal-body">
               <form onSubmit={submitSupportForm}>
                 <div className="form-group">
-                  <label htmlFor="supportName">Name:</label>
+                  <label htmlFor="supportName">{t('help.name')}:</label>
                   <input
                     type="text"
                     id="supportName"
@@ -502,7 +504,7 @@ function Help() {
                 </div>
                 
                 <div className="form-group">
-                  <label htmlFor="supportEmail">Email:</label>
+                  <label htmlFor="supportEmail">{t('help.email')}:</label>
                   <input
                     type="email"
                     id="supportEmail"
@@ -513,39 +515,39 @@ function Help() {
                 </div>
                 
                 <div className="form-group">
-                  <label htmlFor="supportSubject">Subject:</label>
+                  <label htmlFor="supportSubject">{t('help.subject')}:</label>
                   <select
                     id="supportSubject"
                     value={supportForm.subject}
                     onChange={(e) => handleSupportFormChange('subject', e.target.value)}
                     required
                   >
-                    <option value="">Select a topic...</option>
-                    <option value="Account Issues">Account Issues</option>
-                    <option value="Technical Support">Technical Support</option>
-                    <option value="Job Posting">Job Posting</option>
-                    <option value="Profile Management">Profile Management</option>
-                    <option value="Billing & Payments">Billing & Payments</option>
-                    <option value="Report a Problem">Report a Problem</option>
-                    <option value="Feature Request">Feature Request</option>
-                    <option value="General Inquiry">General Inquiry</option>
-                    <option value="Other">Other</option>
+                    <option value="">{t('help.selectTopic')}</option>
+                    <option value="Account Issues">{t('help.accountIssues')}</option>
+                    <option value="Technical Support">{t('help.technicalSupport')}</option>
+                    <option value="Job Posting">{t('help.jobPosting')}</option>
+                    <option value="Profile Management">{t('help.profileManagement')}</option>
+                    <option value="Billing & Payments">{t('help.billingPayments')}</option>
+                    <option value="Report a Problem">{t('help.reportProblem')}</option>
+                    <option value="Feature Request">{t('help.featureRequest')}</option>
+                    <option value="General Inquiry">{t('help.generalInquiry')}</option>
+                    <option value="Other">{t('help.other')}</option>
                   </select>
                   {supportForm.subject && (
                     <small style={{ color: '#666', fontSize: '0.85rem', marginTop: '0.5rem', display: 'block' }}>
-                      💡 A message template has been added below. Please customize it with your details.
+                      💡 {t('help.templateAdded')}
                     </small>
                   )}
                 </div>
                 
                 <div className="form-group">
-                  <label htmlFor="supportMessage">Message:</label>
+                  <label htmlFor="supportMessage">{t('help.message')}:</label>
                   <textarea
                     id="supportMessage"
                     value={supportForm.message}
                     onChange={(e) => handleSupportFormChange('message', e.target.value)}
                     rows="5"
-                    placeholder="Describe your concern or question..."
+                    placeholder={t('help.messagePlaceholder')}
                     required
                   />
                 </div>
@@ -556,7 +558,7 @@ function Help() {
                     className="btn secondary" 
                     onClick={() => setShowSupportModal(false)}
                   >
-                    Cancel
+                    {t('help.cancel')}
                   </button>
                   <button 
                     type="submit" 
@@ -566,12 +568,12 @@ function Help() {
                     {submitting ? (
                       <>
                         <div className="spinner small"></div>
-                        Sending...
+                        {t('help.sending')}
                       </>
                     ) : (
                       <>
                         <i className="fas fa-paper-plane"></i>
-                        Send Message
+                        {t('help.sendMessage')}
                       </>
                     )}
                   </button>

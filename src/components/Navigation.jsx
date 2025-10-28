@@ -5,18 +5,22 @@ import { NotificationContext } from '../context/NotificationContext';
 import NotificationDropdown from './NotificationDropdown';
 import { getProfilePictureUrl } from '../utils/imageHelper';
 import { useTranslation } from '../hooks/useTranslation';
+import { useLanguage } from '../context/LanguageContext';
 
 function Navigation() {
   const { user, logout, hasAccessTo, isAuthenticated, loading } = useContext(AuthContext);
   const { unreadCount } = useContext(NotificationContext);
   const { t } = useTranslation();
+  const { language, changeLanguage } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(user);
   const menuRef = useRef(null);
   const userMenuRef = useRef(null);
+  const langMenuRef = useRef(null);
   
   // Set to false to disable debug logging
   const DEBUG = false;
@@ -68,6 +72,9 @@ function Navigation() {
       }
       if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
         setUserMenuOpen(false);
+      }
+      if (langMenuRef.current && !langMenuRef.current.contains(event.target)) {
+        setLangMenuOpen(false);
       }
     };
 
@@ -221,6 +228,46 @@ function Navigation() {
                 <span className="nav-icon">🔍</span>
                 {t('nav.findJobs')}
               </NavLink>
+              
+              {/* Language Selector Dropdown for non-logged-in users */}
+              <div className="language-dropdown" ref={langMenuRef}>
+                <button
+                  className="lang-dropdown-trigger"
+                  onClick={() => setLangMenuOpen(!langMenuOpen)}
+                >
+                  <span className="lang-icon">🌐</span>
+                  <span className="lang-text">{language === 'en' ? 'English' : 'Tagalog'}</span>
+                  <span className={`dropdown-arrow ${langMenuOpen ? 'open' : ''}`}>▼</span>
+                </button>
+
+                {langMenuOpen && (
+                  <div className="lang-dropdown-menu">
+                    <button
+                      className={`lang-option ${language === 'en' ? 'active' : ''}`}
+                      onClick={() => {
+                        changeLanguage('en');
+                        setLangMenuOpen(false);
+                      }}
+                    >
+                      <span className="lang-flag">🇺🇸</span>
+                      <span>English</span>
+                      {language === 'en' && <span className="checkmark">✓</span>}
+                    </button>
+                    <button
+                      className={`lang-option ${language === 'tl' ? 'active' : ''}`}
+                      onClick={() => {
+                        changeLanguage('tl');
+                        setLangMenuOpen(false);
+                      }}
+                    >
+                      <span className="lang-flag">🇵🇭</span>
+                      <span>Tagalog</span>
+                      {language === 'tl' && <span className="checkmark">✓</span>}
+                    </button>
+                  </div>
+                )}
+              </div>
+              
               <NavLink to="/login" className="btn-outline">
                 {t('nav.login')}
               </NavLink>
@@ -342,9 +389,10 @@ function Navigation() {
         .nav-links {
           display: flex;
           align-items: center;
-          gap: 0.375rem;
+          gap: 0.5rem;
           flex-wrap: nowrap;
           flex: 1;
+          justify-content: flex-end;
         }
 
         .nav-link {
@@ -404,6 +452,92 @@ function Navigation() {
 
         .nav-icon {
           font-size: 0.875rem;
+        }
+
+        /* Language Dropdown */
+        .language-dropdown {
+          position: relative;
+        }
+
+        .lang-dropdown-trigger {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          color: white;
+          padding: 0.5rem 0.75rem;
+          border-radius: var(--radius-xl);
+          cursor: pointer;
+          transition: all var(--transition-fast);
+          backdrop-filter: blur(20px);
+          font-size: 0.75rem;
+          font-weight: 500;
+        }
+
+        .lang-dropdown-trigger:hover {
+          background: rgba(255, 255, 255, 0.2);
+          border-color: rgba(255, 255, 255, 0.25);
+          box-shadow: 0 4px 16px rgba(255, 255, 255, 0.1);
+        }
+
+        .lang-icon {
+          font-size: 1rem;
+        }
+
+        .lang-text {
+          white-space: nowrap;
+        }
+
+        .lang-dropdown-menu {
+          position: absolute;
+          top: calc(100% + 0.5rem);
+          right: 0;
+          background: white;
+          border-radius: var(--radius-xl);
+          box-shadow: var(--shadow-xl);
+          border: 1px solid var(--gray-200);
+          min-width: 160px;
+          overflow: hidden;
+          z-index: 1000;
+          animation: fadeIn 0.2s ease;
+        }
+
+        .lang-option {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          padding: 0.75rem 1rem;
+          color: var(--gray-700);
+          font-size: 0.875rem;
+          transition: all var(--transition-fast);
+          border: none;
+          background: none;
+          width: 100%;
+          text-align: left;
+          cursor: pointer;
+          position: relative;
+        }
+
+        .lang-option:hover {
+          background: var(--gray-100);
+          color: var(--gray-900);
+        }
+
+        .lang-option.active {
+          background: rgba(147, 51, 234, 0.1);
+          color: var(--primary-600);
+          font-weight: 600;
+        }
+
+        .lang-flag {
+          font-size: 1.25rem;
+        }
+
+        .checkmark {
+          margin-left: auto;
+          color: var(--primary-600);
+          font-weight: bold;
         }
 
         /* User Menu */
@@ -863,6 +997,14 @@ function Navigation() {
           
           .nav-icon {
             font-size: 0.8rem;
+          }
+
+          .lang-text {
+            display: none;
+          }
+
+          .lang-dropdown-trigger {
+            padding: 0.5rem;
           }
         }
         
