@@ -219,6 +219,21 @@ function EmployeeDashboard() {
   };
 
   const handleApplyToJob = async (jobId) => {
+    // Find the job to check application status
+    const job = jobMatches.find(j => j._id === jobId);
+    
+    if (job) {
+      // Check if user can apply
+      if (!canApplyToJob(job)) {
+        if (wasRejected(job)) {
+          showError('Your application to this job was rejected. You cannot reapply.');
+        } else {
+          showError('You have already applied to this job.');
+        }
+        return;
+      }
+    }
+
     try {
       await apiService.applyToJob(jobId);
       showError('Application submitted successfully!', 'success');
@@ -232,6 +247,10 @@ function EmployeeDashboard() {
         // Backward compatibility
         setMyApplications(Array.isArray(appResponse) ? appResponse : []);
       }
+      
+      // Refresh job matches to update the UI
+      const matchesResponse = await apiService.getMyMatches();
+      setJobMatches(matchesResponse?.data || []);
       
       // Close modal if open
       if (showJobModal) {
@@ -383,14 +402,62 @@ function EmployeeDashboard() {
     );
   };
 
+  // Helper function to check if user can apply to a job
+  const canApplyToJob = (job) => {
+    if (!job || !job.isOpen) return false;
+    
+    const userApplication = findUserApplication(job);
+    
+    // If no application exists, user can apply
+    if (!userApplication) return true;
+    
+    // If user has been rejected or already applied, cannot reapply
+    return false;
+  };
+
+  // Helper function to check if user was rejected
+  const wasRejected = (job) => {
+    const userApplication = findUserApplication(job);
+    return userApplication && userApplication.status === 'rejected';
+  };
+
   if (loading.stats || loading.applications || loading.matches) {
     return (
-      <div className="dashboard-container">
+      <>
         <div className="loading-state">
-          <div className="spinner large"></div>
-          <p>Loading dashboard...</p>
+          <div className="spinner"></div>
+          <p>{t('employeeDashboard.loadingDashboard')}</p>
         </div>
-      </div>
+        <style>{`
+          .loading-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            gap: 1rem;
+          }
+
+          .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #6366f1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+          }
+
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+
+          .loading-state p {
+            font-size: 1rem;
+            color: #4a5568;
+            margin: 0;
+          }
+        `}</style>
+      </>
     );
   }
 
@@ -706,7 +773,9 @@ function EmployeeDashboard() {
                   </div>
                   
                   <div className="job-actions">
-                    {job.isOpen && !myApplications.some(app => app._id === job._id) ? (
+                    {wasRejected(job) ? (
+                      <span className="rejected-badge">❌ {t('jobs.rejected')}</span>
+                    ) : canApplyToJob(job) ? (
                       <button 
                         onClick={() => handleApplyToJob(job._id)}
                         className="btn primary"
@@ -873,7 +942,9 @@ function EmployeeDashboard() {
                 >
                   {t('common.close')}
                 </button>
-                {selectedJob.isOpen && !myApplications.some(app => app._id === selectedJob._id) ? (
+                {wasRejected(selectedJob) ? (
+                  <span className="rejected-badge-large">❌ {t('jobs.rejected')}</span>
+                ) : canApplyToJob(selectedJob) ? (
                   <button 
                     onClick={() => handleApplyToJob(selectedJob._id)}
                     className="btn primary btn-large"
@@ -1424,6 +1495,35 @@ function EmployeeDashboard() {
           font-size: 1.3rem;
         }
 
+        .rejected-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+          color: #991b1b;
+          padding: 0.75rem 1.25rem;
+          border-radius: 12px;
+          font-size: 0.9375rem;
+          font-weight: 700;
+          border: 1.5px solid #f87171;
+          box-shadow: 0 2px 8px rgba(248, 113, 113, 0.3);
+          text-align: center;
+        }
+
+        .rejected-badge-large {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+          color: #991b1b;
+          padding: 1rem 1.75rem;
+          border-radius: 16px;
+          font-size: 1.125rem;
+          font-weight: 700;
+          border: 2px solid #f87171;
+          box-shadow: 0 4px 12px rgba(248, 113, 113, 0.4);
+        }
+
         /* Invitations Section */
         .invitations-section {
           margin-bottom: 2rem;
@@ -1906,19 +2006,40 @@ function EmployeeDashboard() {
         }
 
         .loading-state {
-          text-align: center;
-          padding: 2rem;
-          color: #666;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: 100vh;
+          gap: 1rem;
+        }
+        
+        .loading-state p {
+          font-size: 1rem;
+          color: #4a5568;
+          margin: 0;
         }
 
         .spinner {
-          width: 40px;
-          height: 40px;
-          border: 4px solid transparent;
-          border-top: 4px solid #2b6cb0;
+          width: 48px;
+          height: 48px;
+          border: 4px solid #e2e8f0;
+          border-top: 4px solid #6366f1;
           border-radius: 50%;
           animation: spin 1s linear infinite;
-          margin: 0 auto 1rem;
+        }
+        
+        .spinner.large {
+          width: 48px;
+          height: 48px;
+          border: 4px solid #e2e8f0;
+          border-top: 4px solid #6366f1;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+        }
+        
+        .modal-body .loading-state {
+          height: 200px;
         }
 
         .no-data {

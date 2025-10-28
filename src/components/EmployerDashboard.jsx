@@ -674,12 +674,41 @@ function EmployerDashboard() {
 
   if (loading) {
     return (
-      <div className="dashboard-container">
+      <>
         <div className="loading-state">
-          <div className="spinner large"></div>
-          <p>{t('common.loading')}</p>
+          <div className="spinner"></div>
+          <p>{t('employerDashboard.loadingDashboard')}</p>
         </div>
-      </div>
+        <style>{`
+          .loading-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            gap: 1rem;
+          }
+
+          .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #6366f1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+          }
+
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+
+          .loading-state p {
+            font-size: 1rem;
+            color: #4a5568;
+            margin: 0;
+          }
+        `}</style>
+      </>
     )
   }
 
@@ -2007,9 +2036,18 @@ function EmployerDashboard() {
         }
 
         .loading-state {
-          text-align: center;
-          padding: 2rem;
-          color: #666;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: 100vh;
+          gap: 1rem;
+        }
+        
+        .loading-state p {
+          font-size: 1rem;
+          color: #4a5568;
+          margin: 0;
         }
 
         .no-data {
@@ -2023,19 +2061,21 @@ function EmployerDashboard() {
         }
 
         .spinner {
-          width: 20px;
-          height: 20px;
-          border: 2px solid transparent;
-          border-top: 2px solid currentColor;
+          width: 48px;
+          height: 48px;
+          border: 4px solid #e2e8f0;
+          border-top: 4px solid #6366f1;
           border-radius: 50%;
           animation: spin 1s linear infinite;
-          margin: 0 auto 1rem;
         }
-
+        
         .spinner.large {
-          width: 40px;
-          height: 40px;
-          border-width: 4px;
+          width: 48px;
+          height: 48px;
+          border: 4px solid #e2e8f0;
+          border-top: 4px solid #6366f1;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
         }
 
         @keyframes spin {

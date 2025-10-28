@@ -915,6 +915,7 @@ export const translations = {
     // Employer Dashboard
     employerDashboard: {
       title: 'Employer Dashboard',
+      loadingDashboard: 'Loading employer dashboard...',
       overview: 'Overview',
       myJobs: 'My Jobs',
       applications: 'Applications',
@@ -1016,6 +1017,7 @@ export const translations = {
     // Employee Dashboard
     employeeDashboard: {
       title: 'Employee Dashboard',
+      loadingDashboard: 'Loading employee dashboard...',
       recommendedJobs: 'Recommended Jobs',
       matchJobs: 'Job Matches',
       jobInvitations: 'Job Invitations',
@@ -1459,23 +1461,128 @@ export const translations = {
     // Admin Dashboard
     admin: {
       dashboard: 'Admin Dashboard',
+      loadingDashboard: 'Loading admin dashboard...',
+      welcomeBack: 'Welcome back',
+      backToLanding: 'Back to Landing',
+      
+      // Tabs
+      overview: 'Overview',
       users: 'Users',
       jobs: 'Jobs',
-      reports: 'Reports',
       analytics: 'Analytics',
-      settings: 'Settings',
+      reports: 'Reports',
+      supportTickets: 'Support Tickets',
+      deletedItems: 'Deleted Items',
+      
+      // Search & Controls
+      search: 'Search',
+      searchPlaceholder: 'Search...',
+      searchUsers: 'Search users...',
+      searchJobs: 'Search jobs...',
+      
+      // Filters
+      allBarangays: 'All Barangays',
+      allRoles: 'All Roles',
+      allVerification: 'All Verification',
+      allStatuses: 'All Statuses',
+      employees: 'Employees',
+      employers: 'Employers',
+      verified: 'Verified',
+      unverified: 'Unverified',
+      open: 'Open',
+      closed: 'Closed',
+      completed: 'Completed',
+      
+      // Sort Options
+      newestFirst: 'Newest First',
+      oldestFirst: 'Oldest First',
+      nameAZ: 'Name A-Z',
+      nameZA: 'Name Z-A',
+      
+      // Export Options
+      exportUsers: 'Export Users',
+      exportJobs: 'Export Jobs',
+      clearFilters: 'Clear Filters',
+      csvUsers: 'CSV Users',
+      pdfUsers: 'PDF Users',
+      csvJobs: 'CSV Jobs',
+      pdfJobs: 'PDF Jobs',
+      exportFilteredUsers: 'Export filtered users as CSV',
+      exportFilteredUsersPdf: 'Export filtered users as PDF',
+      exportFilteredJobs: 'Export filtered jobs as CSV',
+      exportFilteredJobsPdf: 'Export filtered jobs as PDF',
+      exportSuccess: 'Export completed successfully',
+      exportError: 'Failed to export data',
+      
+      // Stats
       totalUsers: 'Total Users',
-      activeUsers: 'Active Users',
       totalJobs: 'Total Jobs',
+      totalRatings: 'Total Ratings',
+      totalReports: 'Total Reports',
+      activeUsers: 'Active Users',
+      activeJobs: 'Active Jobs',
       pendingReports: 'Pending Reports',
+      thisMonth: 'this month',
+      
+      // User Management
       userManagement: 'User Management',
-      jobManagement: 'Job Management',
+      total: 'Total',
       viewUser: 'View User',
       editUser: 'Edit User',
       deleteUser: 'Delete User',
       suspendUser: 'Suspend User',
       activateUser: 'Activate User',
-      verifyUser: 'Verify User'
+      verifyUser: 'Verify User',
+      disableUser: 'Disable',
+      noUsersFound: 'No users found',
+      noUsersMessage: 'There are no users matching your search criteria.',
+      userType: 'Type',
+      barangay: 'Barangay',
+      status: 'Status',
+      joined: 'Joined',
+      actions: 'Actions',
+      view: 'View',
+      edit: 'Edit',
+      verify: 'Verify',
+      disable: 'Disable',
+      delete: 'Delete',
+      
+      // Job Management
+      jobManagement: 'Job Management',
+      activeJobsCount: 'Active',
+      closedJobsCount: 'Closed',
+      noJobsFound: 'No jobs found',
+      noJobsMessage: 'There are no jobs matching your search criteria.',
+      viewJob: 'View Job',
+      deleteJob: 'Delete Job',
+      jobTitle: 'Job Title',
+      price: 'Price',
+      location: 'Location',
+      employer: 'Employer',
+      postedDate: 'Posted',
+      applicants: 'applicants',
+      noLocation: 'No location',
+      unknown: 'Unknown',
+      viewAllJobs: 'View All Jobs',
+      
+      // Overview Section
+      recentJobs: 'Recent Jobs',
+      
+      // Pagination
+      previous: 'Previous',
+      next: 'Next',
+      
+      // Modals
+      confirmDelete: 'Confirm Delete',
+      confirmDeleteUser: 'Are you sure you want to delete this user?',
+      confirmDeleteJob: 'Are you sure you want to delete this job?',
+      cancel: 'Cancel',
+      
+      // Status Messages
+      loadingUsers: 'Loading users...',
+      loadingJobs: 'Loading jobs...',
+      loadingStats: 'Loading statistics...',
+      loadingAnalytics: 'Loading analytics...'
     },
 
     // Error Messages
@@ -2465,6 +2572,7 @@ export const translations = {
     // Employer Dashboard
     employerDashboard: {
       title: 'Dashboard ng Employer',
+      loadingDashboard: 'Naglo-load ng dashboard ng employer...',
       overview: 'Pangkalahatang-ideya',
       myJobs: 'Aking Mga Trabaho',
       applications: 'Mga Aplikasyon',
@@ -2566,6 +2674,7 @@ export const translations = {
     // Employee Dashboard
     employeeDashboard: {
       title: 'Dashboard ng Empleyado',
+      loadingDashboard: 'Naglo-load ng dashboard ng empleyado...',
       recommendedJobs: 'Inirerekomendang Trabaho',
       matchJobs: 'Mga Tugmang Trabaho',
       jobInvitations: 'Mga Imbitasyon sa Trabaho',
@@ -3009,23 +3118,128 @@ export const translations = {
     // Admin Dashboard
     admin: {
       dashboard: 'Admin Dashboard',
+      loadingDashboard: 'Naglo-load ng admin dashboard...',
+      welcomeBack: 'Maligayang pagbabalik',
+      backToLanding: 'Bumalik sa Landing',
+      
+      // Tabs
+      overview: 'Pangkalahatang Pagtingin',
       users: 'Mga User',
       jobs: 'Mga Trabaho',
-      reports: 'Mga Ulat',
       analytics: 'Analytics',
-      settings: 'Mga Setting',
+      reports: 'Mga Ulat',
+      supportTickets: 'Mga Ticket ng Suporta',
+      deletedItems: 'Mga Tinanggal na Item',
+      
+      // Search & Controls
+      search: 'Maghanap',
+      searchPlaceholder: 'Maghanap...',
+      searchUsers: 'Maghanap ng mga user...',
+      searchJobs: 'Maghanap ng mga trabaho...',
+      
+      // Filters
+      allBarangays: 'Lahat ng Barangay',
+      allRoles: 'Lahat ng Tungkulin',
+      allVerification: 'Lahat ng Verification',
+      allStatuses: 'Lahat ng Status',
+      employees: 'Mga Empleyado',
+      employers: 'Mga Employer',
+      verified: 'Verified',
+      unverified: 'Hindi Verified',
+      open: 'Bukas',
+      closed: 'Sarado',
+      completed: 'Tapos Na',
+      
+      // Sort Options
+      newestFirst: 'Pinakabago Una',
+      oldestFirst: 'Pinakamura Una',
+      nameAZ: 'Pangalan A-Z',
+      nameZA: 'Pangalan Z-A',
+      
+      // Export Options
+      exportUsers: 'I-export ang Mga User',
+      exportJobs: 'I-export ang Mga Trabaho',
+      clearFilters: 'I-clear ang mga Filter',
+      csvUsers: 'CSV Mga User',
+      pdfUsers: 'PDF Mga User',
+      csvJobs: 'CSV Mga Trabaho',
+      pdfJobs: 'PDF Mga Trabaho',
+      exportFilteredUsers: 'I-export ang mga naka-filter na user bilang CSV',
+      exportFilteredUsersPdf: 'I-export ang mga naka-filter na user bilang PDF',
+      exportFilteredJobs: 'I-export ang mga naka-filter na trabaho bilang CSV',
+      exportFilteredJobsPdf: 'I-export ang mga naka-filter na trabaho bilang PDF',
+      exportSuccess: 'Matagumpay ang pag-export',
+      exportError: 'Nabigo ang pag-export ng data',
+      
+      // Stats
       totalUsers: 'Kabuuang User',
-      activeUsers: 'Aktibong User',
       totalJobs: 'Kabuuang Trabaho',
+      totalRatings: 'Kabuuang Rating',
+      totalReports: 'Kabuuang Ulat',
+      activeUsers: 'Aktibong User',
+      activeJobs: 'Aktibong Trabaho',
       pendingReports: 'Nakabinbing Ulat',
+      thisMonth: 'ngayong buwan',
+      
+      // User Management
       userManagement: 'Pamamahala ng User',
-      jobManagement: 'Pamamahala ng Trabaho',
+      total: 'Kabuuan',
       viewUser: 'Tingnan ang User',
       editUser: 'I-edit ang User',
       deleteUser: 'Tanggalin ang User',
       suspendUser: 'Suspindihin ang User',
       activateUser: 'Aktibong User',
-      verifyUser: 'I-verify ang User'
+      verifyUser: 'I-verify ang User',
+      disableUser: 'I-disable',
+      noUsersFound: 'Walang nakitang user',
+      noUsersMessage: 'Walang user na tumutugma sa iyong criteria sa paghahanap.',
+      userType: 'Uri',
+      barangay: 'Barangay',
+      status: 'Status',
+      joined: 'Sumali',
+      actions: 'Mga Aksyon',
+      view: 'Tingnan',
+      edit: 'I-edit',
+      verify: 'I-verify',
+      disable: 'I-disable',
+      delete: 'Tanggalin',
+      
+      // Job Management
+      jobManagement: 'Pamamahala ng Trabaho',
+      activeJobsCount: 'Aktibo',
+      closedJobsCount: 'Sarado',
+      noJobsFound: 'Walang nakitang trabaho',
+      noJobsMessage: 'Walang trabaho na tumutugma sa iyong criteria sa paghahanap.',
+      viewJob: 'Tingnan ang Trabaho',
+      deleteJob: 'Tanggalin ang Trabaho',
+      jobTitle: 'Titulo ng Trabaho',
+      price: 'Presyo',
+      location: 'Lokasyon',
+      employer: 'Employer',
+      postedDate: 'Nag-post',
+      applicants: 'mga aplikante',
+      noLocation: 'Walang lokasyon',
+      unknown: 'Hindi Alam',
+      viewAllJobs: 'Tingnan Lahat ng Trabaho',
+      
+      // Overview Section
+      recentJobs: 'Kamakailang Mga Trabaho',
+      
+      // Pagination
+      previous: 'Nakaraan',
+      next: 'Susunod',
+      
+      // Modals
+      confirmDelete: 'Kumpirmahin ang Pagtanggal',
+      confirmDeleteUser: 'Sigurado ka bang gusto mong tanggalin ang user na ito?',
+      confirmDeleteJob: 'Sigurado ka bang gusto mong tanggalin ang trabaho na ito?',
+      cancel: 'Kanselahin',
+      
+      // Status Messages
+      loadingUsers: 'Naglo-load ng mga user...',
+      loadingJobs: 'Naglo-load ng mga trabaho...',
+      loadingStats: 'Naglo-load ng mga istatistika...',
+      loadingAnalytics: 'Naglo-load ng analytics...'
     },
 
     // Error Messages

@@ -1305,8 +1305,8 @@ function Profile() {
           </div>
         )}
 
-        {/* Show Goals only for own profile */}
-        {isOwnProfile && (
+        {/* Show Goals only for own profile and not for admins */}
+        {isOwnProfile && user?.userType !== 'admin' && (
           <div className="profile-section">
             <GoalManagement />
           </div>

@@ -546,17 +546,24 @@ function Navigation() {
         }
 
         .user-menu-trigger {
-          display: flex;
-          align-items: center;
-          gap: var(--spacing-3);
-          background: rgba(255, 255, 255, 0.1);
-          border: 1px solid rgba(255, 255, 255, 0.15);
-          color: white;
-          padding: var(--spacing-2) var(--spacing-4);
-          border-radius: var(--radius-xl);
-          cursor: pointer;
-          transition: all var(--transition-fast);
-          backdrop-filter: blur(20px);
+          display: flex !important;
+          align-items: center !important;
+          gap: 10px !important;
+          background: rgba(255, 255, 255, 0.1) !important;
+          border: 1px solid rgba(255, 255, 255, 0.15) !important;
+          color: white !important;
+          padding: 8px 12px !important;
+          border-radius: var(--radius-xl) !important;
+          cursor: pointer !important;
+          transition: background 0.2s, border-color 0.2s, box-shadow 0.2s !important;
+          backdrop-filter: blur(20px) !important;
+          min-width: 180px !important;
+          max-width: 180px !important;
+          width: 180px !important;
+          height: 52px !important;
+          min-height: 52px !important;
+          max-height: 52px !important;
+          box-sizing: border-box !important;
         }
 
         .user-menu-trigger:hover {
@@ -566,33 +573,58 @@ function Navigation() {
         }
 
         .user-avatar {
-          width: 36px;
-          height: 36px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, var(--primary-400) 0%, var(--primary-600) 100%);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: 600;
-          font-size: var(--font-size-sm);
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-          border: 2px solid rgba(255, 255, 255, 0.3);
-          overflow: hidden;
+          width: 36px !important;
+          height: 36px !important;
+          min-width: 36px !important;
+          min-height: 36px !important;
+          max-width: 36px !important;
+          max-height: 36px !important;
+          flex-shrink: 0 !important;
+          border-radius: 50% !important;
+          background: linear-gradient(135deg, var(--primary-400) 0%, var(--primary-600) 100%) !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          font-weight: 600 !important;
+          font-size: var(--font-size-sm) !important;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+          border: 2px solid rgba(255, 255, 255, 0.3) !important;
+          overflow: hidden !important;
+          padding: 0 !important;
+          margin: 0 !important;
         }
         
         .user-avatar .avatar-img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
+          width: 36px !important;
+          height: 36px !important;
+          min-width: 36px !important;
+          min-height: 36px !important;
+          max-width: 36px !important;
+          max-height: 36px !important;
+          object-fit: cover !important;
+          display: block !important;
+          border-radius: 50% !important;
         }
 
         .user-name {
-          font-weight: 500;
-          font-size: var(--font-size-sm);
+          font-weight: 500 !important;
+          font-size: 14px !important;
+          white-space: nowrap !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
+          width: 85px !important;
+          min-width: 85px !important;
+          max-width: 85px !important;
+          flex-shrink: 0 !important;
         }
 
         .dropdown-arrow {
-          font-size: var(--font-size-xs);
+          font-size: 10px !important;
+          flex-shrink: 0 !important;
+          width: 16px !important;
+          min-width: 16px !important;
+          text-align: center !important;
+          transition: transform 0.2s !important;
         }
 
         .dropdown-arrow.open {

@@ -99,7 +99,7 @@ function Layout({ children }) {
           justify-content: space-between;
           align-items: center;
           padding: 0 var(--spacing-3);
-          min-height: var(--header-height);
+          height: 72px;
           max-width: 1400px;
           margin: 0 auto;
           width: 100%;
@@ -338,7 +338,7 @@ function Layout({ children }) {
           .header-content {
             padding: var(--spacing-2) var(--spacing-3);
             gap: var(--spacing-2);
-            min-height: 60px;
+            height: 60px;
           }
           
           .logo-container {
@@ -375,7 +375,7 @@ function Layout({ children }) {
         @media (max-width: 480px) {
           .header-content {
             padding: var(--spacing-2) var(--spacing-2);
-            min-height: 56px;
+            height: 56px;
           }
           
           .logo-image {

@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { AuthContext } from '../context/AuthContext'
 import { AlertContext } from '../context/AlertContext'
+import { useTranslation } from '../hooks/useTranslation'
 
 // Reusable SVG icons to ensure consistent rendering across tabs (avoid missing emoji glyphs)
 const StatIcons = {
@@ -387,6 +388,7 @@ function JobModal({ job, type, onClose }) {
 }
 
 function AdminDashboard() {
+  const { t } = useTranslation()
   const [loading, setLoading] = useState(true)
   const [currentTab, setCurrentTab] = useState('overview')
   const [stats, setStats] = useState({
@@ -415,6 +417,14 @@ function AdminDashboard() {
   const [jobModal, setJobModal] = useState({ show: false, job: null, type: 'view' })
   const [analyticsData, setAnalyticsData] = useState(null)
   
+  // Filter states
+  const [barangayFilter, setBarangayFilter] = useState('all')
+  const [roleFilter, setRoleFilter] = useState('all') // 'all', 'employee', 'employer'
+  const [jobStatusFilter, setJobStatusFilter] = useState('all') // 'all', 'open', 'closed', 'completed'
+  const [verificationFilter, setVerificationFilter] = useState('all') // 'all', 'verified', 'unverified'
+  const [filteredUsers, setFilteredUsers] = useState([])
+  const [filteredJobs, setFilteredJobs] = useState([])
+  
   // Delete/Restore confirmation modals
   const [showDeleteUserModal, setShowDeleteUserModal] = useState(false)
   const [showDeleteJobModal, setShowDeleteJobModal] = useState(false)
@@ -438,6 +448,46 @@ function AdminDashboard() {
     
     loadDashboardData()
   }, [hasAccessTo, navigate, showError])
+
+  // Filter users whenever filters or users change
+  useEffect(() => {
+    let filtered = [...users]
+    
+    if (barangayFilter !== 'all') {
+      filtered = filtered.filter(user => user.barangay === barangayFilter)
+    }
+    
+    if (roleFilter !== 'all') {
+      filtered = filtered.filter(user => user.role === roleFilter)
+    }
+    
+    if (verificationFilter === 'verified') {
+      filtered = filtered.filter(user => user.isVerified === true)
+    } else if (verificationFilter === 'unverified') {
+      filtered = filtered.filter(user => user.isVerified !== true)
+    }
+    
+    setFilteredUsers(filtered)
+  }, [users, barangayFilter, roleFilter, verificationFilter])
+
+  // Filter jobs whenever filters or jobs change
+  useEffect(() => {
+    let filtered = [...jobs]
+    
+    if (barangayFilter !== 'all') {
+      filtered = filtered.filter(job => job.barangay === barangayFilter)
+    }
+    
+    if (jobStatusFilter === 'open') {
+      filtered = filtered.filter(job => job.isOpen === true)
+    } else if (jobStatusFilter === 'closed') {
+      filtered = filtered.filter(job => job.isOpen === false && !job.isCompleted)
+    } else if (jobStatusFilter === 'completed') {
+      filtered = filtered.filter(job => job.isCompleted === true)
+    }
+    
+    setFilteredJobs(filtered)
+  }, [jobs, barangayFilter, jobStatusFilter])
 
   const loadDashboardData = async () => {
     try {
@@ -1167,13 +1217,50 @@ function AdminDashboard() {
   const exportData = async (type, format = 'csv') => {
     try {
       const token = localStorage.getItem('token')
-  const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://resi-backend-ihyu.vercel.app/api'
-      const response = await fetch(`${apiBaseUrl}/export/${type}?format=${format}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+      const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://resi-backend-ihyu.vercel.app/api'
+      
+      // Build query params based on current filters
+      const params = new URLSearchParams({
+        format,
+        sortBy: sortField,
+        order: sortOrder
       })
+      
+      if (searchQuery) params.append('q', searchQuery)
+      
+      // Add filter params based on type
+      if (type === 'users') {
+        if (barangayFilter !== 'all') params.append('barangay', barangayFilter)
+        if (roleFilter !== 'all') params.append('role', roleFilter)
+        if (verificationFilter !== 'all') params.append('verified', verificationFilter === 'verified')
+      } else if (type === 'jobs') {
+        if (barangayFilter !== 'all') params.append('barangay', barangayFilter)
+        if (jobStatusFilter !== 'all') params.append('status', jobStatusFilter)
+      }
+      
+      console.log('Export request:', `${apiBaseUrl}/export/${type}?${params}`)
+      
+      // Show loading message for PDF exports
+      if (format === 'pdf') {
+        success('Generating PDF report, please wait...')
+      }
+      
+      // Add timeout for long requests (2 minutes)
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 120000)
+      
+      const response = await fetch(`${apiBaseUrl}/export/${type}?${params}`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+        signal: controller.signal
+      })
+      
+      clearTimeout(timeoutId)
+      
+      console.log('Export response status:', response.status, response.statusText)
       
       if (response.ok) {
         const blob = await response.blob()
+        console.log('Blob received:', blob.size, 'bytes, type:', blob.type)
         const url = window.URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
@@ -1182,24 +1269,55 @@ function AdminDashboard() {
         a.click()
         window.URL.revokeObjectURL(url)
         document.body.removeChild(a)
-        success(`${type} data exported successfully`)
+        success(`${type} data exported successfully as ${format.toUpperCase()}`)
       } else {
-        showError(`Failed to export ${type} data`)
+        const errorText = await response.text()
+        console.error('Export error response:', errorText)
+        showError(`Failed to export ${type} data: ${response.status}`)
       }
     } catch (error) {
       console.error('Export error:', error)
-      showError('Error exporting data')
+      showError(`Error exporting data: ${error.message}`)
     }
   }
 
   if (loading) {
     return (
-      <div className="dashboard-container">
+      <>
         <div className="loading-state">
-          <div className="spinner large"></div>
-          <p>Loading admin dashboard...</p>
+          <div className="spinner"></div>
+          <p>{t('admin.loadingDashboard')}</p>
         </div>
-      </div>
+        <style>{`
+          .loading-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            gap: 1rem;
+          }
+
+          .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #6366f1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+          }
+
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+
+          .loading-state p {
+            font-size: 1rem;
+            color: #4a5568;
+            margin: 0;
+          }
+        `}</style>
+      </>
     )
   }
 
@@ -1221,8 +1339,61 @@ function AdminDashboard() {
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
             className="search-input"
+            style={{ width: '300px' }}
           />
           <button onClick={handleSearch} className="btn primary">Search</button>
+        </div>
+        
+        {/* Filter Controls */}
+        <div className="filter-controls">
+          <select 
+            value={barangayFilter}
+            onChange={(e) => setBarangayFilter(e.target.value)}
+            className="filter-select"
+          >
+            <option value="all">All Barangays</option>
+            <option value="Agdao">Agdao</option>
+            <option value="Buhangin">Buhangin</option>
+            <option value="Toril">Toril</option>
+            <option value="Other">Other</option>
+          </select>
+          
+          {currentTab === 'users' && (
+            <>
+              <select 
+                value={roleFilter}
+                onChange={(e) => setRoleFilter(e.target.value)}
+                className="filter-select"
+              >
+                <option value="all">All Roles</option>
+                <option value="employee">Employees</option>
+                <option value="employer">Employers</option>
+              </select>
+              
+              <select 
+                value={verificationFilter}
+                onChange={(e) => setVerificationFilter(e.target.value)}
+                className="filter-select"
+              >
+                <option value="all">All Verification</option>
+                <option value="verified">Verified</option>
+                <option value="unverified">Unverified</option>
+              </select>
+            </>
+          )}
+          
+          {currentTab === 'jobs' && (
+            <select 
+              value={jobStatusFilter}
+              onChange={(e) => setJobStatusFilter(e.target.value)}
+              className="filter-select"
+            >
+              <option value="all">All Statuses</option>
+              <option value="open">Open</option>
+              <option value="closed">Closed</option>
+              <option value="completed">Completed</option>
+            </select>
+          )}
         </div>
         
         <div className="sort-controls">
@@ -1239,20 +1410,51 @@ function AdminDashboard() {
             <option value="firstName-asc">Name A-Z</option>
             <option value="firstName-desc">Name Z-A</option>
           </select>
+          
+          <button 
+            onClick={() => {
+              setSearchQuery('');
+              setBarangayFilter('all');
+              setRoleFilter('all');
+              setVerificationFilter('all');
+              setJobStatusFilter('all');
+            }} 
+            className="filter-select"
+            style={{ cursor: 'pointer', background: 'white', color: '#2d3748', border: '1px solid #e2e8f0', fontWeight: '500' }}
+            title={t('admin.clearFilters')}
+          >
+            {t('admin.clearFilters')}
+          </button>
         </div>
 
         <div className="export-controls">
           <button 
             onClick={() => exportData('users', 'csv')} 
             className="btn secondary"
+            title="Export filtered users as CSV"
           >
-            Export Users CSV
+            📊 CSV Users
+          </button>
+          <button 
+            onClick={() => exportData('users', 'pdf')} 
+            className="btn secondary"
+            title="Export filtered users as PDF"
+          >
+            📄 PDF Users
           </button>
           <button 
             onClick={() => exportData('jobs', 'csv')} 
             className="btn secondary"
+            title="Export filtered jobs as CSV"
           >
-            Export Jobs CSV
+            📊 CSV Jobs
+          </button>
+          <button 
+            onClick={() => exportData('jobs', 'pdf')} 
+            className="btn secondary"
+            title="Export filtered jobs as PDF"
+          >
+            📄 PDF Jobs
           </button>
         </div>
       </div>
@@ -1308,7 +1510,7 @@ function AdminDashboard() {
         {tabLoading ? (
           <div className="loading-state">
             <div className="spinner"></div>
-            <p>Loading...</p>
+            <p>{t('common.loading')}</p>
           </div>
         ) : (
           <>
@@ -1424,6 +1626,34 @@ function AdminDashboard() {
             {/* Users Tab */}
             {currentTab === 'users' && (
               <div className="users-content">
+                {/* Users Header with Controls */}
+                <div className="users-header">
+                  <div className="users-summary">
+                    <h3>User Management</h3>
+                    <p>Total: {users.length} users | Verified: {users.filter(user => user.isVerified).length} | Unverified: {users.filter(user => !user.isVerified).length}</p>
+                  </div>
+                  
+                  <div className="users-controls">
+                    <div className="users-search">
+                      <input
+                        type="text"
+                        placeholder="Search users..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="search-input"
+                        style={{ width: '300px' }}
+                      />
+                    </div>
+                    
+                    <button 
+                      className="btn primary"
+                      onClick={() => exportData('users', 'csv')}
+                    >
+                      Export Users
+                    </button>
+                  </div>
+                </div>
+
                 {users.length === 0 ? (
                   <div className="no-data">
                     <div className="no-data-icon">👥</div>
@@ -1434,7 +1664,7 @@ function AdminDashboard() {
                   <>
                     {/* Mobile Card View */}
                     <div className="users-mobile-view">
-                      {users.map(user => (
+                      {filteredUsers.map(user => (
                         <div key={user._id} className="user-mobile-card">
                           <div className="user-mobile-header">
                             <div className="user-mobile-name">
@@ -1513,7 +1743,7 @@ function AdminDashboard() {
                           </tr>
                         </thead>
                         <tbody>
-                          {users.map(user => (
+                          {filteredUsers.map(user => (
                             <tr key={user._id}>
                               <td>
                                 <div className="user-name">
@@ -1620,6 +1850,7 @@ function AdminDashboard() {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="search-input"
+                        style={{ width: '300px' }}
                       />
                     </div>
                     
@@ -1633,8 +1864,8 @@ function AdminDashboard() {
                 </div>
 
                 <div className="jobs-grid">
-                  {jobs.length > 0 ? (
-                    jobs.map(job => (
+                  {filteredJobs.length > 0 ? (
+                    filteredJobs.map(job => (
                       <div key={job._id} className="job-card">
                         <div className="job-header">
                           <h4>{job.title}</h4>
@@ -2839,16 +3070,36 @@ function AdminDashboard() {
         .search-controls {
           display: flex;
           gap: 0.5rem;
-          flex: 1;
-          min-width: 250px;
+          align-items: center;
         }
 
         .search-input {
-          flex: 1;
+          width: 300px;
           padding: 0.375rem 0.75rem;
           border: 1px solid #e2e8f0;
           border-radius: 6px;
           font-size: 0.875rem;
+        }
+
+        .filter-controls {
+          display: flex;
+          gap: 0.5rem;
+          flex-wrap: wrap;
+          align-items: center;
+        }
+
+        .filter-select {
+          padding: 0.375rem 0.75rem;
+          border: 1px solid #e2e8f0;
+          border-radius: 6px;
+          font-size: 0.875rem;
+          background: white;
+          min-width: 150px;
+          cursor: pointer;
+        }
+
+        .filter-select:hover {
+          border-color: #cbd5e1;
         }
 
         .sort-select {
@@ -3747,10 +3998,51 @@ function AdminDashboard() {
         .jobs-search {
           flex: 1;
           min-width: 200px;
+          max-width: 400px;
+        }
+
+        /* Users Header Styles */
+        .users-header {
+          background: white;
+          padding: 1.5rem;
+          border-radius: 12px;
+          margin-bottom: 1.5rem;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .users-summary h3 {
+          margin: 0 0 0.5rem 0;
+          color: #2b6cb0;
+        }
+
+        .users-summary p {
+          margin: 0;
+          color: #666;
+          font-size: 0.9rem;
+        }
+
+        .users-controls {
+          display: flex;
+          gap: 1rem;
+          margin-top: 1rem;
+          flex-wrap: wrap;
+          align-items: center;
+        }
+
+        .users-search {
+          display: flex;
+        }
+
+        .users-search .search-input {
+          width: 300px;
+          padding: 0.75rem;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          font-size: 0.9rem;
         }
 
         .search-input {
-          width: 100%;
+          width: 300px;
           padding: 0.75rem;
           border: 1px solid #e2e8f0;
           border-radius: 8px;
@@ -3999,19 +4291,18 @@ function AdminDashboard() {
         }
 
         .loading-state {
-          text-align: center;
-          padding: 3rem 2rem;
-          color: #666;
-          background: white;
-          border-radius: 12px;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-          border: 1px solid #e2e8f0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: 100vh;
+          gap: 1rem;
         }
-
+        
         .loading-state p {
-          margin-top: 1rem;
+          font-size: 1rem;
           color: #4a5568;
-          font-size: 1.1rem;
+          margin: 0;
         }
 
         .no-data {
@@ -4042,19 +4333,21 @@ function AdminDashboard() {
         }
 
         .spinner {
-          width: 20px;
-          height: 20px;
-          border: 2px solid transparent;
-          border-top: 2px solid currentColor;
+          width: 48px;
+          height: 48px;
+          border: 4px solid #e2e8f0;
+          border-top: 4px solid #6366f1;
           border-radius: 50%;
           animation: spin 1s linear infinite;
-          margin: 0 auto 1rem;
         }
-
+        
         .spinner.large {
-          width: 40px;
-          height: 40px;
-          border-width: 4px;
+          width: 48px;
+          height: 48px;
+          border: 4px solid #e2e8f0;
+          border-top: 4px solid #6366f1;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
         }
 
         @keyframes spin {
@@ -4479,6 +4772,167 @@ function AdminDashboard() {
           to {
             opacity: 1;
             transform: translateY(0);
+          }
+        }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+          .dashboard-container {
+            padding: 1rem;
+          }
+
+          .dashboard-header h1 {
+            font-size: 1.5rem;
+          }
+
+          .controls-section {
+            flex-direction: column;
+            gap: 1rem;
+          }
+
+          .search-controls,
+          .filter-controls,
+          .sort-controls,
+          .export-controls {
+            width: 100%;
+            flex-direction: column;
+          }
+
+          .filter-select,
+          .sort-select {
+            width: 100%;
+          }
+          
+          .search-input {
+            width: 300px;
+            max-width: 100%;
+          }
+
+          .export-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+          }
+
+          .export-controls .btn {
+            font-size: 0.875rem;
+            padding: 0.625rem 0.75rem;
+          }
+
+          .tab-navigation {
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+          }
+
+          .tab-navigation::-webkit-scrollbar {
+            display: none;
+          }
+
+          .tab-btn {
+            min-width: 120px;
+            font-size: 0.875rem;
+          }
+
+          .stats-grid {
+            grid-template-columns: 1fr 1fr;
+          }
+
+          .jobs-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .deleted-items-selector {
+            flex-direction: column;
+            gap: 0.5rem;
+          }
+
+          .selector-btn {
+            width: 100%;
+            text-align: center;
+          }
+
+          .users-table-container {
+            display: none;
+          }
+
+          .users-mobile-view {
+            display: block;
+          }
+
+          .modal-content {
+            width: 95%;
+            max-width: 95%;
+            margin: 1rem;
+            max-height: 90vh;
+          }
+
+          .modal-body {
+            max-height: 60vh;
+            overflow-y: auto;
+          }
+
+          .modal-footer {
+            flex-direction: column-reverse;
+            gap: 0.5rem;
+          }
+
+          .modal-footer .btn {
+            width: 100%;
+          }
+
+          .job-card {
+            padding: 1rem;
+          }
+
+          .user-mobile-card {
+            padding: 1rem;
+          }
+
+          .deleted-items-table-container {
+            overflow-x: auto;
+          }
+
+          .deleted-items-table {
+            min-width: 600px;
+          }
+
+          .analytics-charts {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .stats-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .export-controls {
+            grid-template-columns: 1fr;
+          }
+
+          .dashboard-header p {
+            font-size: 0.875rem;
+          }
+
+          .tab-btn {
+            padding: 0.625rem 0.875rem;
+            font-size: 0.813rem;
+          }
+
+          .stat-icon {
+            width: 40px;
+            height: 40px;
+          }
+
+          .stat-content h3 {
+            font-size: 1.5rem;
+          }
+
+          .filter-controls select {
+            font-size: 0.875rem;
           }
         }
       `}</style>
