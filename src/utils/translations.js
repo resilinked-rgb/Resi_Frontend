@@ -911,7 +911,8 @@ export const translations = {
       withdraw: 'Withdraw Application',
       confirmWithdraw: "Are you sure you want to withdraw your application?",
       completedBy: 'Completed by',
-      completed: 'Completed'
+      completed: 'Completed',
+      completedJobs: 'Completed Jobs'
     },
 
     // Employer Dashboard
