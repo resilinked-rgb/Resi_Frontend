@@ -2577,7 +2577,8 @@ export const translations = {
       withdraw: 'Bawiin ang Aplikasyon',
       confirmWithdraw: 'Sigurado ka bang nais mong bawiin ang iyong aplikasyon?',
       completedBy: 'Natapos ni',
-      completed: 'Natapos'
+      completed: 'Natapos',
+      completedJobs: 'Natapos na Trabaho'
     },
 
     // Employer Dashboard
