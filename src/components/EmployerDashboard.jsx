@@ -520,7 +520,6 @@ function EmployerDashboard() {
       console.log('Delete job response:', result);
       
       // Remove job from local state immediately
-      setJobs(prevJobs => prevJobs.filter(job => job._id !== jobToDelete._id));
       setMyJobs(prevJobs => prevJobs.filter(job => job._id !== jobToDelete._id));
       
       success(result.alert || t('employerDashboard.deleteSuccess'));
