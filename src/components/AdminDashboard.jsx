@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react'
+﻿import { useState, useEffect, useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { AuthContext } from '../context/AuthContext'
 import { AlertContext } from '../context/AlertContext'
@@ -150,13 +150,13 @@ function UserModal({ user, type, onClose, onSave }) {
                   <div className="detail-item">
                     <span className="label">Email Verified:</span>
                     <span className={`value status-badge ${user?.isEmailVerified ? 'verified' : 'unverified'}`}>
-                      {user?.isEmailVerified ? '✓ Verified' : '✗ Not Verified'}
+                      {user?.isEmailVerified ? '“ Verified' : '— Not Verified'}
                     </span>
                   </div>
                   <div className="detail-item">
                     <span className="label">Admin Approved:</span>
                     <span className={`value status-badge ${user?.isVerified ? 'verified' : 'unverified'}`}>
-                      {user?.isVerified ? '✓ Approved' : '✗ Pending'}
+                      {user?.isVerified ? '“ Approved' : '— Pending'}
                     </span>
                   </div>
                   <div className="detail-item">
@@ -293,7 +293,7 @@ function UserModal({ user, type, onClose, onSave }) {
                 <div className="form-group">
                   <label className="info-label">Email Verified:</label>
                   <span className={`status-badge ${formData.isEmailVerified ? 'verified' : 'unverified'}`}>
-                    {formData.isEmailVerified ? '✓ Verified' : '✗ Not Verified'}
+                    {formData.isEmailVerified ? '“ Verified' : '— Not Verified'}
                   </span>
                   <small style={{ display: 'block', color: '#666', marginTop: '0.25rem' }}>
                     (Email verification is automated when user clicks link)
@@ -367,7 +367,7 @@ function JobModal({ job, type, onClose }) {
                 </div>
                 <div className="detail-item">
                   <span className="label">Price:</span>
-                  <span className="value job-price">?{job?.price?.toLocaleString()}</span>
+                  <span className="value job-price">₱{job?.price?.toLocaleString()}</span>
                 </div>
                 <div className="detail-item">
                   <span className="label">Location:</span>
@@ -480,12 +480,15 @@ function AdminDashboard() {
   const [jobs, setJobs] = useState([])
   const [reports, setReports] = useState([])
   const [reportStatusFilter, setReportStatusFilter] = useState('all')
+  const [reportSearchQuery, setReportSearchQuery] = useState('')
   const [supportTickets, setSupportTickets] = useState([])
   const [ticketStatusFilter, setTicketStatusFilter] = useState('all')
+  const [ticketSearchQuery, setTicketSearchQuery] = useState('')
   const [deletedUsers, setDeletedUsers] = useState([])
   const [deletedJobs, setDeletedJobs] = useState([])
   const [deletedGoals, setDeletedGoals] = useState([])
   const [deletedItemType, setDeletedItemType] = useState('users') // 'users', 'jobs', 'goals'
+  const [deletedSearchQuery, setDeletedSearchQuery] = useState('')
   const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 })
   const [tabLoading, setTabLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -1359,6 +1362,294 @@ function AdminDashboard() {
     }
   }
 
+  // Export Reports
+  const exportReports = (format = 'pdf') => {
+    try {
+      const filteredReports = reports.filter(report => {
+        const matchesStatus = reportStatusFilter === 'all' || report.status === reportStatusFilter
+        const matchesSearch = !reportSearchQuery || 
+          report.reason?.toLowerCase().includes(reportSearchQuery.toLowerCase()) ||
+          report.reporter?.email?.toLowerCase().includes(reportSearchQuery.toLowerCase()) ||
+          report.reporter?.firstName?.toLowerCase().includes(reportSearchQuery.toLowerCase()) ||
+          report.reporter?.lastName?.toLowerCase().includes(reportSearchQuery.toLowerCase()) ||
+          report.reportedUser?.email?.toLowerCase().includes(reportSearchQuery.toLowerCase()) ||
+          report.reportedUser?.firstName?.toLowerCase().includes(reportSearchQuery.toLowerCase()) ||
+          report.reportedUser?.lastName?.toLowerCase().includes(reportSearchQuery.toLowerCase()) ||
+          report.reportedJob?.title?.toLowerCase().includes(reportSearchQuery.toLowerCase())
+        return matchesStatus && matchesSearch
+      })
+
+      if (format === 'csv') {
+        // CSV Export
+        const csvContent = [
+          ['Report ID', 'Reporter Email', 'Reported Type', 'Reported Item', 'Reason', 'Status', 'Date Created'].join(','),
+          ...filteredReports.map(report => [
+            report._id,
+            report.reporter?.email || 'Unknown',
+            report.reportedUser ? 'User' : 'Job',
+            report.reportedUser ? `${report.reportedUser.firstName} ${report.reportedUser.lastName}` : report.reportedJob?.title || 'N/A',
+            `"${report.reason?.replace(/"/g, '""') || ''}"`,
+            report.status,
+            new Date(report.createdAt).toLocaleDateString()
+          ].join(','))
+        ].join('\n')
+
+        const blob = new Blob([csvContent], { type: 'text/csv' })
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `resilinked-reports-${new Date().toISOString().split('T')[0]}.csv`
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(a)
+        success('Reports exported as CSV successfully')
+      } else {
+        // PDF Export
+        const { jsPDF } = window.jspdf
+        const doc = new jsPDF()
+        
+        // Header
+        doc.setFontSize(18)
+        doc.setTextColor(99, 102, 241) // ResiLinked brand color
+        doc.text('ResiLinked - Reports Export', 14, 20)
+        
+        // Metadata
+        doc.setFontSize(10)
+        doc.setTextColor(100, 100, 100)
+        doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 28)
+        doc.text(`Total Reports: ${filteredReports.length}`, 14, 34)
+        doc.text(`Status Filter: ${reportStatusFilter === 'all' ? 'All' : reportStatusFilter}`, 14, 40)
+        
+        // Table
+        const tableData = filteredReports.map(report => [
+          report._id.substring(0, 8) + '...',
+          report.reporter?.email || 'Unknown',
+          report.reportedUser ? 'User' : 'Job',
+          report.reportedUser 
+            ? `${report.reportedUser.firstName} ${report.reportedUser.lastName}` 
+            : report.reportedJob?.title || 'N/A',
+          report.reason || '',
+          report.status,
+          new Date(report.createdAt).toLocaleDateString()
+        ])
+        
+        doc.autoTable({
+          head: [['ID', 'Reporter', 'Type', 'Reported Item', 'Reason', 'Status', 'Date']],
+          body: tableData,
+          startY: 45,
+          styles: { fontSize: 8, cellPadding: 2 },
+          headStyles: { fillColor: [99, 102, 241], textColor: 255 },
+          alternateRowStyles: { fillColor: [245, 245, 245] },
+          margin: { top: 45 }
+        })
+        
+        doc.save(`resilinked-reports-${new Date().toISOString().split('T')[0]}.pdf`)
+        success('Reports exported as PDF successfully')
+      }
+    } catch (error) {
+      showError('Error exporting reports: ' + error.message)
+    }
+  }
+
+  // Export Support Tickets
+  const exportSupportTickets = (format = 'pdf') => {
+    try {
+      const filteredTickets = supportTickets.filter(ticket => {
+        const matchesStatus = ticketStatusFilter === 'all' || ticket.status === ticketStatusFilter
+        const matchesSearch = !ticketSearchQuery ||
+          ticket.subject?.toLowerCase().includes(ticketSearchQuery.toLowerCase()) ||
+          ticket.message?.toLowerCase().includes(ticketSearchQuery.toLowerCase()) ||
+          ticket.user?.email?.toLowerCase().includes(ticketSearchQuery.toLowerCase()) ||
+          ticket.user?.firstName?.toLowerCase().includes(ticketSearchQuery.toLowerCase()) ||
+          ticket.user?.lastName?.toLowerCase().includes(ticketSearchQuery.toLowerCase())
+        return matchesStatus && matchesSearch
+      })
+
+      if (format === 'csv') {
+        // CSV Export
+        const csvContent = [
+          ['Ticket ID', 'User Email', 'User Name', 'Subject', 'Message', 'Status', 'Date Created', 'Date Updated'].join(','),
+          ...filteredTickets.map(ticket => [
+            ticket._id,
+            ticket.user?.email || 'Unknown',
+            ticket.user ? `${ticket.user.firstName} ${ticket.user.lastName}` : 'Unknown',
+            `"${ticket.subject?.replace(/"/g, '""') || ''}"`,
+            `"${ticket.message?.replace(/"/g, '""') || ''}"`,
+            ticket.status,
+            new Date(ticket.createdAt).toLocaleDateString(),
+            new Date(ticket.updatedAt).toLocaleDateString()
+          ].join(','))
+        ].join('\n')
+
+        const blob = new Blob([csvContent], { type: 'text/csv' })
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `resilinked-support-tickets-${new Date().toISOString().split('T')[0]}.csv`
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(a)
+        success('Support tickets exported as CSV successfully')
+      } else {
+        // PDF Export
+        const { jsPDF } = window.jspdf
+        const doc = new jsPDF()
+        
+        // Header
+        doc.setFontSize(18)
+        doc.setTextColor(99, 102, 241)
+        doc.text('ResiLinked - Support Tickets Export', 14, 20)
+        
+        // Metadata
+        doc.setFontSize(10)
+        doc.setTextColor(100, 100, 100)
+        doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 28)
+        doc.text(`Total Tickets: ${filteredTickets.length}`, 14, 34)
+        doc.text(`Status Filter: ${ticketStatusFilter === 'all' ? 'All' : ticketStatusFilter}`, 14, 40)
+        
+        // Table
+        const tableData = filteredTickets.map(ticket => [
+          ticket._id.substring(0, 8) + '...',
+          ticket.user?.email || 'Unknown',
+          ticket.user ? `${ticket.user.firstName} ${ticket.user.lastName}` : 'Unknown',
+          ticket.subject || '',
+          ticket.message || '',
+          ticket.status,
+          new Date(ticket.createdAt).toLocaleDateString()
+        ])
+        
+        doc.autoTable({
+          head: [['ID', 'Email', 'Name', 'Subject', 'Message', 'Status', 'Date']],
+          body: tableData,
+          startY: 45,
+          styles: { fontSize: 8, cellPadding: 2 },
+          headStyles: { fillColor: [99, 102, 241], textColor: 255 },
+          alternateRowStyles: { fillColor: [245, 245, 245] },
+          margin: { top: 45 },
+          columnStyles: {
+            3: { cellWidth: 30 }, // Subject
+            4: { cellWidth: 40 }  // Message
+          }
+        })
+        
+        doc.save(`resilinked-support-tickets-${new Date().toISOString().split('T')[0]}.pdf`)
+        success('Support tickets exported as PDF successfully')
+      }
+    } catch (error) {
+      showError('Error exporting support tickets: ' + error.message)
+    }
+  }
+
+  // Export Deleted Items
+  const exportDeletedItems = (format = 'pdf') => {
+    try {
+      let data, headers, filename, filteredData
+      
+      if (deletedItemType === 'users') {
+        filteredData = deletedUsers.filter(user =>
+          !deletedSearchQuery ||
+          user.email?.toLowerCase().includes(deletedSearchQuery.toLowerCase()) ||
+          user.firstName?.toLowerCase().includes(deletedSearchQuery.toLowerCase()) ||
+          user.lastName?.toLowerCase().includes(deletedSearchQuery.toLowerCase())
+        )
+        headers = ['User ID', 'Email', 'Name', 'User Type', 'Barangay', 'Deleted At']
+        data = filteredData.map(user => [
+          user._id,
+          user.email,
+          `${user.firstName} ${user.lastName}`,
+          user.userType,
+          user.barangay || 'N/A',
+          new Date(user.deletedAt).toLocaleDateString()
+        ])
+        filename = 'deleted-users'
+      } else if (deletedItemType === 'jobs') {
+        filteredData = deletedJobs.filter(job =>
+          !deletedSearchQuery ||
+          job.title?.toLowerCase().includes(deletedSearchQuery.toLowerCase()) ||
+          job.description?.toLowerCase().includes(deletedSearchQuery.toLowerCase())
+        )
+        headers = ['Job ID', 'Title', 'Price', 'Barangay', 'Posted By', 'Deleted At']
+        data = filteredData.map(job => [
+          job._id,
+          job.title || '',
+          job.price || '0',
+          job.barangay || 'N/A',
+          job.postedBy?.email || 'Unknown',
+          new Date(job.deletedAt).toLocaleDateString()
+        ])
+        filename = 'deleted-jobs'
+      } else {
+        filteredData = deletedGoals.filter(goal =>
+          !deletedSearchQuery ||
+          goal.description?.toLowerCase().includes(deletedSearchQuery.toLowerCase())
+        )
+        headers = ['Goal ID', 'User Email', 'Description', 'Status', 'Deleted At']
+        data = filteredData.map(goal => [
+          goal._id,
+          goal.userId?.email || 'Unknown',
+          goal.description || '',
+          goal.completed ? 'Completed' : 'Pending',
+          new Date(goal.deletedAt).toLocaleDateString()
+        ])
+        filename = 'deleted-goals'
+      }
+
+      if (format === 'csv') {
+        // CSV Export
+        const csvContent = [
+          headers.join(','),
+          ...data.map(row => row.map(cell => 
+            typeof cell === 'string' && cell.includes(',') ? `"${cell.replace(/"/g, '""')}"` : cell
+          ).join(','))
+        ].join('\n')
+
+        const blob = new Blob([csvContent], { type: 'text/csv' })
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `resilinked-${filename}-${new Date().toISOString().split('T')[0]}.csv`
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(a)
+        success(`${deletedItemType} exported as CSV successfully`)
+      } else {
+        // PDF Export
+        const { jsPDF } = window.jspdf
+        const doc = new jsPDF()
+        
+        // Header
+        doc.setFontSize(18)
+        doc.setTextColor(99, 102, 241)
+        doc.text(`ResiLinked - ${filename.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')} Export`, 14, 20)
+        
+        // Metadata
+        doc.setFontSize(10)
+        doc.setTextColor(100, 100, 100)
+        doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 28)
+        doc.text(`Total Items: ${filteredData.length}`, 14, 34)
+        
+        // Table
+        doc.autoTable({
+          head: [headers],
+          body: data,
+          startY: 40,
+          styles: { fontSize: 8, cellPadding: 2 },
+          headStyles: { fillColor: [99, 102, 241], textColor: 255 },
+          alternateRowStyles: { fillColor: [245, 245, 245] },
+          margin: { top: 40 }
+        })
+        
+        doc.save(`resilinked-${filename}-${new Date().toISOString().split('T')[0]}.pdf`)
+        success(`${deletedItemType} exported as PDF successfully`)
+      }
+    } catch (error) {
+      showError('Error exporting deleted items: ' + error.message)
+    }
+  }
+
   if (loading) {
     return (
       <>
@@ -1412,9 +1703,25 @@ function AdminDashboard() {
         <div className="search-controls">
           <input
             type="text"
-            placeholder="Search..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={
+              currentTab === 'users' || currentTab === 'jobs' ? 'Search...' :
+              currentTab === 'reports' ? 'Search reports...' :
+              currentTab === 'support' ? 'Search support tickets...' :
+              currentTab === 'deleted' ? 'Search deleted items...' :
+              'Search...'
+            }
+            value={
+              currentTab === 'reports' ? reportSearchQuery :
+              currentTab === 'support' ? ticketSearchQuery :
+              currentTab === 'deleted' ? deletedSearchQuery :
+              searchQuery
+            }
+            onChange={(e) => {
+              if (currentTab === 'reports') setReportSearchQuery(e.target.value);
+              else if (currentTab === 'support') setTicketSearchQuery(e.target.value);
+              else if (currentTab === 'deleted') setDeletedSearchQuery(e.target.value);
+              else setSearchQuery(e.target.value);
+            }}
             onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
             className="search-input"
             style={{ width: '300px' }}
@@ -1430,9 +1737,9 @@ function AdminDashboard() {
             className="filter-select"
           >
             <option value="all">All Barangays</option>
-            <option value="Agdao">Agdao</option>
-            <option value="Buhangin">Buhangin</option>
-            <option value="Toril">Toril</option>
+            <option value="Sta. Lucia">Sta. Lucia</option>
+            <option value="Sta. Teresita">Sta. Teresita</option>
+            <option value="Sto. Rosario">Sto. Rosario</option>
             <option value="Other">Other</option>
           </select>
           
@@ -1472,6 +1779,48 @@ function AdminDashboard() {
               <option value="completed">Completed</option>
             </select>
           )}
+          
+          {currentTab === 'reports' && (
+            <select 
+              value={reportStatusFilter}
+              onChange={(e) => setReportStatusFilter(e.target.value)}
+              className="filter-select"
+            >
+              <option value="all">All Statuses</option>
+              <option value="pending">Pending</option>
+              <option value="resolved">Resolved</option>
+              <option value="dismissed">Dismissed</option>
+            </select>
+          )}
+          
+          {currentTab === 'support' && (
+            <select 
+              value={ticketStatusFilter}
+              onChange={(e) => setTicketStatusFilter(e.target.value)}
+              className="filter-select"
+            >
+              <option value="all">All Statuses</option>
+              <option value="open">Open</option>
+              <option value="in-progress">In Progress</option>
+              <option value="resolved">Resolved</option>
+              <option value="closed">Closed</option>
+            </select>
+          )}
+          
+          {currentTab === 'deleted' && (
+            <select 
+              value={deletedItemType}
+              onChange={(e) => {
+                setDeletedItemType(e.target.value);
+                loadDeletedItems(e.target.value);
+              }}
+              className="filter-select"
+            >
+              <option value="users">Deleted Users</option>
+              <option value="jobs">Deleted Jobs</option>
+              <option value="goals">Deleted Goals</option>
+            </select>
+          )}
         </div>
         
         <div className="sort-controls">
@@ -1492,10 +1841,15 @@ function AdminDashboard() {
           <button 
             onClick={() => {
               setSearchQuery('');
+              setReportSearchQuery('');
+              setTicketSearchQuery('');
+              setDeletedSearchQuery('');
               setBarangayFilter('all');
               setRoleFilter('all');
               setVerificationFilter('all');
               setJobStatusFilter('all');
+              setReportStatusFilter('all');
+              setTicketStatusFilter('all');
             }} 
             className="filter-select"
             style={{ cursor: 'pointer', background: 'white', color: '#2d3748', border: '1px solid #e2e8f0', fontWeight: '500' }}
@@ -1504,37 +1858,103 @@ function AdminDashboard() {
             {t('admin.clearFilters')}
           </button>
         </div>
-
         <div className="export-controls">
-          <button 
-            onClick={() => exportData('users', 'csv')} 
-            className="btn secondary"
-            title="Export filtered users as CSV"
-          >
-            📊 CSV Users
-          </button>
-          <button 
-            onClick={() => exportData('users', 'pdf')} 
-            className="btn secondary"
-            title="Export filtered users as PDF"
-          >
-            📄 PDF Users
-          </button>
-          <button 
-            onClick={() => exportData('jobs', 'csv')} 
-            className="btn secondary"
-            title="Export filtered jobs as CSV"
-          >
-            📊 CSV Jobs
-          </button>
-          <button 
-            onClick={() => exportData('jobs', 'pdf')} 
-            className="btn secondary"
-            title="Export filtered jobs as PDF"
-          >
-            📄 PDF Jobs
-          </button>
+          {currentTab === 'users' && (
+            <>
+              <button 
+                onClick={() => exportData('users', 'csv')} 
+                className="btn secondary"
+                title="Export filtered users as CSV"
+              >
+                📊 Export CSV
+              </button>
+              <button 
+                onClick={() => exportData('users', 'pdf')} 
+                className="btn secondary"
+                title="Export filtered users as PDF"
+              >
+                📄 Export PDF
+              </button>
+            </>
+          )}
+          
+          {currentTab === 'jobs' && (
+            <>
+              <button 
+                onClick={() => exportData('jobs', 'csv')} 
+                className="btn secondary"
+                title="Export filtered jobs as CSV"
+              >
+                📊 Export CSV
+              </button>
+              <button 
+                onClick={() => exportData('jobs', 'pdf')} 
+                className="btn secondary"
+                title="Export filtered jobs as PDF"
+              >
+                📄 Export PDF
+              </button>
+            </>
+          )}
+          
+          {currentTab === 'reports' && (
+            <>
+              <button 
+                onClick={() => exportReports('csv')} 
+                className="btn secondary"
+                title="Export filtered reports as CSV"
+              >
+                📊 Export CSV
+              </button>
+              <button 
+                onClick={() => exportReports('pdf')} 
+                className="btn secondary"
+                title="Export filtered reports as PDF"
+              >
+                📄 Export PDF
+              </button>
+            </>
+          )}
+          
+          {currentTab === 'support' && (
+            <>
+              <button 
+                onClick={() => exportSupportTickets('csv')} 
+                className="btn secondary"
+                title="Export filtered support tickets as CSV"
+              >
+                📊 Export CSV
+              </button>
+              <button 
+                onClick={() => exportSupportTickets('pdf')} 
+                className="btn secondary"
+                title="Export filtered support tickets as PDF"
+              >
+                📄 Export PDF
+              </button>
+            </>
+          )}
+          
+          {currentTab === 'deleted' && (
+            <>
+              <button 
+                onClick={() => exportDeletedItems('csv')} 
+                className="btn secondary"
+                title="Export filtered deleted items as CSV"
+              >
+                📊 Export CSV
+              </button>
+              <button 
+                onClick={() => exportDeletedItems('pdf')} 
+                className="btn secondary"
+                title="Export filtered deleted items as PDF"
+              >
+                📄 Export PDF
+              </button>
+            </>
+          )}
         </div>
+
       </div>
 
       {/* Tab Navigation */}
@@ -1650,7 +2070,7 @@ function AdminDashboard() {
                         <div key={job._id} className="job-card">
                           <div className="job-header">
                             <h4>{job.title}</h4>
-                            <div className="job-price">?{job.price?.toLocaleString() || '0'}</div>
+                            <div className="job-price">₱{job.price?.toLocaleString() || '0'}</div>
                           </div>
                           
                           <div className="job-meta">
@@ -1947,7 +2367,7 @@ function AdminDashboard() {
                       <div key={job._id} className="job-card">
                         <div className="job-header">
                           <h4>{job.title}</h4>
-                          <div className="job-price">?{job.price?.toLocaleString() || '0'}</div>
+                          <div className="job-price">₱{job.price?.toLocaleString() || '0'}</div>
                         </div>
                         
                         <div className="job-meta">
@@ -2219,7 +2639,7 @@ function AdminDashboard() {
                               <div className="job-title-analytics">{job.title}</div>
                               <div className="job-meta-analytics">
                                 <span>📍 {job.barangay}</span>
-                                <span>💰 ₱{job.price?.toLocaleString()}</span>
+                                <span>💰 {job.price?.toLocaleString()}</span>
                                 <span>👥 {job.applicantCount} applicants</span>
                               </div>
                             </div>
@@ -2320,47 +2740,42 @@ function AdminDashboard() {
                   <p>Manage reports submitted by users for policy violations</p>
                 </div>
 
-                {/* Report Status Filter */}
-                <div className="reports-filter">
-                  <label htmlFor="report-status-filter">Filter by Status:</label>
-                  <select 
-                    id="report-status-filter"
-                    value={reportStatusFilter} 
-                    onChange={(e) => {
-                      setReportStatusFilter(e.target.value);
-                      loadReports();
-                    }}
-                    className="filter-select"
-                  >
-                    <option value="all">All Reports</option>
-                    <option value="pending">Pending</option>
-                    <option value="resolved">Resolved</option>
-                    <option value="dismissed">Dismissed</option>
-                  </select>
-                  <span className="report-count">{reports.length} reports found</span>
-                </div>
-
                 {/* Reports List */}
-                {reports.length === 0 ? (
-                  <div className="no-data">
-                    <p>No reports found</p>
-                  </div>
-                ) : (
-                  <div className="reports-table-container">
-                    <table className="reports-table">
-                      <thead>
-                        <tr>
-                          <th>Reporter</th>
-                          <th>Type</th>
-                          <th>Reported Item</th>
-                          <th>Reason</th>
-                          <th>Status</th>
-                          <th>Date</th>
-                          <th>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {reports.map(report => (
+                {(() => {
+                  const filteredReports = reports.filter(report => {
+                    const matchesStatus = reportStatusFilter === 'all' || report.status === reportStatusFilter
+                    const matchesSearch = !reportSearchQuery || 
+                      report.reason?.toLowerCase().includes(reportSearchQuery.toLowerCase()) ||
+                      report.reporter?.email?.toLowerCase().includes(reportSearchQuery.toLowerCase()) ||
+                      report.reporter?.firstName?.toLowerCase().includes(reportSearchQuery.toLowerCase()) ||
+                      report.reporter?.lastName?.toLowerCase().includes(reportSearchQuery.toLowerCase()) ||
+                      report.reportedUser?.email?.toLowerCase().includes(reportSearchQuery.toLowerCase()) ||
+                      report.reportedUser?.firstName?.toLowerCase().includes(reportSearchQuery.toLowerCase()) ||
+                      report.reportedUser?.lastName?.toLowerCase().includes(reportSearchQuery.toLowerCase()) ||
+                      report.reportedJob?.title?.toLowerCase().includes(reportSearchQuery.toLowerCase())
+                    return matchesStatus && matchesSearch
+                  })
+
+                  return filteredReports.length === 0 ? (
+                    <div className="no-data">
+                      <p>No reports found</p>
+                    </div>
+                  ) : (
+                    <div className="reports-table-container">
+                      <table className="reports-table">
+                        <thead>
+                          <tr>
+                            <th>Reporter</th>
+                            <th>Type</th>
+                            <th>Reported Item</th>
+                            <th>Reason</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filteredReports.map(report => (
                           <tr key={report._id}>
                             <td>
                               <div className="user-cell">
@@ -2442,7 +2857,8 @@ function AdminDashboard() {
                       </tbody>
                     </table>
                   </div>
-                )}
+                  )
+                })()}
               </div>
             )}
             
@@ -2455,34 +2871,25 @@ function AdminDashboard() {
                   <p>Manage support requests from users</p>
                 </div>
 
-                {/* Ticket Status Filter */}
-                <div className="support-filter">
-                  <label htmlFor="ticket-status-filter">Filter by Status:</label>
-                  <select 
-                    id="ticket-status-filter"
-                    value={ticketStatusFilter} 
-                    onChange={(e) => {
-                      setTicketStatusFilter(e.target.value);
-                      loadSupportTickets();
-                    }}
-                    className="filter-select"
-                  >
-                    <option value="all">All Tickets</option>
-                    <option value="open">Open</option>
-                    <option value="in-progress">In Progress</option>
-                    <option value="resolved">Resolved</option>
-                    <option value="closed">Closed</option>
-                  </select>
-                  <span className="ticket-count">{supportTickets.length} tickets found</span>
-                </div>
-
                 {/* Support Tickets List */}
-                {supportTickets.length === 0 ? (
-                  <div className="no-data">
-                    <p>No support tickets found</p>
-                  </div>
-                ) : (
-                  <div className="support-table-container">
+                {(() => {
+                  const filteredTickets = supportTickets.filter(ticket => {
+                    const matchesStatus = ticketStatusFilter === 'all' || ticket.status === ticketStatusFilter
+                    const matchesSearch = !ticketSearchQuery ||
+                      ticket.subject?.toLowerCase().includes(ticketSearchQuery.toLowerCase()) ||
+                      ticket.message?.toLowerCase().includes(ticketSearchQuery.toLowerCase()) ||
+                      ticket.user?.email?.toLowerCase().includes(ticketSearchQuery.toLowerCase()) ||
+                      ticket.user?.firstName?.toLowerCase().includes(ticketSearchQuery.toLowerCase()) ||
+                      ticket.user?.lastName?.toLowerCase().includes(ticketSearchQuery.toLowerCase())
+                    return matchesStatus && matchesSearch
+                  })
+
+                  return filteredTickets.length === 0 ? (
+                    <div className="no-data">
+                      <p>No support tickets found</p>
+                    </div>
+                  ) : (
+                    <div className="support-table-container">
                     <table className="support-table">
                       <thead>
                         <tr>
@@ -2497,7 +2904,7 @@ function AdminDashboard() {
                         </tr>
                       </thead>
                       <tbody>
-                        {supportTickets.map(ticket => (
+                        {filteredTickets.map(ticket => (
                           <tr key={ticket._id}>
                             <td>
                               <strong>{ticket.name}</strong>
@@ -2607,7 +3014,8 @@ function AdminDashboard() {
                       </tbody>
                     </table>
                   </div>
-                )}
+                  )
+                })()}
               </div>
             )}
             
@@ -2620,52 +3028,38 @@ function AdminDashboard() {
                   <p>Manage soft-deleted items across the platform</p>
                 </div>
 
-                {/* Item Type Selector */}
-                <div className="deleted-items-selector">
-                  <button 
-                    className={`selector-btn ${deletedItemType === 'users' ? 'active' : ''}`}
-                    onClick={() => loadDeletedItems('users')}
-                  >
-                    Users
-                  </button>
-                  <button 
-                    className={`selector-btn ${deletedItemType === 'jobs' ? 'active' : ''}`}
-                    onClick={() => loadDeletedItems('jobs')}
-                  >
-                    Jobs
-                  </button>
-                  <button 
-                    className={`selector-btn ${deletedItemType === 'goals' ? 'active' : ''}`}
-                    onClick={() => loadDeletedItems('goals')}
-                  >
-                    Goals
-                  </button>
-                </div>
-
                 {/* Deleted Users */}
-                {deletedItemType === 'users' && (
-                  <div className="deleted-users">
-                    <h4>Deleted Users <span className="count-badge">{deletedUsers.length}</span></h4>
-                    
-                    {deletedUsers.length === 0 ? (
-                      <div className="no-data">
-                        <p>No deleted users found</p>
-                      </div>
-                    ) : (
-                      <div className="deleted-items-table-container">
-                        <table className="deleted-items-table">
-                          <thead>
-                            <tr>
-                              <th>Name</th>
-                              <th>Email</th>
-                              <th>Type</th>
-                              <th>Barangay</th>
-                              <th>Deleted At</th>
-                              <th>Actions</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {deletedUsers.map(user => (
+                {deletedItemType === 'users' && (() => {
+                  const filteredUsers = deletedUsers.filter(user =>
+                    !deletedSearchQuery ||
+                    user.email?.toLowerCase().includes(deletedSearchQuery.toLowerCase()) ||
+                    user.firstName?.toLowerCase().includes(deletedSearchQuery.toLowerCase()) ||
+                    user.lastName?.toLowerCase().includes(deletedSearchQuery.toLowerCase())
+                  )
+
+                  return (
+                    <div className="deleted-users">
+                      <h4>Deleted Users <span className="count-badge">{filteredUsers.length}</span></h4>
+                      
+                      {filteredUsers.length === 0 ? (
+                        <div className="no-data">
+                          <p>No deleted users found</p>
+                        </div>
+                      ) : (
+                        <div className="deleted-items-table-container">
+                          <table className="deleted-items-table">
+                            <thead>
+                              <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Type</th>
+                                <th>Barangay</th>
+                                <th>Deleted At</th>
+                                <th>Actions</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {filteredUsers.map(user => (
                               <tr key={user._id} className="deleted-item">
                                 <td>
                                   <div className="user-name">
@@ -2703,20 +3097,28 @@ function AdminDashboard() {
                       </div>
                     )}
                   </div>
-                )}
+                  )
+                })()}
 
                 {/* Deleted Jobs */}
-                {deletedItemType === 'jobs' && (
-                  <div className="deleted-jobs">
-                    <h4>Deleted Jobs <span className="count-badge">{deletedJobs.length}</span></h4>
-                    
-                    {deletedJobs.length === 0 ? (
-                      <div className="no-data">
-                        <p>No deleted jobs found</p>
-                      </div>
-                    ) : (
-                      <div className="deleted-items-grid">
-                        {deletedJobs.map(job => (
+                {deletedItemType === 'jobs' && (() => {
+                  const filteredJobs = deletedJobs.filter(job =>
+                    !deletedSearchQuery ||
+                    job.title?.toLowerCase().includes(deletedSearchQuery.toLowerCase()) ||
+                    job.description?.toLowerCase().includes(deletedSearchQuery.toLowerCase())
+                  )
+
+                  return (
+                    <div className="deleted-jobs">
+                      <h4>Deleted Jobs <span className="count-badge">{filteredJobs.length}</span></h4>
+                      
+                      {filteredJobs.length === 0 ? (
+                        <div className="no-data">
+                          <p>No deleted jobs found</p>
+                        </div>
+                      ) : (
+                        <div className="deleted-items-grid">
+                          {filteredJobs.map(job => (
                           <div key={job._id} className="deleted-job-card">
                             <div className="job-header">
                               <h4>{job.title}</h4>
@@ -2763,32 +3165,39 @@ function AdminDashboard() {
                       </div>
                     )}
                   </div>
-                )}
+                  )
+                })()}
 
                 {/* Deleted Goals */}
-                {deletedItemType === 'goals' && (
-                  <div className="deleted-goals">
-                    <h4>Deleted Goals <span className="count-badge">{deletedGoals.length}</span></h4>
-                    
-                    {deletedGoals.length === 0 ? (
-                      <div className="no-data">
-                        <p>No deleted goals found</p>
-                      </div>
-                    ) : (
-                      <div className="deleted-items-table-container">
-                        <table className="deleted-items-table">
-                          <thead>
-                            <tr>
-                              <th>Description</th>
-                              <th>Target</th>
-                              <th>Progress</th>
+                {deletedItemType === 'goals' && (() => {
+                  const filteredGoals = deletedGoals.filter(goal =>
+                    !deletedSearchQuery ||
+                    goal.description?.toLowerCase().includes(deletedSearchQuery.toLowerCase())
+                  )
+
+                  return (
+                    <div className="deleted-goals">
+                      <h4>Deleted Goals <span className="count-badge">{filteredGoals.length}</span></h4>
+                      
+                      {filteredGoals.length === 0 ? (
+                        <div className="no-data">
+                          <p>No deleted goals found</p>
+                        </div>
+                      ) : (
+                        <div className="deleted-items-table-container">
+                          <table className="deleted-items-table">
+                            <thead>
+                              <tr>
+                                <th>Description</th>
+                                <th>Target</th>
+                                <th>Progress</th>
                               <th>Owner</th>
                               <th>Deleted At</th>
                               <th>Actions</th>
                             </tr>
                           </thead>
                           <tbody>
-                            {deletedGoals.map(goal => (
+                            {filteredGoals.map(goal => (
                               <tr key={goal._id} className="deleted-item">
                                 <td>
                                   <div className="goal-title">
@@ -2828,7 +3237,8 @@ function AdminDashboard() {
                       </div>
                     )}
                   </div>
-                )}
+                  )
+                })()}
               </div>
             )}
           </>
@@ -2935,14 +3345,14 @@ function AdminDashboard() {
         <div className="modal-overlay" onClick={() => setShowPermanentDeleteModal(false)}>
           <div className="modal-content confirmation-modal danger-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header danger-header">
-              <h3>⚠️ Permanent Deletion Warning</h3>
+              <h3>š ï¸ Permanent Deletion Warning</h3>
             </div>
             <div className="modal-body">
               <p className="danger-text">
                 You are about to <strong>PERMANENTLY DELETE</strong> this {itemToDeletePermanently.type ? itemToDeletePermanently.type.slice(0, -1) : 'item'}.
               </p>
               <div className="warning-box">
-                <p><strong>⚠️ This action:</strong></p>
+                <p><strong>š ï¸ This action:</strong></p>
                 <ul>
                   <li><strong>CANNOT be undone</strong></li>
                   <li>Will remove <strong>ALL data</strong> related to this {itemToDeletePermanently.type ? itemToDeletePermanently.type.slice(0, -1) : 'item'}</li>
@@ -5306,3 +5716,7 @@ function AdminDashboard() {
 }
 
 export default AdminDashboard
+
+
+
+
