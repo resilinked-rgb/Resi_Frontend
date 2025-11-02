@@ -937,6 +937,38 @@ class ApiService {
       method: "GET"
     });
   }
+
+  // ================= Payment Methods =================
+  async initiatePayment(jobId, paymentMethod, receiptImage = null) {
+    return this.request("/payments/initiate", {
+      method: "POST",
+      body: { jobId, paymentMethod, receiptImage }
+    });
+  }
+
+  async getPaymentStatus(paymentId) {
+    return this.request(`/payments/${paymentId}/status`, {
+      method: "GET"
+    });
+  }
+
+  async getJobPayments(jobId) {
+    return this.request(`/payments/job/${jobId}`, {
+      method: "GET"
+    });
+  }
+
+  async getJobPayment(jobId) {
+    return this.request(`/payments/job/${jobId}`, {
+      method: "GET"
+    });
+  }
+
+  async getMyPayments(type = 'all') {
+    return this.request(`/payments/my-payments?type=${type}`, {
+      method: "GET"
+    });
+  }
 }
 
 const apiService = new ApiService();

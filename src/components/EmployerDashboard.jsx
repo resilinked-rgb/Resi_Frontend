@@ -5,6 +5,7 @@ import { AlertContext } from '../context/AlertContext'
 import { useTranslation } from '../hooks/useTranslation'
 import apiService from '../api'
 import ReportModal from './ReportModal'
+import PaymentModal from './PaymentModal'
 import { getProfilePictureUrl } from '../utils/imageHelper'
 
 function EmployerDashboard() {
@@ -47,13 +48,9 @@ function EmployerDashboard() {
   // New state for invitation modal
   const [showInviteModal, setShowInviteModal] = useState(false)
   const [selectedJobForInvite, setSelectedJobForInvite] = useState(null)
-  // New state for complete job modal
-  const [showCompleteModal, setShowCompleteModal] = useState(false)
+  // New state for payment modal
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
   const [jobToComplete, setJobToComplete] = useState(null)
-  const [rating, setRating] = useState(0)
-  const [ratingComment, setRatingComment] = useState('')
-  const [paymentProof, setPaymentProof] = useState(null)
-  const [paymentProofPreview, setPaymentProofPreview] = useState(null)
 
   const { user, hasAccessTo } = useContext(AuthContext)
   const { success, error: showError } = useContext(AlertContext)
@@ -398,106 +395,18 @@ function EmployerDashboard() {
 
   const openCompleteModal = (job) => {
     setJobToComplete(job);
-    setRating(0);
-    setRatingComment('');
-    setPaymentProof(null);
-    setPaymentProofPreview(null);
-    setShowCompleteModal(true);
+    setShowPaymentModal(true);
   };
 
-  // Handle payment proof file selection
-  const handlePaymentProofChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      // Validate file type
-      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
-      if (!validTypes.includes(file.type)) {
-        showError('Please upload a valid image (JPEG, PNG, WebP) or PDF file');
-        return;
-      }
-
-      // Validate file size (5MB max)
-      if (file.size > 5 * 1024 * 1024) {
-        showError('File size must be less than 5MB');
-        return;
-      }
-
-      setPaymentProof(file);
-      
-      // Create preview for images only
-      if (file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setPaymentProofPreview(reader.result);
-        };
-        reader.readAsDataURL(file);
-      } else {
-        setPaymentProofPreview(null);
-      }
-    }
-  };
-
-  const handleCompleteJob = async (e) => {
-    e.preventDefault();
-
-    if (rating === 0) {
-      showError('Please provide a rating for the worker');
-      return;
-    }
-
-    if (!ratingComment.trim()) {
-      showError('Please provide feedback for the worker');
-      return;
-    }
-
-    if (!paymentProof) {
-      showError('Please upload proof of payment (image or receipt)');
-      return;
-    }
-
-    // Check if job is already completed
-    if (jobToComplete.status === 'completed' || jobToComplete.completed) {
-      showError('This job has already been completed');
-      setShowCompleteModal(false);
-      setJobToComplete(null);
-      setRating(0);
-      setRatingComment('');
-      setPaymentProof(null);
-      setPaymentProofPreview(null);
-      return;
-    }
-
-    try {
-      // Create FormData to send file
-      const formData = new FormData();
-      formData.append('paymentProof', paymentProof);
-
-      // First complete the job with payment proof
-      const result = await apiService.completeJobWithPayment(jobToComplete._id, formData);
-      
-      // Then submit the rating (using rateeId to match backend expectation)
-      await apiService.rateUser({
-        rateeId: jobToComplete.assignedTo._id,
-        rating: rating,
-        comment: ratingComment,
-        jobId: jobToComplete._id
-      });
-
-      success(t('employerDashboard.completeSuccess'));
-      setShowCompleteModal(false);
-      setJobToComplete(null);
-      setRating(0);
-      setRatingComment('');
-      setPaymentProof(null);
-      setPaymentProofPreview(null);
-      
-      // Refresh the jobs list and dashboard stats
-      await loadMyJobs();
-      await loadDashboardStats();
-    } catch (error) {
-      console.error('Error completing job:', error);
-      showError(error.message || t('employerDashboard.completeFailed'));
-    }
+  // Handle successful payment completion
+  const handlePaymentSuccess = async () => {
+    success(t('employerDashboard.paymentSuccess'));
+    setShowPaymentModal(false);
+    setJobToComplete(null);
+    
+    // Refresh the jobs list and dashboard stats
+    await loadMyJobs();
+    await loadDashboardStats();
   };
 
   // Open delete confirmation modal
@@ -3604,109 +3513,16 @@ function EmployerDashboard() {
         </div>
       )}
       
-      {/* Complete Job Modal */}
-      {showCompleteModal && jobToComplete && (
-        <div className="modal-overlay" onClick={() => setShowCompleteModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>{t('employerDashboard.completeJobTitle')}</h3>
-            </div>
-            
-            <form onSubmit={handleCompleteJob}>
-              <div className="modal-body">
-                <div className="complete-job-info">
-                  <h4>{jobToComplete.title}</h4>
-                  <p className="worker-info">
-                    Worker: <strong>{jobToComplete.assignedTo?.firstName} {jobToComplete.assignedTo?.lastName}</strong>
-                  </p>
-                  <p className="job-price-info">{t('employerDashboard.price')}: {formatPrice(jobToComplete.price)}</p>
-                </div>
-
-                <div className="rating-section">
-                  <label className="rating-label">{t('employerDashboard.rateWorker')} *</label>
-                  <div className="star-rating">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        key={star}
-                        type="button"
-                        className={`star ${rating >= star ? 'filled' : ''}`}
-                        onClick={() => setRating(star)}
-                      >
-                        ★
-                      </button>
-                    ))}
-                  </div>
-                  <p className="rating-description">
-                    {rating === 0 && 'Select a rating'}
-                    {rating === 1 && 'Poor - Did not meet expectations'}
-                    {rating === 2 && 'Fair - Below expectations'}
-                    {rating === 3 && 'Good - Met expectations'}
-                    {rating === 4 && 'Very Good - Exceeded expectations'}
-                    {rating === 5 && 'Excellent - Outstanding work!'}
-                  </p>
-                </div>
-
-                <div className="form-group">
-                  <label>{t('employerDashboard.comment')} *</label>
-                  <textarea
-                    value={ratingComment}
-                    onChange={(e) => setRatingComment(e.target.value)}
-                    placeholder="Share your experience working with this person. This helps build their reputation..."
-                    rows="4"
-                    required
-                    minLength="10"
-                  />
-                  <small className="char-count">{ratingComment.length} characters</small>
-                </div>
-
-                <div className="form-group">
-                  <label>{t('employerDashboard.paymentProof')} *</label>
-                  <p className="field-description">{t('employerDashboard.paymentProofDesc')}</p>
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/jpg,image/png,image/webp,application/pdf"
-                    onChange={handlePaymentProofChange}
-                    required
-                    className="file-input"
-                  />
-                  {paymentProofPreview && (
-                    <div className="payment-proof-preview">
-                      <img src={paymentProofPreview} alt="Payment proof preview" />
-                    </div>
-                  )}
-                  {paymentProof && !paymentProofPreview && (
-                    <div className="file-selected">
-                      📄 {paymentProof.name}
-                    </div>
-                  )}
-                </div>
-
-                <div className="complete-note">
-                  <span className="note-icon">💡</span>
-                  <span className="note-text">
-                    Completing this job will transfer the payment ({formatPrice(jobToComplete.price)}) to the worker's active financial goal.
-                  </span>
-                </div>
-              </div>
-              
-              <div className="modal-footer">
-                <button 
-                  type="button"
-                  className="btn secondary" 
-                  onClick={() => setShowCompleteModal(false)}
-                >
-                  {t('employerDashboard.cancel')}
-                </button>
-                <button 
-                  type="submit"
-                  className="btn success"
-                >
-                  {t('employerDashboard.submit')}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+      {/* Payment Modal - PayMongo Integration */}
+      {showPaymentModal && jobToComplete && (
+        <PaymentModal
+          job={jobToComplete}
+          onClose={() => {
+            setShowPaymentModal(false);
+            setJobToComplete(null);
+          }}
+          onSuccess={handlePaymentSuccess}
+        />
       )}
       
       {/* Delete Confirmation Modal */}

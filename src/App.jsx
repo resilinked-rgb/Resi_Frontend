@@ -29,6 +29,9 @@ import VerifyEmailChange from './components/VerifyEmailChange'
 import Notifications from './components/Notifications'
 import Chat from './components/Chat'
 import Chatbot from './components/Chatbot'
+import PaymentSuccess from './components/PaymentSuccess'
+import PaymentFailed from './components/PaymentFailed'
+import PaymentHistory from './components/PaymentHistory'
 
 // Layout component
 import Layout from './components/Layout'
@@ -123,6 +126,23 @@ function App() {
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/verify-email/:token" element={<VerifyEmail />} />
             <Route path="/verify-email-change/:token" element={<VerifyEmailChange />} />
+            
+            {/* Payment routes */}
+            <Route path="/payment/success" element={
+              <ProtectedRoute>
+                <PaymentSuccess />
+              </ProtectedRoute>
+            } />
+            <Route path="/payment/failed" element={
+              <ProtectedRoute>
+                <PaymentFailed />
+              </ProtectedRoute>
+            } />
+            <Route path="/payment-history" element={
+              <ProtectedRoute>
+                <PaymentHistory />
+              </ProtectedRoute>
+            } />
             
             {/* Protected routes */}
             <Route path="/profile" element={
