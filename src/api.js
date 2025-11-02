@@ -969,6 +969,12 @@ class ApiService {
       method: "GET"
     });
   }
+
+  async completePaymentByJobId(jobId) {
+    return this.request(`/payments/complete-by-job/${jobId}`, {
+      method: "POST"
+    });
+  }
 }
 
 const apiService = new ApiService();
