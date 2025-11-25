@@ -393,7 +393,7 @@ function Navigation() {
         }
 
         .nav-link {
-          display: flex;
+          display: inline-flex;
           align-items: center;
           gap: 0.25rem;
           color: white;
@@ -408,6 +408,8 @@ function Navigation() {
           background: rgba(255, 255, 255, 0.1);
           backdrop-filter: blur(20px);
           border: 1px solid rgba(255, 255, 255, 0.15);
+          flex-shrink: 0;
+          width: auto;
         }
 
         .nav-link:hover {
