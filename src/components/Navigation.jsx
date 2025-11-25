@@ -391,7 +391,6 @@ function Navigation() {
           align-items: center;
           gap: 0.5rem;
           flex-wrap: nowrap;
-          flex: 1;
           justify-content: flex-end;
         }
 
@@ -443,6 +442,7 @@ function Navigation() {
           font-weight: 600;
           border: none;
           box-shadow: 0 4px 16px rgba(34, 197, 94, 0.3);
+          max-width: fit-content;
         }
 
         .nav-link.btn-primary:hover {
