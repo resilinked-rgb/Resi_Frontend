@@ -223,55 +223,55 @@ function Navigation() {
         ) : (
           /* Guest Navigation */
           <div className="nav-desktop">
-            <div className="nav-links">
-              <NavLink to="/search-jobs">
-                <span className="nav-icon">🔍</span>
-                {t('nav.findJobs')}
-              </NavLink>
-              
-              {/* Language Selector Dropdown for non-logged-in users */}
-              <div className="language-dropdown" ref={langMenuRef}>
-                <button
-                  className="lang-dropdown-trigger"
-                  onClick={() => setLangMenuOpen(!langMenuOpen)}
-                >
-                  <span className="lang-icon">🌐</span>
-                  <span className="lang-text">{language === 'en' ? 'English' : 'Tagalog'}</span>
-                  <span className={`dropdown-arrow ${langMenuOpen ? 'open' : ''}`}>▼</span>
-                </button>
+            <NavLink to="/search-jobs">
+              <span className="nav-icon">🔍</span>
+              {t('nav.findJobs')}
+            </NavLink>
+            
+            {/* Language Selector Dropdown for non-logged-in users */}
+            <div className="language-dropdown" ref={langMenuRef}>
+              <button
+                className="lang-dropdown-trigger"
+                onClick={() => setLangMenuOpen(!langMenuOpen)}
+              >
+                <span className="lang-icon">🌐</span>
+                <span className="lang-text">{language === 'en' ? 'English' : 'Tagalog'}</span>
+                <span className={`dropdown-arrow ${langMenuOpen ? 'open' : ''}`}>▼</span>
+              </button>
 
-                {langMenuOpen && (
-                  <div className="lang-dropdown-menu">
-                    <button
-                      className={`lang-option ${language === 'en' ? 'active' : ''}`}
-                      onClick={() => {
-                        changeLanguage('en');
-                        setLangMenuOpen(false);
-                      }}
-                    >
-                      <span className="lang-flag">🇺🇸</span>
-                      <span>English</span>
-                      {language === 'en' && <span className="checkmark">✓</span>}
-                    </button>
-                    <button
-                      className={`lang-option ${language === 'tl' ? 'active' : ''}`}
-                      onClick={() => {
-                        changeLanguage('tl');
-                        setLangMenuOpen(false);
-                      }}
-                    >
-                      <span className="lang-flag">🇵🇭</span>
-                      <span>Tagalog</span>
-                      {language === 'tl' && <span className="checkmark">✓</span>}
-                    </button>
-                  </div>
-                )}
-              </div>
-              
-              <NavLink to="/login" className="btn-outline" style={{ flexShrink: 0, flexGrow: 0, width: 'auto' }}>
+              {langMenuOpen && (
+                <div className="lang-dropdown-menu">
+                  <button
+                    className={`lang-option ${language === 'en' ? 'active' : ''}`}
+                    onClick={() => {
+                      changeLanguage('en');
+                      setLangMenuOpen(false);
+                    }}
+                  >
+                    <span className="lang-flag">🇺🇸</span>
+                    <span>English</span>
+                    {language === 'en' && <span className="checkmark">✓</span>}
+                  </button>
+                  <button
+                    className={`lang-option ${language === 'tl' ? 'active' : ''}`}
+                    onClick={() => {
+                      changeLanguage('tl');
+                      setLangMenuOpen(false);
+                    }}
+                  >
+                    <span className="lang-flag">🇵🇭</span>
+                    <span>Tagalog</span>
+                    {language === 'tl' && <span className="checkmark">✓</span>}
+                  </button>
+                </div>
+              )}
+            </div>
+            
+            <div className="guest-auth-buttons">
+              <NavLink to="/login" className="btn-outline">
                 {t('nav.login')}
               </NavLink>
-              <NavLink to="/register" className="btn-primary" style={{ flexShrink: 0, flexGrow: 0, width: 'auto' }}>
+              <NavLink to="/register" className="btn-primary">
                 {t('landing.getStarted')}
               </NavLink>
             </div>
@@ -382,6 +382,22 @@ function Navigation() {
           display: flex;
           align-items: center;
           gap: var(--spacing-3);
+          margin-left: auto;
+        }
+        
+        .nav-desktop > * {
+          flex-shrink: 0;
+          flex-grow: 0;
+        }
+
+        .guest-auth-buttons {
+          display: flex;
+          gap: 0.5rem;
+          align-items: center;
+        }
+        
+        .guest-auth-buttons .nav-link {
+          align-self: center;
         }
 
         .nav-links {
@@ -425,27 +441,37 @@ function Navigation() {
         }
 
         .nav-link.btn-outline {
-          background: transparent;
-          border: 1px solid rgba(255, 255, 255, 0.4);
-          min-height: unset;
-          height: auto;
+          background: transparent !important;
+          border: 1px solid rgba(255, 255, 255, 0.4) !important;
+          min-height: unset !important;
+          height: auto !important;
+          padding: 0.5rem 0.625rem !important;
+          font-size: 0.75rem !important;
+          width: fit-content !important;
+          flex: 0 0 fit-content !important;
+          align-self: center !important;
         }
 
         .nav-link.btn-outline:hover {
-          background: rgba(255, 255, 255, 0.15);
-          border-color: rgba(255, 255, 255, 0.6);
+          background: rgba(255, 255, 255, 0.15) !important;
+          border-color: rgba(255, 255, 255, 0.6) !important;
         }
 
         .nav-link.btn-primary {
-          background: linear-gradient(135deg, var(--success-500) 0%, var(--success-600) 100%);
-          border: 1px solid rgba(255, 255, 255, 0.15);
-          min-height: unset;
-          height: auto;
+          background: linear-gradient(135deg, var(--success-500) 0%, var(--success-600) 100%) !important;
+          border: 1px solid rgba(255, 255, 255, 0.15) !important;
+          min-height: unset !important;
+          height: auto !important;
+          padding: 0.5rem 0.625rem !important;
+          font-size: 0.75rem !important;
+          width: fit-content !important;
+          flex: 0 0 fit-content !important;
+          align-self: center !important;
         }
 
         .nav-link.btn-primary:hover {
-          background: linear-gradient(135deg, var(--success-600) 0%, var(--success-700) 100%);
-          box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+          background: linear-gradient(135deg, var(--success-600) 0%, var(--success-700) 100%) !important;
+          box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4) !important;
         }
 
         .nav-icon {
