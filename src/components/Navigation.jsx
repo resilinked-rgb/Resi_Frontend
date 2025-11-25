@@ -268,12 +268,14 @@ function Navigation() {
                 )}
               </div>
               
-              <NavLink to="/login" className="btn-outline">
-                {t('nav.login')}
-              </NavLink>
-              <NavLink to="/register" className="btn-primary">
-                {t('landing.getStarted')}
-              </NavLink>
+              <div className="auth-btn-wrapper">
+                <NavLink to="/login" className="btn-outline">
+                  {t('nav.login')}
+                </NavLink>
+                <NavLink to="/register" className="btn-primary">
+                  {t('landing.getStarted')}
+                </NavLink>
+              </div>
             </div>
           </div>
         )}
@@ -453,6 +455,12 @@ function Navigation() {
         .nav-link.btn-primary:hover {
           background: linear-gradient(135deg, var(--success-600) 0%, var(--success-700) 100%) !important;
           box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4) !important;
+        }
+
+        .auth-btn-wrapper {
+          display: flex;
+          gap: 0.5rem;
+          align-items: center;
         }
 
         .nav-icon {
