@@ -440,7 +440,6 @@ function Navigation() {
           font-weight: 600;
           border: none;
           box-shadow: 0 4px 16px rgba(34, 197, 94, 0.3);
-          padding: 0.5rem 1rem;
         }
 
         .nav-link.btn-primary:hover {
