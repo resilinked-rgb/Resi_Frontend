@@ -268,14 +268,12 @@ function Navigation() {
                 )}
               </div>
               
-              <div className="auth-btn-wrapper">
-                <NavLink to="/login" className="btn-outline">
-                  {t('nav.login')}
-                </NavLink>
-                <NavLink to="/register" className="btn-primary">
-                  {t('landing.getStarted')}
-                </NavLink>
-              </div>
+              <NavLink to="/login" className="btn-outline">
+                {t('nav.login')}
+              </NavLink>
+              <NavLink to="/register" className="btn-primary">
+                {t('landing.getStarted')}
+              </NavLink>
             </div>
           </div>
         )}
@@ -428,8 +426,7 @@ function Navigation() {
 
         .nav-link.btn-outline {
           background: transparent;
-          border: 2px solid rgba(255, 255, 255, 0.4);
-          font-weight: 600;
+          border: 1px solid rgba(255, 255, 255, 0.4);
         }
 
         .nav-link.btn-outline:hover {
@@ -438,29 +435,13 @@ function Navigation() {
         }
 
         .nav-link.btn-primary {
-          background: linear-gradient(135deg, var(--success-500) 0%, var(--success-600) 100%) !important;
-          color: white !important;
-          font-weight: 600 !important;
-          border: none !important;
-          box-shadow: 0 4px 16px rgba(34, 197, 94, 0.3) !important;
-          padding: 0.5rem 0.625rem !important;
-          font-size: 0.75rem !important;
-          min-height: auto !important;
-          max-width: max-content !important;
-          width: auto !important;
-          flex-grow: 0 !important;
-          flex-shrink: 0 !important;
+          background: linear-gradient(135deg, var(--success-500) 0%, var(--success-600) 100%);
+          border: 1px solid rgba(255, 255, 255, 0.15);
         }
 
         .nav-link.btn-primary:hover {
-          background: linear-gradient(135deg, var(--success-600) 0%, var(--success-700) 100%) !important;
-          box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4) !important;
-        }
-
-        .auth-btn-wrapper {
-          display: flex;
-          gap: 0.5rem;
-          align-items: center;
+          background: linear-gradient(135deg, var(--success-600) 0%, var(--success-700) 100%);
+          box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
         }
 
         .nav-icon {
