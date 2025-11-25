@@ -437,16 +437,19 @@ function Navigation() {
         }
 
         .nav-link.btn-primary {
-          background: linear-gradient(135deg, var(--success-500) 0%, var(--success-600) 100%);
-          color: white;
-          font-weight: 600;
-          border: none;
-          box-shadow: 0 4px 16px rgba(34, 197, 94, 0.3);
+          background: linear-gradient(135deg, var(--success-500) 0%, var(--success-600) 100%) !important;
+          color: white !important;
+          font-weight: 600 !important;
+          border: none !important;
+          box-shadow: 0 4px 16px rgba(34, 197, 94, 0.3) !important;
+          padding: 0.5rem 0.625rem !important;
+          font-size: 0.75rem !important;
+          min-height: auto !important;
         }
 
         .nav-link.btn-primary:hover {
-          background: linear-gradient(135deg, var(--success-600) 0%, var(--success-700) 100%);
-          box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+          background: linear-gradient(135deg, var(--success-600) 0%, var(--success-700) 100%) !important;
+          box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4) !important;
         }
 
         .nav-icon {
