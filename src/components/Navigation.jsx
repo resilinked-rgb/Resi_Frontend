@@ -383,7 +383,6 @@ function Navigation() {
           display: flex;
           align-items: center;
           gap: var(--spacing-3);
-          flex: 1;
         }
 
         .nav-links {
@@ -391,7 +390,6 @@ function Navigation() {
           align-items: center;
           gap: 0.5rem;
           flex-wrap: nowrap;
-          justify-content: flex-end;
         }
 
         .nav-link {
