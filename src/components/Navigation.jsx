@@ -271,7 +271,7 @@ function Navigation() {
               <NavLink to="/login" className="btn-outline">
                 {t('nav.login')}
               </NavLink>
-              <NavLink to="/register" className="btn-primary">
+              <NavLink to="/register" className="btn-primary" style={{ width: 'fit-content', maxWidth: '120px', flex: '0 0 auto' }}>
                 {t('landing.getStarted')}
               </NavLink>
             </div>
