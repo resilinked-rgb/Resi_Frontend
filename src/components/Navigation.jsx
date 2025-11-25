@@ -268,10 +268,10 @@ function Navigation() {
                 )}
               </div>
               
-              <NavLink to="/login" className="btn-outline">
+              <NavLink to="/login" className="btn-outline" style={{ flexShrink: 0, flexGrow: 0, width: 'auto' }}>
                 {t('nav.login')}
               </NavLink>
-              <NavLink to="/register" className="btn-primary">
+              <NavLink to="/register" className="btn-primary" style={{ flexShrink: 0, flexGrow: 0, width: 'auto' }}>
                 {t('landing.getStarted')}
               </NavLink>
             </div>
@@ -427,6 +427,8 @@ function Navigation() {
         .nav-link.btn-outline {
           background: transparent;
           border: 1px solid rgba(255, 255, 255, 0.4);
+          min-height: unset;
+          height: auto;
         }
 
         .nav-link.btn-outline:hover {
@@ -437,6 +439,8 @@ function Navigation() {
         .nav-link.btn-primary {
           background: linear-gradient(135deg, var(--success-500) 0%, var(--success-600) 100%);
           border: 1px solid rgba(255, 255, 255, 0.15);
+          min-height: unset;
+          height: auto;
         }
 
         .nav-link.btn-primary:hover {
