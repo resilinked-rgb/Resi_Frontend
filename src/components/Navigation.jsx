@@ -445,12 +445,16 @@ function Navigation() {
           background: transparent !important;
           border: 1px solid rgba(255, 255, 255, 0.4) !important;
           height: 32px !important;
+          min-height: 32px !important;
+          max-height: 32px !important;
           padding: 0.5rem 0.625rem !important;
           font-size: 0.75rem !important;
-          width: fit-content !important;
+          width: 100px !important;
           flex: none !important;
           display: flex !important;
           align-items: center !important;
+          justify-content: center !important;
+          box-shadow: none !important;
         }
 
         .nav-link.btn-outline:hover {
@@ -462,6 +466,8 @@ function Navigation() {
           background: linear-gradient(135deg, var(--success-500) 0%, var(--success-600) 100%) !important;
           border: 1px solid rgba(255, 255, 255, 0.15) !important;
           height: 32px !important;
+          min-height: 32px !important;
+          max-height: 32px !important;
           padding: 0.5rem 0.625rem !important;
           font-size: 0.75rem !important;
           width: 100px !important;
@@ -470,6 +476,7 @@ function Navigation() {
           display: flex !important;
           align-items: center !important;
           justify-content: center !important;
+          box-shadow: none !important;
         }
 
         .nav-link.btn-primary:hover {
