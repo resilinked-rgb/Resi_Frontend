@@ -383,6 +383,7 @@ function Navigation() {
           align-items: center;
           gap: var(--spacing-3);
           margin-left: auto;
+          justify-content: flex-end;
         }
         
         .nav-desktop > * {
@@ -443,13 +444,13 @@ function Navigation() {
         .nav-link.btn-outline {
           background: transparent !important;
           border: 1px solid rgba(255, 255, 255, 0.4) !important;
-          min-height: unset !important;
-          height: auto !important;
+          height: 32px !important;
           padding: 0.5rem 0.625rem !important;
           font-size: 0.75rem !important;
           width: fit-content !important;
-          flex: 0 0 fit-content !important;
-          align-self: center !important;
+          flex: none !important;
+          display: flex !important;
+          align-items: center !important;
         }
 
         .nav-link.btn-outline:hover {
@@ -460,13 +461,15 @@ function Navigation() {
         .nav-link.btn-primary {
           background: linear-gradient(135deg, var(--success-500) 0%, var(--success-600) 100%) !important;
           border: 1px solid rgba(255, 255, 255, 0.15) !important;
-          min-height: unset !important;
-          height: auto !important;
+          height: 32px !important;
           padding: 0.5rem 0.625rem !important;
           font-size: 0.75rem !important;
-          width: fit-content !important;
-          flex: 0 0 fit-content !important;
-          align-self: center !important;
+          width: 100px !important;
+          flex: none !important;
+          text-align: center !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
         }
 
         .nav-link.btn-primary:hover {
