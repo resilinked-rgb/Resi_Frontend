@@ -375,8 +375,6 @@ function Navigation() {
           display: flex;
           align-items: center;
           gap: var(--spacing-2);
-          flex: 1;
-          justify-content: flex-end;
         }
 
         .nav-desktop {
