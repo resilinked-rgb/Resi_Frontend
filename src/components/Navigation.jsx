@@ -444,6 +444,10 @@ function Navigation() {
           padding: 0.5rem 0.625rem !important;
           font-size: 0.75rem !important;
           min-height: auto !important;
+          max-width: max-content !important;
+          width: auto !important;
+          flex-grow: 0 !important;
+          flex-shrink: 0 !important;
         }
 
         .nav-link.btn-primary:hover {
