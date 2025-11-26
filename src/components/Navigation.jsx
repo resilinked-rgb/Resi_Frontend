@@ -271,7 +271,7 @@ function Navigation() {
               <NavLink to="/login" className="btn-outline">
                 {t('nav.login')}
               </NavLink>
-              <NavLink to="/register" className="btn-primary" style={{ width: 'fit-content', maxWidth: '120px', flex: '0 0 auto' }}>
+              <NavLink to="/register" className="btn-primary">
                 {t('landing.getStarted')}
               </NavLink>
             </div>
@@ -393,12 +393,14 @@ function Navigation() {
 
         .guest-auth-buttons {
           display: flex;
-          gap: 0.5rem;
+          gap: 0.75rem;
           align-items: center;
+          margin-left: 0.5rem;
         }
         
         .guest-auth-buttons .nav-link {
           align-self: center;
+          margin: 0 !important;
         }
 
         .nav-links {
@@ -443,45 +445,57 @@ function Navigation() {
 
         .nav-link.btn-outline {
           background: transparent !important;
-          border: 1px solid rgba(255, 255, 255, 0.4) !important;
-          height: 32px !important;
-          min-height: 32px !important;
-          max-height: 32px !important;
-          padding: 0.5rem 0.625rem !important;
-          font-size: 0.75rem !important;
-          width: 100px !important;
+          border: 2px solid rgba(255, 255, 255, 0.5) !important;
+          height: 40px !important;
+          min-height: 40px !important;
+          max-height: 40px !important;
+          padding: 0 1.25rem !important;
+          font-size: 0.875rem !important;
+          font-weight: 600 !important;
+          width: auto !important;
+          min-width: 100px !important;
           flex: none !important;
           display: flex !important;
           align-items: center !important;
           justify-content: center !important;
           box-shadow: none !important;
+          letter-spacing: 0.3px !important;
+          line-height: 1 !important;
         }
 
         .nav-link.btn-outline:hover {
-          background: rgba(255, 255, 255, 0.15) !important;
-          border-color: rgba(255, 255, 255, 0.6) !important;
+          background: rgba(255, 255, 255, 0.2) !important;
+          border-color: rgba(255, 255, 255, 0.8) !important;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2) !important;
         }
 
         .nav-link.btn-primary {
           background: linear-gradient(135deg, var(--success-500) 0%, var(--success-600) 100%) !important;
-          border: 1px solid rgba(255, 255, 255, 0.15) !important;
-          height: 32px !important;
-          min-height: 32px !important;
-          max-height: 32px !important;
-          padding: 0.5rem 0.625rem !important;
-          font-size: 0.75rem !important;
-          width: 100px !important;
+          border: 2px solid rgba(255, 255, 255, 0.3) !important;
+          height: 40px !important;
+          min-height: 40px !important;
+          max-height: 40px !important;
+          padding: 0 1.25rem !important;
+          font-size: 0.875rem !important;
+          font-weight: 600 !important;
+          width: auto !important;
+          min-width: 100px !important;
           flex: none !important;
           text-align: center !important;
           display: flex !important;
           align-items: center !important;
           justify-content: center !important;
-          box-shadow: none !important;
+          box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3) !important;
+          letter-spacing: 0.3px !important;
+          line-height: 1 !important;
         }
 
         .nav-link.btn-primary:hover {
           background: linear-gradient(135deg, var(--success-600) 0%, var(--success-700) 100%) !important;
-          box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4) !important;
+          box-shadow: 0 4px 16px rgba(34, 197, 94, 0.5) !important;
+          transform: translateY(-1px);
+          border-color: rgba(255, 255, 255, 0.4) !important;
         }
 
         .nav-icon {

@@ -14,6 +14,10 @@ function Register() {
 
   // TOS Modal state
   const [showTOSModal, setShowTOSModal] = useState(false);
+  
+  // Barangay data state
+  const [barangays, setBarangays] = useState([]);
+  const [loadingBarangays, setLoadingBarangays] = useState(false);
 
   // Add touched and fieldErrors state for password fields
   const [touched, setTouched] = useState({
@@ -201,6 +205,82 @@ function Register() {
       document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [skillsDropdownOpen])
+
+  // Fetch barangays from Philippine PSGC API
+  useEffect(() => {
+    const fetchBarangays = async () => {
+      setLoadingBarangays(true);
+      
+      // Complete list of all 35 barangays in San Fernando, Pampanga
+      const sanFernandoBarangays = [
+        'Alasas',
+        'Baliti',
+        'Bulaon',
+        'Calulut',
+        'Dela Paz Norte',
+        'Dela Paz Sur',
+        'Del Carmen',
+        'Del Pilar',
+        'Del Rosario',
+        'Dolores',
+        'Juliana',
+        'Lara',
+        'Lourdes',
+        'Magliman',
+        'Maimpis',
+        'Malino',
+        'Malpitic',
+        'Pandaras',
+        'Panipuan',
+        'Pulung Bulu',
+        'Quebiawan',
+        'Saguin',
+        'San Agustin',
+        'San Felipe',
+        'San Isidro',
+        'San Jose',
+        'San Juan',
+        'San Nicolas',
+        'San Pedro',
+        'Santa Lucia',
+        'Santa Teresita',
+        'Santo Niño',
+        'Santo Rosario',
+        'Sindalan',
+        'Telabastagan'
+      ];
+      
+      try {
+        // Try to fetch from API first
+        const response = await fetch('https://psgc.gitlab.io/api/cities-municipalities/035414000/barangays');
+        const data = await response.json();
+        
+        console.log('API Response:', data);
+        
+        if (data && Array.isArray(data) && data.length > 20) {
+          // Only use API data if it returns a reasonable number of barangays
+          const sortedBarangays = data
+            .map(brgy => brgy.name)
+            .sort((a, b) => a.localeCompare(b));
+          setBarangays(sortedBarangays);
+          console.log('Loaded from API:', sortedBarangays.length, 'barangays');
+        } else {
+          // Use hardcoded list if API returns incomplete data
+          setBarangays(sanFernandoBarangays);
+          console.log('Using hardcoded list:', sanFernandoBarangays.length, 'barangays');
+        }
+      } catch (error) {
+        console.error('Error fetching barangays:', error);
+        // Use hardcoded list on error
+        setBarangays(sanFernandoBarangays);
+        console.log('Using fallback list:', sanFernandoBarangays.length, 'barangays');
+      } finally {
+        setLoadingBarangays(false);
+      }
+    };
+
+    fetchBarangays();
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value, type, files } = e.target
@@ -825,11 +905,18 @@ function Register() {
                   onChange={handleInputChange}
                   required
                   autoComplete="address-level2"
+                  disabled={loadingBarangays}
                 >
-                  <option value="">{t('common.select')} {t('register.barangay')}</option>
-                  <option value="Sto. Rosario">Sto. Rosario</option>
-                  <option value="Sta. Lucia">Sta. Lucia</option>
-                  <option value="Sta. Teresita">Sta. Teresita</option>
+                  <option value="">
+                    {loadingBarangays 
+                      ? 'Loading barangays...' 
+                      : `${t('common.select')} ${t('register.barangay')}`}
+                  </option>
+                  {barangays.map((barangay) => (
+                    <option key={barangay} value={barangay}>
+                      {barangay}
+                    </option>
+                  ))}
                   <option value="other">{t('register.other')}</option>
                 </select>
                 {formData.barangay === 'other' && (
@@ -1253,8 +1340,9 @@ function Register() {
         .register-container {
           min-height: 100vh;
           display: flex;
-          align-items: center;
+          align-items: flex-start;
           justify-content: center;
+          padding: 2rem 1rem;
         }
 
         .register-container::before {
@@ -1270,11 +1358,11 @@ function Register() {
 
         /* Progress Indicator Styles */
         .progress-container {
-          margin-bottom: 2.5rem;
-          padding: 1.5rem;
-          background: rgba(147, 51, 234, 0.05);
+          margin-bottom: 2rem;
+          padding: 1.25rem;
+          background: linear-gradient(135deg, rgba(147, 51, 234, 0.03), rgba(147, 51, 234, 0.08));
           border-radius: 16px;
-          border: 1px solid rgba(147, 51, 234, 0.1);
+          border: 1px solid rgba(147, 51, 234, 0.15);
         }
 
         .progress-steps {
@@ -1381,12 +1469,12 @@ function Register() {
         }
 
         .step-title {
-          font-size: 1.5rem;
+          font-size: 1.35rem;
           font-weight: 700;
           color: #374151;
-          margin-bottom: 1.5rem;
-          padding-bottom: 1rem;
-          border-bottom: 2px solid rgba(147, 51, 234, 0.1);
+          margin-bottom: 1.25rem;
+          padding-bottom: 0.75rem;
+          border-bottom: 2px solid rgba(147, 51, 234, 0.15);
           background: linear-gradient(135deg, #9333ea, #7c3aed);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
@@ -1464,51 +1552,33 @@ function Register() {
         }
 
         .register-card {
-          background: rgba(255, 255, 255, 0.95);
+          background: rgba(255, 255, 255, 0.98);
           backdrop-filter: blur(20px);
           border-radius: 24px;
           box-shadow: 
-            0 32px 64px rgba(147, 51, 234, 0.2),
-            0 0 0 1px rgba(255, 255, 255, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.2);
-          padding: 3rem 2.5rem;
+            0 20px 60px rgba(147, 51, 234, 0.15),
+            0 0 0 1px rgba(147, 51, 234, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+          padding: 2.5rem 3rem;
           width: 100%;
           max-width: 720px;
-          max-height: 90vh;
-          overflow-y: auto;
           position: relative;
-          border: 1px solid rgba(255, 255, 255, 0.2);
+          border: 1px solid rgba(147, 51, 234, 0.15);
         }
 
-        .register-card::-webkit-scrollbar {
-          width: 8px;
-        }
 
-        .register-card::-webkit-scrollbar-track {
-          background: rgba(147, 51, 234, 0.1);
-          border-radius: 8px;
-        }
-
-        .register-card::-webkit-scrollbar-thumb {
-          background: linear-gradient(135deg, #9333ea, #7c3aed);
-          border-radius: 8px;
-        }
-
-        .register-card::-webkit-scrollbar-thumb:hover {
-          background: linear-gradient(135deg, #7c3aed, #6b21a8);
-        }
 
         .register-header {
           text-align: center;
-          margin-bottom: 3rem;
+          margin-bottom: 2rem;
         }
 
         .register-logo {
-          width: 80px;
-          height: 80px;
+          width: 100px;
+          height: 100px;
           border-radius: 20px;
-          margin-bottom: 1.5rem;
-          box-shadow: 0 8px 32px rgba(147, 51, 234, 0.3);
+          margin-bottom: 1rem;
+          box-shadow: 0 8px 32px rgba(147, 51, 234, 0.25);
         }
 
         .register-header h1 {
@@ -1516,8 +1586,8 @@ function Register() {
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
-          margin: 0 0 0.75rem 0;
-          font-size: 2.5rem;
+          margin: 0 0 0.5rem 0;
+          font-size: 2rem;
           font-weight: 800;
           letter-spacing: -0.02em;
         }
@@ -1525,19 +1595,19 @@ function Register() {
         .register-header p {
           color: #64748b;
           margin: 0;
-          font-size: 1.1rem;
+          font-size: 0.95rem;
           font-weight: 500;
         }
 
         .form-row {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          gap: 1.5rem;
-          margin-bottom: 1.75rem;
+          gap: 1.25rem;
+          margin-bottom: 1.25rem;
         }
 
         .form-group {
-          margin-bottom: 1.75rem;
+          margin-bottom: 1.25rem;
         }
 
         .form-row .form-group {

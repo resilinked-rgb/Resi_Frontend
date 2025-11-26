@@ -50,6 +50,10 @@ function Profile() {
   const [requestingEmailChange, setRequestingEmailChange] = useState(false)
   const [pendingEmailChange, setPendingEmailChange] = useState(null)
   
+  // Barangay data state
+  const [barangays, setBarangays] = useState([]);
+  const [loadingBarangays, setLoadingBarangays] = useState(false);
+  
   const { user, updateUser, verifyToken } = useAuth()
   const { success, error: showError } = useAlert()
   const { t } = useTranslation()
@@ -64,6 +68,77 @@ function Profile() {
       checkPendingEmailChange()
     }
   }, [userId])
+
+  // Fetch barangays from Philippine PSGC API
+  useEffect(() => {
+    const fetchBarangays = async () => {
+      setLoadingBarangays(true);
+      
+      // Complete list of all 35 barangays in San Fernando, Pampanga
+      const sanFernandoBarangays = [
+        'Alasas',
+        'Baliti',
+        'Bulaon',
+        'Calulut',
+        'Dela Paz Norte',
+        'Dela Paz Sur',
+        'Del Carmen',
+        'Del Pilar',
+        'Del Rosario',
+        'Dolores',
+        'Juliana',
+        'Lara',
+        'Lourdes',
+        'Magliman',
+        'Maimpis',
+        'Malino',
+        'Malpitic',
+        'Pandaras',
+        'Panipuan',
+        'Pulung Bulu',
+        'Quebiawan',
+        'Saguin',
+        'San Agustin',
+        'San Felipe',
+        'San Isidro',
+        'San Jose',
+        'San Juan',
+        'San Nicolas',
+        'San Pedro',
+        'Santa Lucia',
+        'Santa Teresita',
+        'Santo Niño',
+        'Santo Rosario',
+        'Sindalan',
+        'Telabastagan'
+      ];
+      
+      try {
+        // Try to fetch from API first
+        const response = await fetch('https://psgc.gitlab.io/api/cities-municipalities/035414000/barangays');
+        const data = await response.json();
+        
+        if (data && Array.isArray(data) && data.length > 20) {
+          // Only use API data if it returns a reasonable number of barangays
+          const sortedBarangays = data
+            .map(brgy => brgy.name)
+            .sort((a, b) => a.localeCompare(b));
+          setBarangays(sortedBarangays);
+        } else {
+          // Use hardcoded list if API returns incomplete data
+          setBarangays(sanFernandoBarangays);
+        }
+      } catch (error) {
+        console.error('Error fetching barangays:', error);
+        // Use hardcoded list on error
+        setBarangays(sanFernandoBarangays);
+      } finally {
+        setLoadingBarangays(false);
+      }
+    };
+
+    fetchBarangays();
+  }, []);
 
   const checkPendingEmailChange = async () => {
     try {
@@ -1541,13 +1616,35 @@ function Profile() {
                 <div className="form-row">
                   <div className="form-group">
                     <label htmlFor="barangay">{t('register.barangay')}</label>
-                    <input
-                      type="text"
+                    <select
                       id="barangay"
                       name="barangay"
                       value={editFormData.barangay}
                       onChange={handleInputChange}
-                    />
+                      disabled={loadingBarangays}
+                    >
+                      <option value="">
+                        {loadingBarangays 
+                          ? 'Loading barangays...' 
+                          : `${t('common.select')} ${t('register.barangay')}`}
+                      </option>
+                      {barangays.map((barangay) => (
+                        <option key={barangay} value={barangay}>
+                          {barangay}
+                        </option>
+                      ))}
+                      <option value="other">{t('register.other')}</option>
+                    </select>
+                    {editFormData.barangay === 'other' && (
+                      <input
+                        type="text"
+                        id="otherBarangay"
+                        name="otherBarangay"
+                        placeholder={t('register.specifyBarangay')}
+                        style={{ marginTop: '0.5rem' }}
+                        onChange={handleInputChange}
+                      />
+                    )}
                   </div>
                 </div>
                 <div className="form-group">
