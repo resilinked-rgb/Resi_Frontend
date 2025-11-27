@@ -263,7 +263,12 @@ function SearchJobs() {
 
   // Load initial job listings on component mount
   useEffect(() => {
-    searchJobs({})
+    // Only run initial search once on mount
+    const performInitialSearch = async () => {
+      await searchJobs({})
+    }
+    performInitialSearch()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (

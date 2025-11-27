@@ -321,7 +321,12 @@ function SearchWorkers() {
 
   // Load initial worker listings on component mount
   useEffect(() => {
-    searchWorkers({})
+    // Only run initial search once on mount
+    const performInitialSearch = async () => {
+      await searchWorkers({})
+    }
+    performInitialSearch()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
