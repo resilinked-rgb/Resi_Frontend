@@ -666,12 +666,10 @@ function EmployerDashboard() {
       {/* Quick Actions */}
       <div className="quick-actions">
         <Link to="/post-job" className="action-btn primary">
-          <span className="icon">➕</span>
-          {t('employerDashboard.postNewJob')}
+          ➕ {t('employerDashboard.postNewJob')}
         </Link>
         <Link to="/search-workers" className="action-btn secondary">
-          <span className="icon">🔍</span>
-          {t('employerDashboard.searchWorkers')}
+          🔍 {t('employerDashboard.searchWorkers')}
         </Link>
       </div>
 
@@ -725,12 +723,10 @@ function EmployerDashboard() {
                               
                               <div className="job-meta">
                                 <div className="meta-item">
-                                  <span className="icon">📍</span>
-                                  {job.barangay}
+                                  📍 {job.barangay}
                                 </div>
                                 <div className="meta-item">
-                                  <span className="icon">👥</span>
-                                  {job.applicants ? job.applicants.length : 0} {t('employerDashboard.applicants')}
+                                  👥 {job.applicants ? job.applicants.length : 0} {t('employerDashboard.applicants')}
                                 </div>
                                 <div className="meta-item">
                                   <span className={`status ${job.isOpen !== false ? 'active' : 'closed'}`}>
@@ -739,8 +735,7 @@ function EmployerDashboard() {
                                 </div>
                                 {job.assignedTo && (
                                   <div className="meta-item">
-                                    <span className="icon">👤</span>
-                                    {t('employerDashboard.assignedTo')}: {job.assignedTo.firstName} {job.assignedTo.lastName}
+                                    👤 {t('employerDashboard.assignedTo')}: {job.assignedTo.firstName} {job.assignedTo.lastName}
                                   </div>
                                 )}
                               </div>
@@ -796,16 +791,14 @@ function EmployerDashboard() {
                               
                               <div className="job-meta">
                                 <div className="meta-item">
-                                  <span className="icon">📍</span>
-                                  {job.barangay}
+                                  📍 {job.barangay}
                                 </div>
                                 <div className="meta-item">
                                   <span className="status completed">{t('employerDashboard.completed')}</span>
                                 </div>
                                 {job.assignedTo && (
                                   <div className="meta-item">
-                                    <span className="icon">👤</span>
-                                    <Link 
+                                    👤 <Link 
                                       to={`/profile/${job.assignedTo._id}`}
                                       className="employee-link"
                                     >
@@ -1382,7 +1375,6 @@ function EmployerDashboard() {
         
         .action-btn .icon {
           font-size: 1.2rem;
-          filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
         }
 
         .action-btn.primary {
@@ -1688,14 +1680,14 @@ function EmployerDashboard() {
         .meta-item {
           display: flex;
           align-items: center;
-          gap: 0.5rem;
           color: #666;
           font-size: 0.9rem;
           margin-bottom: 0.5rem;
         }
 
-        .icon {
-          font-size: 0.8rem;
+        .meta-item .icon {
+          margin-right: 0.4rem;
+          font-size: 1.1rem;
         }
 
         .status {

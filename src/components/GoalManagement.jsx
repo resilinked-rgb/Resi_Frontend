@@ -210,7 +210,7 @@ function GoalManagement() {
           className="action-btn primary" 
           onClick={() => handleOpenGoalModal()}
         >
-          <span className="icon">+</span> {t('goals.create') || 'Create New Goal'}
+          + {t('goals.create') || 'Create New Goal'}
         </button>
       </div>
       
@@ -494,39 +494,52 @@ function GoalManagement() {
           font-size: 2.25rem;
         }
 
-        .actions-panel {
+        .goal-management-container .actions-panel {
           display: flex;
           gap: 1rem;
           margin-bottom: 2rem;
         }
 
-        .action-btn {
-          display: flex;
+        .goal-management-container .action-btn {
+          display: inline-flex;
           align-items: center;
+          justify-content: center;
           gap: 0.5rem;
-          padding: 0.75rem 1.5rem;
+          padding: 0.75rem 1.25rem;
           border: none;
           border-radius: 8px;
-          font-size: 1rem;
+          font-size: 0.95rem;
+          font-weight: 600;
           cursor: pointer;
-          transition: background-color 0.2s;
+          transition: all 0.2s ease;
+          white-space: nowrap;
+          min-height: auto;
+          max-height: none;
+          height: auto;
+          line-height: normal;
+          box-sizing: border-box;
+        }
+        
+        .goal-management-container .action-btn > .icon {
+          font-size: 1.4rem;
+          line-height: 1;
         }
 
-        .action-btn.primary {
+        .goal-management-container .action-btn.primary {
           background: #2b6cb0;
           color: white;
         }
 
-        .action-btn.primary:hover {
+        .goal-management-container .action-btn.primary:hover {
           background: #2c5282;
         }
 
-        .action-btn.secondary {
+        .goal-management-container .action-btn.secondary {
           background: #38a169;
           color: white;
         }
 
-        .action-btn.secondary:hover {
+        .goal-management-container .action-btn.secondary:hover {
           background: #2f855a;
         }
 

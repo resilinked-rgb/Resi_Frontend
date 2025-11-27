@@ -400,15 +400,13 @@ function Settings() {
               className="action-btn primary"
               onClick={() => setShowEmailModal(true)}
             >
-              <span className="icon">📧</span>
-              {t('settings.changeEmail')}
+              📧 {t('settings.changeEmail')}
             </button>
             <button 
               className="action-btn primary"
               onClick={() => setShowPasswordModal(true)}
             >
-              <span className="icon">🔑</span>
-              {t('settings.changePassword')}
+              🔑 {t('settings.changePassword')}
             </button>
           </div>
         </div>
@@ -420,8 +418,7 @@ function Settings() {
             className="action-btn secondary"
             onClick={() => setShowSupportModal(true)}
           >
-            <span className="icon">💬</span>
-            {t('settings.contactSupport')}
+            💬 {t('settings.contactSupport')}
           </button>
         </div>
       </div>
@@ -994,41 +991,59 @@ function Settings() {
         }
 
         .action-btn {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 0.5rem;
-          padding: 0.875rem 1.5rem;
-          border: none;
-          border-radius: 8px;
-          font-size: 1rem;
-          font-weight: 500;
-          cursor: pointer;
-          transition: all 0.2s;
-          min-height: 44px;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          gap: 0.5rem !important;
+          padding: 0.75rem 1.25rem !important;
+          border: none !important;
+          border-radius: 8px !important;
+          font-size: 0.95rem !important;
+          font-weight: 500 !important;
+          cursor: pointer !important;
+          transition: all 0.2s !important;
+          min-height: 42px !important;
+          height: 42px !important;
+          line-height: 1 !important;
+          box-shadow: none !important;
+          background: #2b6cb0 !important;
           -webkit-tap-highlight-color: transparent;
         }
 
         .action-btn:active {
-          transform: scale(0.98);
+          transform: scale(0.98) !important;
+        }
+        
+        .action-btn .icon {
+          font-size: 1.15rem;
+          line-height: 1;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          height: 100%;
+          vertical-align: middle;
         }
 
         .action-btn.primary {
-          background: #2b6cb0;
-          color: white;
+          background: #2b6cb0 !important;
+          color: white !important;
         }
 
         .action-btn.primary:hover {
-          background: #2c5282;
+          background: #2c5282 !important;
+          box-shadow: 0 2px 8px rgba(43, 108, 176, 0.3) !important;
+          transform: translateY(-1px) !important;
         }
 
         .action-btn.secondary {
-          background: #e2e8f0;
-          color: #2d3748;
+          background: #e2e8f0 !important;
+          color: #2d3748 !important;
         }
 
         .action-btn.secondary:hover {
-          background: #cbd5e0;
+          background: #cbd5e0 !important;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+          transform: translateY(-1px) !important;
         }
 
         .settings-actions {
@@ -1036,22 +1051,25 @@ function Settings() {
         }
 
         .save-btn {
-          background: #38a169;
-          color: white;
-          border: none;
-          padding: 0.875rem 2rem;
-          border-radius: 8px;
-          font-size: 1rem;
-          font-weight: 500;
-          cursor: pointer;
-          transition: all 0.2s;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 0.5rem;
-          margin: 0 auto;
-          min-height: 48px;
-          min-width: 120px;
+          background: #38a169 !important;
+          color: white !important;
+          border: none !important;
+          padding: 0.75rem 1.5rem !important;
+          border-radius: 8px !important;
+          font-size: 0.95rem !important;
+          font-weight: 500 !important;
+          cursor: pointer !important;
+          transition: all 0.2s !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          gap: 0.5rem !important;
+          margin: 0 auto !important;
+          min-height: 42px !important;
+          height: 42px !important;
+          min-width: 120px !important;
+          line-height: 1 !important;
+          box-shadow: none !important;
           -webkit-tap-highlight-color: transparent;
         }
 
@@ -1281,21 +1299,29 @@ function Settings() {
         }
 
         .cancel-btn {
-          background: #e2e8f0;
-          color: #2d3748;
-          border: none;
-          padding: 0.75rem 1.5rem;
-          border-radius: 8px;
-          cursor: pointer;
+          background: #e2e8f0 !important;
+          color: #2d3748 !important;
+          border: none !important;
+          padding: 0.65rem 1.25rem !important;
+          border-radius: 8px !important;
+          cursor: pointer !important;
+          font-size: 0.95rem !important;
+          height: 38px !important;
+          line-height: 1 !important;
+          box-shadow: none !important;
         }
 
         .submit-btn {
-          background: #2b6cb0;
-          color: white;
-          border: none;
-          padding: 0.75rem 1.5rem;
-          border-radius: 8px;
-          cursor: pointer;
+          background: #2b6cb0 !important;
+          color: white !important;
+          border: none !important;
+          padding: 0.65rem 1.25rem !important;
+          border-radius: 8px !important;
+          cursor: pointer !important;
+          font-size: 0.95rem !important;
+          height: 38px !important;
+          line-height: 1 !important;
+          box-shadow: none !important;
         }
 
         .loading-state {

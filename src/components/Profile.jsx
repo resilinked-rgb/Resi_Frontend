@@ -856,20 +856,27 @@ function Profile() {
         }
         
         .upload-btn {
-          padding: 0.7rem 1.5rem !important;
+          padding: 0.65rem 1.25rem !important;
           background: #2b6cb0 !important;
           color: white !important;
           border-radius: 8px !important;
           cursor: pointer !important;
-          font-weight: 600 !important;
+          font-weight: 500 !important;
           font-size: 0.95rem !important;
-          transition: background 0.2s !important;
+          transition: all 0.2s !important;
           border: none !important;
-          display: inline-block !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          line-height: 1 !important;
+          height: 38px !important;
+          box-shadow: none !important;
         }
         
         .upload-btn:hover {
-          background: #2c5282;
+          background: #2c5282 !important;
+          transform: translateY(-1px) !important;
+          box-shadow: 0 2px 8px rgba(43, 108, 176, 0.3) !important;
         }
         
         .upload-hint {
@@ -1085,22 +1092,28 @@ function Profile() {
           transform: translate(-50%, -50%);
           font-size: 13px;
         }
-        .modal-actions {
-          display: flex;
-          gap: 2rem;
-          justify-content: flex-end;
-          margin-top: 2.5rem;
-          padding-top: 1.5rem;
-          border-top: 1px solid #e2e8f0;
-        }
         .btn {
-          padding: 0.5rem 1.2rem;
-          border-radius: 8px;
-          font-size: 1rem;
-          font-weight: 500;
-          border: none;
-          cursor: pointer;
-          transition: background 0.2s, color 0.2s;
+          padding: 0 1.25rem !important;
+          border-radius: 8px !important;
+          font-size: 0.95rem !important;
+          font-weight: 500 !important;
+          border: 1px solid transparent !important;
+          cursor: pointer !important;
+          transition: all 0.2s !important;
+          line-height: 38px !important;
+          height: 38px !important;
+          min-height: 38px !important;
+          max-height: 38px !important;
+          min-width: 150px !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          box-shadow: none !important;
+          white-space: nowrap !important;
+          margin: 0 !important;
+          box-sizing: border-box !important;
+          vertical-align: middle !important;
+          outline: none !important;
         }
         .modal-actions {
           display: flex;
@@ -1111,24 +1124,34 @@ function Profile() {
           border-top: 1px solid #e2e8f0;
         }
         .btn-primary {
-          background: #2b6cb0;
-          color: #fff;
-          padding: 0.75rem 1.5rem;
-          border-radius: 6px;
-          font-weight: 500;
+          background: #2b6cb0 !important;
+          color: #fff !important;
+          box-shadow: none !important;
+          outline: none !important;
         }
         .btn-primary:hover {
-          background: #2c5282;
+          background: #2c5282 !important;
+          transform: translateY(-1px) !important;
+          box-shadow: 0 2px 8px rgba(43, 108, 176, 0.3) !important;
+        }
+        .btn-primary:focus {
+          box-shadow: none !important;
+          outline: none !important;
         }
         .btn-secondary {
-          background: #e2e8f0;
-          color: #2d3748;
-          padding: 0.75rem 1.5rem;
-          border-radius: 6px;
-          font-weight: 500;
+          background: #e2e8f0 !important;
+          color: #2d3748 !important;
+          box-shadow: none !important;
+          outline: none !important;
         }
         .btn-secondary:hover {
-          background: #cbd5e1;
+          background: #cbd5e1 !important;
+          transform: translateY(-1px) !important;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+        }
+        .btn-secondary:focus {
+          box-shadow: none !important;
+          outline: none !important;
         }
         @media (max-width: 768px) {
           .modal-content {
@@ -1563,6 +1586,7 @@ function Profile() {
                       name="firstName"
                       value={editFormData.firstName}
                       onChange={handleInputChange}
+                      autoComplete="given-name"
                       required
                     />
                   </div>
@@ -1574,6 +1598,7 @@ function Profile() {
                       name="lastName"
                       value={editFormData.lastName}
                       onChange={handleInputChange}
+                      autoComplete="family-name"
                       required
                     />
                   </div>
@@ -1611,6 +1636,7 @@ function Profile() {
                     name="address"
                     value={editFormData.address}
                     onChange={handleInputChange}
+                    autoComplete="street-address"
                   />
                 </div>
                 <div className="form-row">
@@ -1655,12 +1681,13 @@ function Profile() {
                     name="mobileNo"
                     value={editFormData.mobileNo}
                     onChange={handleInputChange}
+                    autoComplete="tel"
                   />
                 </div>
                 
                 {/* Skills Section - Moved to Bottom */}
                 <div className="form-group">
-                  <label htmlFor="skills">{t('profile.skills')}</label>
+                  <label htmlFor="skillInput">{t('profile.skills')}</label>
                   <div className="skills-section">
                     <div className="skills-input-container">
                       <input
@@ -1840,6 +1867,7 @@ function Profile() {
                         value={newEmailInput}
                         onChange={(e) => setNewEmailInput(e.target.value)}
                         placeholder="Enter your new email address"
+                        autoComplete="email"
                         required
                         style={{ width: '100%' }}
                       />
@@ -2549,36 +2577,51 @@ function Profile() {
         }
         .edit-profile-btn {
           margin-top: 1.2rem;
-          background: #22314a;
-          color: #fff;
-          border: none;
-          border-radius: 8px;
-          padding: 0.5rem 1.5rem;
-          font-size: 1rem;
-          font-weight: 500;
-          cursor: pointer;
-          transition: background 0.2s;
+          background: #22314a !important;
+          color: #fff !important;
+          border: none !important;
+          border-radius: 8px !important;
+          padding: 0.65rem 1.25rem !important;
+          font-size: 0.95rem !important;
+          font-weight: 500 !important;
+          cursor: pointer !important;
+          transition: all 0.2s !important;
+          line-height: 1 !important;
+          height: 38px !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          box-shadow: none !important;
         }
         .edit-profile-btn:hover {
-          background: #2d4059;
+          background: #2d4059 !important;
+          transform: translateY(-1px) !important;
+          box-shadow: 0 2px 8px rgba(34, 49, 74, 0.3) !important;
         }
         .message-user-btn {
           margin-top: 1.2rem;
-          background: #9333ea;
-          color: #fff;
-          border: none;
-          border-radius: 8px;
-          padding: 0.5rem 1.5rem;
-          font-size: 1rem;
-          font-weight: 500;
-          cursor: pointer;
-          transition: background 0.2s;
-          text-decoration: none;
-          display: inline-block;
+          background: #9333ea !important;
+          color: #fff !important;
+          border: none !important;
+          border-radius: 8px !important;
+          padding: 0.65rem 1.25rem !important;
+          font-size: 0.95rem !important;
+          font-weight: 500 !important;
+          cursor: pointer !important;
+          transition: all 0.2s !important;
+          text-decoration: none !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          line-height: 1 !important;
+          height: 38px !important;
+          box-shadow: none !important;
         }
         .message-user-btn:hover {
-          background: #7c3aed;
-          text-decoration: none;
+          background: #7c3aed !important;
+          text-decoration: none !important;
+          transform: translateY(-1px) !important;
+          box-shadow: 0 2px 8px rgba(147, 51, 234, 0.3) !important;
         }
         .completed-jobs-carousel-container {
           position: relative;

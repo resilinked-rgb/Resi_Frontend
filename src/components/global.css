@@ -140,10 +140,10 @@
   cursor: pointer;
   transition: all var(--transition-fast);
   text-decoration: none;
-  min-height: 48px;
   box-shadow: 0 4px 16px rgba(147, 51, 234, 0.3);
   position: relative;
   overflow: hidden;
+  line-height: 1;
 }
 
 .btn:hover:not(:disabled),
