@@ -319,8 +319,8 @@ function Login() {
               Login
             </span>
             <div className="btn-loader" style={{ display: loading ? 'flex' : 'none' }}>
-              <div className="spinner"></div>
               <span>Logging in...</span>
+              <div className="spinner"></div>
             </div>
           </button>
 
@@ -643,6 +643,9 @@ function Login() {
           box-shadow: 0 8px 24px rgba(147, 51, 234, 0.3);
           text-transform: uppercase;
           letter-spacing: 0.025em;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
         .login-btn::before {
@@ -679,19 +682,25 @@ function Login() {
         }
 
         .btn-loader {
-          display: flex;
+          display: inline-flex;
           align-items: center;
           justify-content: center;
-          gap: 0.75rem;
+          gap: 0.6rem;
+        }
+
+        .btn-loader span {
+          line-height: 1.2;
         }
 
         .spinner {
-          width: 20px;
-          height: 20px;
-          border: 2.5px solid rgba(255, 255, 255, 0.3);
-          border-top: 2.5px solid white;
+          width: 16px;
+          height: 16px;
+          border: 2px solid rgba(255, 255, 255, 0.3);
+          border-top: 2px solid white;
           border-radius: 50%;
+          flex-shrink: 0;
           animation: spin 1s linear infinite;
+          margin-bottom: 2px;
         }
 
         @keyframes spin {

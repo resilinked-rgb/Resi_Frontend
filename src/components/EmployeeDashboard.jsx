@@ -728,21 +728,7 @@ function EmployeeDashboard() {
                         t('searchJobs.anonymous')}
                     </div>
                     
-                    {/* Matching Skills Section */}
-                    {job.matchingSkills && job.matchingSkills.length > 0 && (
-                      <div className="matching-skills-container">
-                        <div className="matching-skills-label">
-                          <span className="icon">✓</span> {t('profile.skills')} ({job.matchingSkills.length}):
-                        </div>
-                        <div className="matching-skills-list">
-                          {job.matchingSkills.map((skill, index) => (
-                            <span key={index} className="skill-tag matching">{skill}</span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* All Required Skills Section */}
+                    {/* Required Skills Section */}
                     {job.skillsRequired && job.skillsRequired.length > 0 && (
                       <div className="skills-container">
                         <div className="skills-label">{t('jobs.requiredSkills')} ({job.skillsRequired.length}):</div>
@@ -1247,15 +1233,15 @@ function EmployeeDashboard() {
         }
 
         .job-card {
-          background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-          border: 2px solid #e2e8f0;
-          border-radius: 16px;
-          padding: 1.75rem;
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 10px;
+          padding: 1rem;
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           display: flex;
           flex-direction: column;
-          gap: 1rem;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+          gap: 0.5rem;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
           position: relative;
           overflow: hidden;
         }
@@ -1294,21 +1280,21 @@ function EmployeeDashboard() {
         .job-header h3 {
           margin: 0;
           color: #1e293b;
-          font-size: 1.25rem;
-          font-weight: 700;
+          font-size: 0.95rem;
+          font-weight: 600;
           flex: 1;
-          line-height: 1.4;
-          letter-spacing: -0.02em;
+          line-height: 1.3;
+          letter-spacing: -0.01em;
         }
 
         .job-price {
           background: linear-gradient(135deg, #10b981 0%, #059669 100%);
           color: white;
-          padding: 0.5rem 1rem;
-          border-radius: 20px;
-          font-weight: 700;
-          font-size: 1rem;
-          box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+          padding: 0.3rem 0.6rem;
+          border-radius: 12px;
+          font-weight: 600;
+          font-size: 0.85rem;
+          box-shadow: 0 1px 4px rgba(16, 185, 129, 0.15);
           white-space: nowrap;
           flex-shrink: 0;
         }
@@ -1316,40 +1302,40 @@ function EmployeeDashboard() {
         .job-meta {
           display: flex;
           flex-direction: column;
-          gap: 0.75rem;
-          margin: 0.5rem 0 1rem 0;
-          padding: 1rem;
+          gap: 0.4rem;
+          margin: 0;
+          padding: 0.6rem;
           background: #f8fafc;
-          border-radius: 12px;
+          border-radius: 6px;
           border: 1px solid #e2e8f0;
         }
 
         .meta-item {
           display: flex;
           align-items: center;
-          gap: 0.75rem;
+          gap: 0.4rem;
           color: #475569;
-          font-size: 0.925rem;
+          font-size: 0.8rem;
           font-weight: 500;
         }
 
         .meta-item .icon {
-          font-size: 1.1rem;
+          font-size: 0.9rem;
           flex-shrink: 0;
         }
 
         .skills-container, .matching-skills-container {
-          margin: 1rem 0;
+          margin: 0.5rem 0 0.25rem 0;
         }
         
         .skills-label, .matching-skills-label {
-          font-weight: 700;
-          font-size: 0.875rem;
-          margin-bottom: 0.75rem;
+          font-weight: 600;
+          font-size: 0.75rem;
+          margin-bottom: 0.4rem;
           color: #334155;
           display: flex;
           align-items: center;
-          gap: 0.5rem;
+          gap: 0.3rem;
         }
         
         .matching-skills-label {
@@ -1365,12 +1351,12 @@ function EmployeeDashboard() {
         .skill-tag {
           background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
           color: #475569;
-          padding: 0.5rem 0.875rem;
-          border-radius: 20px;
-          font-size: 0.8125rem;
+          padding: 0.25rem 0.5rem;
+          border-radius: 10px;
+          font-size: 0.7rem;
           font-weight: 600;
           white-space: nowrap;
-          border: 1.5px solid #cbd5e1;
+          border: 1px solid #cbd5e1;
           transition: all 0.2s ease;
         }
 
@@ -1396,30 +1382,30 @@ function EmployeeDashboard() {
         .match-score-container {
           display: flex;
           justify-content: flex-end;
-          margin-bottom: 0.75rem;
+          margin-bottom: 0.25rem;
         }
         
         .match-score {
           display: flex;
           align-items: center;
-          gap: 0.5rem;
+          gap: 0.3rem;
           background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-          border-radius: 20px;
-          padding: 0.5rem 1rem;
-          border: 2px solid #93c5fd;
-          box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+          border-radius: 10px;
+          padding: 0.25rem 0.6rem;
+          border: 1px solid #93c5fd;
+          box-shadow: 0 1px 3px rgba(59, 130, 246, 0.1);
         }
         
         .match-label {
           color: #1e40af;
-          font-size: 0.875rem;
+          font-size: 0.7rem;
           font-weight: 600;
         }
         
         .match-percentage {
           color: #1e40af;
-          font-size: 1rem;
-          font-weight: 800;
+          font-size: 0.75rem;
+          font-weight: 700;
         }
         
         .location-match {
