@@ -67,6 +67,17 @@
   width: 100%;
 }
 
+.btn-primary,
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px; /* Same padding */
+  font-size: 16px;     /* Same font-size */
+  line-height: 1;      /* Prevents tall text boxes */
+}
+
+
 .hero-section::before {
   content: '';
   position: absolute;
@@ -458,3 +469,4 @@
 .read-the-docs:hover {
   color: var(--primary-600);
 }
+

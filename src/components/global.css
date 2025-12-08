@@ -446,3 +446,13 @@ button:disabled {
 .fade-exit {
   opacity: 0;
 }
+
+.btn-primary {
+    padding: 1rem 2rem !important;
+    font-size: 1.1rem !important;
+}
+
+.btn-secondary {
+    padding: 1rem 2rem !important;
+    font-size: 1.1rem !important;
+}

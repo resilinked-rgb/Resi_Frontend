@@ -1153,6 +1153,7 @@ function Profile() {
           box-shadow: none !important;
           outline: none !important;
         }
+          
         @media (max-width: 768px) {
           .modal-content {
             width: 95%;
@@ -2182,6 +2183,8 @@ function Profile() {
   color: white;
   border: none;
 }
+  
+
 
 .add-income-btn {
   background: var(--success-color, #28a745);
@@ -3771,6 +3774,63 @@ function Profile() {
         .remove-skill:hover {
           opacity: 1;
         }
+        /* Base button style */
+.btn {
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* PRIMARY BUTTON (Blue) */
+.btn-primary {
+  background: #2b6cb0 !important;
+  color: #fff !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.btn-primary:hover {
+  background: #2c5282 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 8px rgba(43, 108, 176, 0.3) !important;
+}
+
+.btn-primary:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* SECONDARY BUTTON (Gray) */
+.btn-secondary {
+  background: #e2e8f0 !important;
+  color: #2d3748 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.btn-secondary:hover {
+  background: #cbd5e1 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+.btn-secondary:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+.btn-primary {
+    margin-top: 0 !important;
+}
+
+
+        
       `}</style>
     </div>
   )
