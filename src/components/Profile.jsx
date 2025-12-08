@@ -2004,7 +2004,6 @@ function Profile() {
             <div className="modal-content worker-modal-content" onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">
                 <h3>{t('employerDashboard.workerProfile')}</h3>
-                <button onClick={handleCloseWorkerModal} className="close-btn">×</button>
               </div>
               
               <div className="worker-modal-details">

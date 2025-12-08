@@ -159,7 +159,7 @@ const PaymentModal = ({ job, onClose, onSuccess }) => {
                   onChange={(e) => setPaymentMethod(e.target.value)}
                 />
                 <div className="option-content">
-                  <img src="/payment-icons/gcash.png" alt="GCash" />
+                  <img src="/Gcash.webp" alt="GCash" />
                   <span>GCash</span>
                 </div>
               </label>
@@ -173,7 +173,7 @@ const PaymentModal = ({ job, onClose, onSuccess }) => {
                   onChange={(e) => setPaymentMethod(e.target.value)}
                 />
                 <div className="option-content">
-                  <img src="/payment-icons/paymaya.png" alt="PayMaya" />
+                  <img src="Paymaya.png" alt="PayMaya" />
                   <span>PayMaya</span>
                 </div>
               </label>
@@ -187,7 +187,7 @@ const PaymentModal = ({ job, onClose, onSuccess }) => {
                   onChange={(e) => setPaymentMethod(e.target.value)}
                 />
                 <div className="option-content">
-                  <img src="/payment-icons/grabpay.png" alt="GrabPay" />
+                  <img src="grabpay.webp" alt="GrabPay" />
                   <span>GrabPay</span>
                 </div>
               </label>
