@@ -308,11 +308,20 @@ function Settings() {
 
   if (loading) {
     return (
-      <div className="settings-container">
-        <div className="loading-state">
-          <div className="spinner"></div>
-          <p>Loading settings...</p>
-        </div>
+      <div style={{ 
+        position: 'fixed', 
+        top: '50%', 
+        left: '50%', 
+        transform: 'translate(-50%, -50%)',
+        zIndex: 10001,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '16px'
+      }}>
+        <div style={{ width: 48, height: 48, border: '4px solid #f0f0f0', borderTop: '4px solid #9333ea', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+        <div style={{ color: '#666', fontSize: '1rem' }}>Loading settings...</div>
+        <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
@@ -841,14 +850,14 @@ function Settings() {
         .settings-container {
           max-width: 800px;
           margin: 0 auto;
-          padding: 2rem;
+          padding: 5rem 2rem 2rem 2rem;
         }
 
         .settings-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 2rem;
+          margin-bottom: 3rem;
         }
 
         .settings-header h1 {
@@ -1325,19 +1334,23 @@ function Settings() {
         }
 
         .loading-state {
-          text-align: center;
-          padding: 3rem;
-          color: #666;
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: center !important;
+          justify-content: center !important;
+          padding: 3rem !important;
+          color: #666 !important;
+          text-align: center !important;
         }
 
         .spinner {
-          width: 20px;
-          height: 20px;
-          border: 2px solid transparent;
-          border-top: 2px solid currentColor;
+          width: 48px;
+          height: 48px;
+          border: 4px solid #f0f0f0;
+          border-top: 4px solid #9333ea;
           border-radius: 50%;
           animation: spin 1s linear infinite;
-          margin: 0 auto 1rem;
+          margin-bottom: 1rem;
         }
 
         @keyframes spin {

@@ -718,10 +718,11 @@ function Profile() {
   if (loading) {
     return (
       <div className="container">
-        <div className="loading" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '40vh' }}>
-          <div className="spinner" style={{ width: 48, height: 48, border: '6px solid #eee', borderTop: '6px solid #9333ea', borderRadius: '50%', animation: 'spin 1s linear infinite', marginBottom: 16 }}></div>
+        <div className="loading" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+          <div style={{ width: 48, height: 48, border: '4px solid #f0f0f0', borderTop: '4px solid #9333ea', borderRadius: '50%', animation: 'spin 1s linear infinite', marginBottom: 16 }}></div>
           <div>{t('common.loading')}</div>
         </div>
+        <style>{`.loading::before { display: none !important; } .profile-banner { max-width: 100%; margin: 0 auto; width: 100%; }`}</style>
         <style>{`
         /* Edit Profile Modal Modern Styles */
         .modal-content {
@@ -1260,7 +1261,7 @@ function Profile() {
         </div>
 
         {/* Show recommended jobs if viewing own profile and user is an employee or both */}
-        {isOwnProfile && (profile?.userType === 'employee' || profile?.userType === 'both') && (
+        {isOwnProfile && (profile?.userType === 'employee' || profile?.userType === 'both') && !loading && (
           <div className="profile-section">
             <div className="section-header-with-actions">
               <h2>{t('employeeDashboard.recommendedJobs')}</h2>
@@ -1321,7 +1322,7 @@ function Profile() {
         )}
         
         {/* Show recommended workers if viewing own profile and user is an employer or both */}
-        {isOwnProfile && (profile?.userType === 'employer' || profile?.userType === 'both') && (
+        {isOwnProfile && (profile?.userType === 'employer' || profile?.userType === 'both') && !loading && (
           <div className="profile-section">
             <div className="section-header-with-actions">
               <h2>
@@ -2475,7 +2476,7 @@ function Profile() {
         .profile-banner {
           background: #22314a;
           height: 140px;
-          width: 100vw;
+          width: 100%;
         }
         .profile-main-card {
           background: #fff;
