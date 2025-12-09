@@ -1318,11 +1318,11 @@ export const translations = {
       
       section4AltTitle: '4. Platform Role and Limitations',
       section4AltImportant: 'Important: ResiLinked is a CONNECTION PLATFORM ONLY. We:',
-      section4Alt_1: 'DO NOT employ workers or hire on behalf of employers',
-      section4Alt_2: 'DO NOT guarantee the quality, safety, or legality of jobs or services',
-      section4Alt_3: 'DO NOT conduct background checks or verify user credentials',
-      section4Alt_4: 'DO NOT mediate disputes between users',
-      section4Alt_5: 'DO NOT process payments between users',
+      section4Alt_1: ' employ workers or hire on behalf of employers',
+      section4Alt_2: ' guarantee the quality, safety, or legality of jobs or services',
+      section4Alt_3: ' conduct background checks or verify user credentials',
+      section4Alt_4: ' mediate disputes between users',
+      section4Alt_5: ' process payments between users',
       
       section5Title: '5. Safety and Security',
       section5_1Title: '5.1 User Verification',
@@ -2985,11 +2985,11 @@ export const translations = {
       
       section4AltTitle: '4. Tungkulin at Limitasyon ng Platform',
       section4AltImportant: 'Mahalaga: Ang ResiLinked ay isang PLATFORM NG KONEKSYON LAMANG. Kami ay:',
-      section4Alt_1: 'HINDI nag-employ ng mga manggagawa o nag-hire sa ngalan ng mga employers',
-      section4Alt_2: 'HINDI garantisado ang kalidad, kaligtasan, o legalidad ng mga trabaho o serbisyo',
-      section4Alt_3: 'HINDI nagsasagawa ng background checks o nag-verify ng credentials ng user',
-      section4Alt_4: 'HINDI namamagitan sa mga alitan sa pagitan ng mga users',
-      section4Alt_5: 'HINDI nagpoproseso ng mga pagbabayad sa pagitan ng mga users',
+      section4Alt_1: 'nag-employ ng mga manggagawa o nag-hire sa ngalan ng mga employers',
+      section4Alt_2: 'garantisado ang kalidad, kaligtasan, o legalidad ng mga trabaho o serbisyo',
+      section4Alt_3: 'nagsasagawa ng background checks o nag-verify ng credentials ng user',
+      section4Alt_4: 'namamagitan sa mga alitan sa pagitan ng mga users',
+      section4Alt_5: ' nagpoproseso ng mga pagbabayad sa pagitan ng mga users',
       
       section5Title: '5. Kaligtasan at Seguridad',
       section5_1Title: '5.1 Verification ng User',
