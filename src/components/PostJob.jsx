@@ -239,11 +239,42 @@ function PostJob() {
               onChange={handleInputChange}
               required
             >
-              <option value="">{t('postJob.selectBarangay')}</option>
-              <option value="Sto. Rosario">Sto. Rosario</option>
-              <option value="Sta. Lucia">Sta. Lucia</option>
-              <option value="Sta. Teresita">Sta. Teresita</option>
-              <option value="other">{t('postJob.other')}</option>
+            <option value="Alasas">Alasas</option>
+            <option value="Baliti">Baliti</option>
+            <option value="Bulaon">Bulaon</option>
+            <option value="Calulut">Calulut</option>
+            <option value="Dela Paz Norte">Dela Paz Norte</option>
+            <option value="Dela Paz Sur">Dela Paz Sur</option>
+            <option value="Del Carmen">Del Carmen</option>
+            <option value="Del Pilar">Del Pilar</option>
+            <option value="Del Rosario">Del Rosario</option>
+            <option value="Dolores">Dolores</option>
+            <option value="Juliana">Juliana</option>
+            <option value="Lara">Lara</option>
+            <option value="Lourdes">Lourdes</option>
+            <option value="Magliman">Magliman</option>
+            <option value="Maimpis">Maimpis</option>
+            <option value="Malino">Malino</option>
+            <option value="Malpitic">Malpitic</option>
+            <option value="Pandaras">Pandaras</option>
+            <option value="Panipuan">Panipuan</option>
+            <option value="Pulung Bulu">Pulung Bulu</option>
+            <option value="Quebiawan">Quebiawan</option>
+            <option value="Saguin">Saguin</option>
+            <option value="San Agustin">San Agustin</option>
+            <option value="San Felipe">San Felipe</option>
+            <option value="San Isidro">San Isidro</option>
+            <option value="San Jose">San Jose</option>
+            <option value="San Juan">San Juan</option>
+            <option value="San Nicolas">San Nicolas</option>
+            <option value="San Pedro">San Pedro</option>
+            <option value="Santa Lucia">Santa Lucia</option>
+            <option value="Santa Teresita">Santa Teresita</option>
+            <option value="Santo Niño">Santo Niño</option>
+            <option value="Santo Rosario">Santo Rosario</option>
+            <option value="Sindalan">Sindalan</option>
+            <option value="Telabastagan">Telabastagan</option>
+            <option value="other">{t('postJob.other')}</option>
             </select>
             {formData.barangay === 'other' && (
               <input
