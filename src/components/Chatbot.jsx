@@ -435,23 +435,39 @@ const chatbotStyles = `
   }
 
   .chatbot-close {
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    color: white;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
+    color: white !important;
+    font-size: 1.5rem !important;
+
+    /* FIXED SIZE so it stays positioned correctly on mobile */
+    width: 32px !important;
+    height: 32px !important;
+
+    /* Make the hitbox circular but invisible */
+    border-radius: 50% !important;
+
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+
     cursor: pointer;
-    font-size: 1.2rem;
+
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.2s;
-  }
 
-  .chatbot-close:hover {
-    background: rgba(255, 255, 255, 0.3);
-  }
+    line-height: 1 !important;
+
+    outline: none !important;
+    box-shadow: none !important;
+
+    transition: background 0.15s ease;
+}
+
+/* Circle ONLY appears on hover */
+.chatbot-close:hover {
+    background: rgba(255, 255, 255, 0.25) !important;
+}
 
   .chatbot-messages {
     flex: 1;
