@@ -1140,36 +1140,160 @@ function EmployeeDashboard() {
         .quick-actions {
           display: flex;
           gap: 1rem;
-          margin-bottom: 2rem;
+          margin-bottom: 2.5rem;
+          flex-wrap: wrap;
         }
-
+        
+        /* BUTTON BASE - Professional Design */
         .action-btn {
-          display: flex;
+          display: inline-flex;
           align-items: center;
           gap: 0.5rem;
-          padding: 0.75rem 1.5rem;
+          padding: 0.625rem 1.25rem;
           border-radius: 8px;
           text-decoration: none;
-          font-weight: 500;
-          transition: background-color 0.2s;
+          font-weight: 600;
+          font-size: 0.875rem;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          line-height: 1.2;
+          letter-spacing: 0.01em;
+          
+          flex: 0 0 auto;
+          width: auto;
+          max-width: 100%;
+          
+          /* Professional touch */
+          border: 2px solid transparent;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+          position: relative;
+          overflow: hidden;
         }
-
+        
+        /* Height and spacing */
+        .action-btn {
+          height: 42px;
+          min-height: 42px;
+        }
+        
+        /* Icon styling */
+        .action-btn .icon {
+          font-size: 1.1rem;
+          width: 20px;
+          height: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: transform 0.3s ease;
+        }
+        
+        /* PRIMARY BUTTON - Elegant Blue */
         .action-btn.primary {
-          background: #2b6cb0;
+          background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
           color: white;
+          border: 2px solid #3b82f6;
+          box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
         }
-
+        
         .action-btn.primary:hover {
-          background: #2c5282;
+          background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+          border-color: #2563eb;
+          transform: translateY(-2px);
+          box-shadow: 0 6px 16px rgba(59, 130, 246, 0.35);
         }
-
+        
+        .action-btn.primary:hover .icon {
+          transform: translateX(2px);
+        }
+        
+        /* Add subtle shine effect */
+        .action-btn.primary::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 50%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+          transition: left 0.7s ease;
+        }
+        
+        .action-btn.primary:hover::after {
+          left: 100%;
+        }
+        
+        /* SECONDARY BUTTON - Clean Gray */
         .action-btn.secondary {
-          background: #e2e8f0;
-          color: #2d3748;
+          background: white;
+          color: #374151;
+          border: 2px solid #d1d5db;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
         }
-
+        
         .action-btn.secondary:hover {
-          background: #cbd5e0;
+          background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+          border-color: #9ca3af;
+          color: #1f2937;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .action-btn.secondary:hover .icon {
+          transform: scale(1.1);
+        }
+        
+        /* Active/Focus states */
+        .action-btn:focus {
+          outline: none;
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+        
+        .action-btn.secondary:focus {
+          box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.15);
+        }
+        
+        /* Disabled state */
+        .action-btn:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+          transform: none !important;
+        }
+        
+        /* Active click effect */
+        .action-btn:active {
+          transform: translateY(0);
+          transition: transform 0.1s ease;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+          .quick-actions {
+            gap: 0.75rem;
+          }
+          
+          .action-btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.8125rem;
+            height: 38px;
+            min-height: 38px;
+          }
+          
+          .action-btn .icon {
+            font-size: 1rem;
+            width: 18px;
+            height: 18px;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .quick-actions {
+            gap: 0.5rem;
+          }
+          
+          .action-btn {
+            flex: 1 0 calc(50% - 0.5rem);
+            min-width: calc(50% - 0.5rem);
+            justify-content: center;
+          }
         }
 
         .dashboard-section {
