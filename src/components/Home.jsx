@@ -580,13 +580,14 @@ function Home() {
 
         .carousel-wrapper {
           overflow: hidden;
-
           position: relative;
           width: 100%;
         }
 
         .carousel-track {
           display: flex;
+          justify-content: center;
+          align-items: center; 
           gap: var(--spacing-6);
           width: 100%;
         }
