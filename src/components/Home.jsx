@@ -580,7 +580,7 @@ function Home() {
 
         .carousel-wrapper {
           overflow: hidden;
-          margin: 0 var(--spacing-12);
+
           position: relative;
           width: 100%;
         }
