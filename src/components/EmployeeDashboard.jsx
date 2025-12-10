@@ -504,11 +504,11 @@ function EmployeeDashboard() {
       {/* Quick Actions */}
       <div className="quick-actions">
         <Link to="/search-jobs" className="action-btn primary">
-          <span className="icon">🔍</span>
+          🔍
           {t('nav.findJobs')}
         </Link>
         <Link to="/profile" className="action-btn secondary">
-          <span className="icon">👤</span>
+         👤
           {t('profile.editProfile')}
         </Link>
       </div>
